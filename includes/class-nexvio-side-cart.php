@@ -498,10 +498,16 @@ class Nexvio_Side_Cart {
 			if ( ! $variation_id ) {
 				wp_send_json_error( self::state( array( array( 'type' => 'error', 'text' => Nexvio_Texts::get( 'options' ) ) ) ), 400 );
 			}
-			foreach ( $_POST as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
-				if ( is_string( $k ) && 0 === strpos( $k, 'attribute_' ) && is_scalar( $v ) ) {
-					$variations[ sanitize_title( wp_unslash( $k ) ) ] = wc_clean( wp_unslash( $v ) );
-				}
+			/* Only the attribute_* fields are read; the nonce was checked at the top of this handler. */
+			$posted = array_filter(
+				wc_clean( wp_unslash( $_POST ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
+				static function ( $v, $k ) {
+					return is_string( $k ) && 0 === strpos( $k, 'attribute_' ) && is_scalar( $v );
+				},
+				ARRAY_FILTER_USE_BOTH
+			);
+			foreach ( $posted as $k => $v ) {
+				$variations[ sanitize_title( $k ) ] = $v;
 			}
 		}
 		$passed = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $qty, $variation_id, $variations ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core hook.

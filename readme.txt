@@ -95,12 +95,14 @@ You find them in the Elementor panel, in the **Nexvio** category.
 
 == Source code ==
 
-Nexvio ships no compiled, minified or bundled code. There is no build step (no npm, webpack or composer), and no third-party JavaScript or CSS library is included. Every JavaScript and CSS file in the plugin is hand-written and readable as shipped:
+The full source code of Nexvio is public: https://github.com/mdfarhan01/nexvio-for-woocommerce
 
-* `admin/assets/admin.js`, `admin/assets/filters.js`, `admin/assets/admin.css` - the wp-admin screens (Filters page builder and live preview).
+Nexvio ships no compiled, minified or bundled code. There is no build step (no npm, webpack or composer) and no third-party JavaScript or CSS library is included. Every JavaScript and CSS file in the plugin is hand-written, unminified and readable exactly as shipped, so the files in the plugin are the source - edit them directly:
+
+* `admin/assets/admin.js`, `admin/assets/filters.js`, `admin/assets/swatch-media.js`, `admin/assets/admin.css` - the wp-admin screens (dashboard, Filters page builder with live preview, swatch image picker).
 * `assets/js/*.js` and `assets/css/*.css` - the front-end widgets (slider, filter, side cart, wishlist, search).
 
-The files above are the source: edit them directly.
+The same files are in the GitHub repository above, which is where development happens and where issues and pull requests are welcome.
 
 == Installation ==
 

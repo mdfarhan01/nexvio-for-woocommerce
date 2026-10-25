@@ -66,33 +66,7 @@ class Nexvio_Swatches {
 			return;
 		}
 		wp_enqueue_media();
-		$js = <<<'NEXVIOJS'
-jQuery(function($){
-	var frame;
-	$(document).on('click','.nexvio-swimg-pick',function(e){
-		e.preventDefault();
-		var w=$(this).closest('.nexvio-swimg');
-		frame=wp.media({title:w.data('title'),multiple:false,library:{type:'image'}});
-		frame.on('select',function(){
-			var a=frame.state().get('selection').first().toJSON();
-			var url=a.sizes&&a.sizes.thumbnail?a.sizes.thumbnail.url:a.url;
-			w.find('input').val(a.id);
-			w.find('.nexvio-swimg-preview').empty().append($('<img alt="">').attr('src',url).css({width:48,height:48,borderRadius:'50%',objectFit:'cover'}));
-			w.find('.nexvio-swimg-remove').show();
-		});
-		frame.open();
-	});
-	$(document).on('click','.nexvio-swimg-remove',function(e){
-		e.preventDefault();
-		var w=$(this).closest('.nexvio-swimg');
-		w.find('input').val('');w.find('.nexvio-swimg-preview').empty();$(this).hide();
-	});
-	$(document).ajaxComplete(function(ev,x,o){
-		if(o&&o.data&&String(o.data).indexOf('action=add-tag')>-1){$('.nexvio-swimg input').val('');$('.nexvio-swimg-preview').empty();$('.nexvio-swimg-remove').hide();}
-	});
-});
-NEXVIOJS;
-		wp_add_inline_script( 'jquery-core', $js );
+		wp_enqueue_script( 'nexvio-swatch-media', NEXVIO_URL . 'admin/assets/swatch-media.js', array( 'jquery' ), Nexvio_Plugin::ver( 'admin/assets/swatch-media.js' ), true );
 	}
 
 	private static function image_field( $value ) {

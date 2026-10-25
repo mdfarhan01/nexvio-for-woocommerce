@@ -1075,24 +1075,27 @@ class Nexvio_Admin {
 			wp_die( esc_html__( 'Not allowed.', 'nexvio' ) );
 		}
 		check_admin_referer( 'nexvio_save_settings' );
-		$p       = wp_unslash( $_POST );
-		$section = isset( $p['nexvio_section'] ) && 'wishlist' === $p['nexvio_section'] ? 'wishlist' : 'general';
+		$section = isset( $_POST['nexvio_section'] ) && 'wishlist' === sanitize_key( wp_unslash( $_POST['nexvio_section'] ) ) ? 'wishlist' : 'general';
 
 		if ( 'wishlist' === $section ) {
-			update_option( 'nexvio_wishlist_page', isset( $p['nexvio_wishlist_page'] ) ? absint( $p['nexvio_wishlist_page'] ) : 0 );
-			update_option( 'nexvio_wishlist_guests', ! empty( $p['nexvio_wishlist_guests'] ) ? 'yes' : 'no' );
-			update_option( 'nexvio_wishlist_days', max( 1, min( 730, isset( $p['nexvio_wishlist_days'] ) ? absint( $p['nexvio_wishlist_days'] ) : 60 ) ) );
+			$days = isset( $_POST['nexvio_wishlist_days'] ) ? absint( wp_unslash( $_POST['nexvio_wishlist_days'] ) ) : 60;
+			update_option( 'nexvio_wishlist_page', isset( $_POST['nexvio_wishlist_page'] ) ? absint( wp_unslash( $_POST['nexvio_wishlist_page'] ) ) : 0 );
+			update_option( 'nexvio_wishlist_guests', ! empty( $_POST['nexvio_wishlist_guests'] ) ? 'yes' : 'no' );
+			update_option( 'nexvio_wishlist_days', max( 1, min( 730, $days ) ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=' . self::WISHLIST . '&updated=1' ) );
 			exit;
 		}
 
-		update_option( 'nexvio_per_page', min( 200, isset( $p['nexvio_per_page'] ) ? absint( $p['nexvio_per_page'] ) : 0 ) );
-		update_option( 'nexvio_auto_related', ! empty( $p['nexvio_auto_related'] ) ? 'yes' : 'no' );
-		update_option( 'nexvio_related_title', isset( $p['nexvio_related_title'] ) ? sanitize_text_field( $p['nexvio_related_title'] ) : '' );
-		update_option( 'nexvio_related_limit', max( 1, min( 40, isset( $p['nexvio_related_limit'] ) ? absint( $p['nexvio_related_limit'] ) : 8 ) ) );
-		$orderby = isset( $p['nexvio_related_orderby'] ) ? sanitize_key( $p['nexvio_related_orderby'] ) : 'popularity';
+		$per_page = isset( $_POST['nexvio_per_page'] ) ? absint( wp_unslash( $_POST['nexvio_per_page'] ) ) : 0;
+		$limit    = isset( $_POST['nexvio_related_limit'] ) ? absint( wp_unslash( $_POST['nexvio_related_limit'] ) ) : 8;
+		$orderby  = isset( $_POST['nexvio_related_orderby'] ) ? sanitize_key( wp_unslash( $_POST['nexvio_related_orderby'] ) ) : 'popularity';
+		$layout   = isset( $_POST['nexvio_related_layout'] ) ? sanitize_key( wp_unslash( $_POST['nexvio_related_layout'] ) ) : 'slider';
+		update_option( 'nexvio_per_page', min( 200, $per_page ) );
+		update_option( 'nexvio_auto_related', ! empty( $_POST['nexvio_auto_related'] ) ? 'yes' : 'no' );
+		update_option( 'nexvio_related_title', isset( $_POST['nexvio_related_title'] ) ? sanitize_text_field( wp_unslash( $_POST['nexvio_related_title'] ) ) : '' );
+		update_option( 'nexvio_related_limit', max( 1, min( 40, $limit ) ) );
 		update_option( 'nexvio_related_orderby', in_array( $orderby, array( 'popularity', 'rating', 'rand', 'date' ), true ) ? $orderby : 'popularity' );
-		update_option( 'nexvio_related_layout', isset( $p['nexvio_related_layout'] ) && 'grid' === $p['nexvio_related_layout'] ? 'grid' : 'slider' );
+		update_option( 'nexvio_related_layout', 'grid' === $layout ? 'grid' : 'slider' );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SETTINGS . '&updated=1' ) );
 		exit;

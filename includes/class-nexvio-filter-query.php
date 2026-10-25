@@ -82,7 +82,7 @@ class Nexvio_Filter_Query {
 			if ( 0 !== strpos( $key, 'nexvio_tax_' ) || '_all' === substr( $key, -4 ) ) {
 				continue;
 			}
-			$taxonomy = sanitize_key( substr( $key, 8 ) );
+			$taxonomy = sanitize_key( substr( $key, strlen( 'nexvio_tax_' ) ) );
 			if ( ! taxonomy_exists( $taxonomy ) || ! is_object_in_taxonomy( 'product', $taxonomy ) ) {
 				continue;
 			}

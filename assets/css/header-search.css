@@ -1,47 +1,247 @@
 /* Nexvio Header Search */
-.nexvio-hs-wrap{display:flex}
-.nexvio-hs{
-	--nexvio-hs-box:42px;--nexvio-hs-icon:22px;--nexvio-hs-radius:6px;--nexvio-hs-color:#e8edf4;--nexvio-hs-color-h:#fff;--nexvio-hs-bg:transparent;--nexvio-hs-bg-h:#262d37;
-	--nexvio-hs-w:380px;--nexvio-hs-bar-w:760px;--nexvio-hs-offset:10px;--nexvio-hs-pbg:#1f252e;--nexvio-hs-pborder:#313945;--nexvio-hs-pradius:8px;--nexvio-hs-ppad:10px;--nexvio-hs-overlay:rgba(5,7,10,.6);
-	--nexvio-hs-ih:46px;--nexvio-hs-ibg:#181d24;--nexvio-hs-iborder:#313945;--nexvio-hs-focus:#3d8bff;--nexvio-hs-itext:#e8edf4;--nexvio-hs-ph:#8f9aab;
-	--nexvio-hs-btn:#3d8bff;--nexvio-hs-btn-h:#5a9dff;--nexvio-hs-btn-t:#fff;
-	position:relative;font-family:"Barlow","Segoe UI",system-ui,sans-serif}
-.nexvio-hs *,.nexvio-hs *::before,.nexvio-hs *::after{box-sizing:border-box}
-.nexvio-hs .nexvio-hs__toggle{display:grid;place-items:center;width:var(--nexvio-hs-box);height:var(--nexvio-hs-box);margin:0;padding:0;border:0;border-radius:var(--nexvio-hs-radius);
-	background:var(--nexvio-hs-bg);color:var(--nexvio-hs-color);cursor:pointer;transition:background .15s,color .15s;box-shadow:none;line-height:1}
-.nexvio-hs .nexvio-hs__toggle:hover,.nexvio-hs .nexvio-hs__toggle:focus-visible,.nexvio-hs.is-open .nexvio-hs__toggle{background:var(--nexvio-hs-bg-h);color:var(--nexvio-hs-color-h)}
-.nexvio-hs__icon{display:grid;place-items:center;width:var(--nexvio-hs-icon);height:var(--nexvio-hs-icon);font-size:var(--nexvio-hs-icon)}
-.nexvio-hs__icon svg{width:100%;height:100%;display:block}
-.nexvio-hs__panel[hidden]{display:none!important}
-.nexvio-hs__sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.nexvio-hs-wrap {
+	display: flex;
+}
+.nexvio-hs {
+	--nexvio-hs-box: 42px;
+	--nexvio-hs-icon: 22px;
+	--nexvio-hs-radius: 6px;
+	--nexvio-hs-color: #e8edf4;
+	--nexvio-hs-color-h: #fff;
+	--nexvio-hs-bg: transparent;
+	--nexvio-hs-bg-h: #262d37;
+	--nexvio-hs-w: 380px;
+	--nexvio-hs-bar-w: 760px;
+	--nexvio-hs-offset: 10px;
+	--nexvio-hs-pbg: #1f252e;
+	--nexvio-hs-pborder: #313945;
+	--nexvio-hs-pradius: 8px;
+	--nexvio-hs-ppad: 10px;
+	--nexvio-hs-overlay: rgba(5, 7, 10, 0.6);
+	--nexvio-hs-ih: 46px;
+	--nexvio-hs-ibg: #181d24;
+	--nexvio-hs-iborder: #313945;
+	--nexvio-hs-focus: #3d8bff;
+	--nexvio-hs-itext: #e8edf4;
+	--nexvio-hs-ph: #8f9aab;
+	--nexvio-hs-btn: #3d8bff;
+	--nexvio-hs-btn-h: #5a9dff;
+	--nexvio-hs-btn-t: #fff;
+	position: relative;
+	font-family: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+}
+.nexvio-hs *,
+.nexvio-hs *::before,
+.nexvio-hs *::after {
+	box-sizing: border-box;
+}
+.nexvio-hs .nexvio-hs__toggle {
+	display: grid;
+	place-items: center;
+	width: var(--nexvio-hs-box);
+	height: var(--nexvio-hs-box);
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--nexvio-hs-radius);
+	background: var(--nexvio-hs-bg);
+	color: var(--nexvio-hs-color);
+	cursor: pointer;
+	transition:
+		background 0.15s,
+		color 0.15s;
+	box-shadow: none;
+	line-height: 1;
+}
+.nexvio-hs .nexvio-hs__toggle:hover,
+.nexvio-hs .nexvio-hs__toggle:focus-visible,
+.nexvio-hs.is-open .nexvio-hs__toggle {
+	background: var(--nexvio-hs-bg-h);
+	color: var(--nexvio-hs-color-h);
+}
+.nexvio-hs__icon {
+	display: grid;
+	place-items: center;
+	width: var(--nexvio-hs-icon);
+	height: var(--nexvio-hs-icon);
+	font-size: var(--nexvio-hs-icon);
+}
+.nexvio-hs__icon svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+.nexvio-hs__panel[hidden] {
+	display: none !important;
+}
+.nexvio-hs__sr {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
 
 /* dropdown */
-.nexvio-hs--dropdown .nexvio-hs__panel{position:absolute;top:calc(100% + var(--nexvio-hs-offset));z-index:9999;width:var(--nexvio-hs-w);max-width:calc(100vw - 24px);
-	background:var(--nexvio-hs-pbg);border:1px solid var(--nexvio-hs-pborder);border-radius:var(--nexvio-hs-pradius);padding:var(--nexvio-hs-ppad);box-shadow:0 18px 40px rgba(0,0,0,.45);
-	animation:nexvio-hs-in .18s ease}
-.nexvio-hs--right .nexvio-hs__panel{right:0}
-.nexvio-hs--left .nexvio-hs__panel{left:0}
-@keyframes nexvio-hs-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.nexvio-hs--dropdown .nexvio-hs__panel {
+	position: absolute;
+	top: calc(100% + var(--nexvio-hs-offset));
+	z-index: 9999;
+	width: var(--nexvio-hs-w);
+	max-width: calc(100vw - 24px);
+	background: var(--nexvio-hs-pbg);
+	border: 1px solid var(--nexvio-hs-pborder);
+	border-radius: var(--nexvio-hs-pradius);
+	padding: var(--nexvio-hs-ppad);
+	box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+	animation: nexvio-hs-in 0.18s ease;
+}
+.nexvio-hs--right .nexvio-hs__panel {
+	right: 0;
+}
+.nexvio-hs--left .nexvio-hs__panel {
+	left: 0;
+}
+@keyframes nexvio-hs-in {
+	from {
+		opacity: 0;
+		transform: translateY(-6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
 
 /* full-width bar */
-.nexvio-hs--bar .nexvio-hs__panel{position:fixed;inset:0;z-index:99999;background:var(--nexvio-hs-overlay);padding:calc(env(safe-area-inset-top,0px) + 16px) 16px 16px;animation:nexvio-hs-fade .18s ease}
-.nexvio-hs--bar .nexvio-hs__form{max-width:var(--nexvio-hs-bar-w);margin:0 auto;background:var(--nexvio-hs-pbg);border:1px solid var(--nexvio-hs-pborder);border-radius:var(--nexvio-hs-pradius);padding:var(--nexvio-hs-ppad);
-	box-shadow:0 18px 40px rgba(0,0,0,.45);animation:nexvio-hs-in .2s ease}
-@keyframes nexvio-hs-fade{from{opacity:0}to{opacity:1}}
-html.nexvio-hs-lock{overflow:hidden}
+.nexvio-hs--bar .nexvio-hs__panel {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	background: var(--nexvio-hs-overlay);
+	padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 16px;
+	animation: nexvio-hs-fade 0.18s ease;
+}
+.nexvio-hs--bar .nexvio-hs__form {
+	max-width: var(--nexvio-hs-bar-w);
+	margin: 0 auto;
+	background: var(--nexvio-hs-pbg);
+	border: 1px solid var(--nexvio-hs-pborder);
+	border-radius: var(--nexvio-hs-pradius);
+	padding: var(--nexvio-hs-ppad);
+	box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+	animation: nexvio-hs-in 0.2s ease;
+}
+@keyframes nexvio-hs-fade {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+html.nexvio-hs-lock {
+	overflow: hidden;
+}
 
-.nexvio-hs__form{display:flex;align-items:center;gap:8px;margin:0}
-.nexvio-hs__field{position:relative;flex:1;min-width:0;display:flex;align-items:center}
-.nexvio-hs__field svg{position:absolute;left:12px;width:18px;height:18px;color:var(--nexvio-hs-ph);pointer-events:none}
-.nexvio-hs .nexvio-hs__input{width:100%;height:var(--nexvio-hs-ih);margin:0;padding:0 12px 0 40px;background:var(--nexvio-hs-ibg);color:var(--nexvio-hs-itext);border:1px solid var(--nexvio-hs-iborder);
-	border-radius:4px;font:inherit;font-size:15px;outline:none;box-shadow:none;-webkit-appearance:none;appearance:none}
-.nexvio-hs .nexvio-hs__input::-webkit-search-cancel-button{display:none}
-.nexvio-hs .nexvio-hs__input::placeholder{color:var(--nexvio-hs-ph);opacity:1}
-.nexvio-hs .nexvio-hs__input:focus{border-color:var(--nexvio-hs-focus);box-shadow:0 0 0 3px rgba(61,139,255,.2)}
-.nexvio-hs .nexvio-hs__submit{flex-shrink:0;display:grid;place-items:center;min-width:var(--nexvio-hs-ih);height:var(--nexvio-hs-ih);margin:0;padding:0 14px;border:0;background:var(--nexvio-hs-btn);color:var(--nexvio-hs-btn-t);
-	cursor:pointer;font:600 15px/1 "Chakra Petch","Segoe UI",sans-serif;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);transition:background .15s}
-.nexvio-hs .nexvio-hs__submit:hover{background:var(--nexvio-hs-btn-h);color:var(--nexvio-hs-btn-t)}
-.nexvio-hs .nexvio-hs__submit svg{width:20px;height:20px}
-.nexvio-hs .nexvio-hs__close{flex-shrink:0;width:38px;height:38px;margin:0;padding:0;border:0;border-radius:50%;background:transparent;color:var(--nexvio-hs-ph);font-size:24px;line-height:1;cursor:pointer;display:grid;place-items:center}
-.nexvio-hs .nexvio-hs__close:hover{background:rgba(255,255,255,.06);color:var(--nexvio-hs-itext)}
-@media (prefers-reduced-motion:reduce){.nexvio-hs__panel,.nexvio-hs__form{animation:none!important}}
+.nexvio-hs__form {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+}
+.nexvio-hs__field {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	align-items: center;
+}
+.nexvio-hs__field svg {
+	position: absolute;
+	left: 12px;
+	width: 18px;
+	height: 18px;
+	color: var(--nexvio-hs-ph);
+	pointer-events: none;
+}
+.nexvio-hs .nexvio-hs__input {
+	width: 100%;
+	height: var(--nexvio-hs-ih);
+	margin: 0;
+	padding: 0 12px 0 40px;
+	background: var(--nexvio-hs-ibg);
+	color: var(--nexvio-hs-itext);
+	border: 1px solid var(--nexvio-hs-iborder);
+	border-radius: 4px;
+	font: inherit;
+	font-size: 15px;
+	outline: none;
+	box-shadow: none;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.nexvio-hs .nexvio-hs__input::-webkit-search-cancel-button {
+	display: none;
+}
+.nexvio-hs .nexvio-hs__input::placeholder {
+	color: var(--nexvio-hs-ph);
+	opacity: 1;
+}
+.nexvio-hs .nexvio-hs__input:focus {
+	border-color: var(--nexvio-hs-focus);
+	box-shadow: 0 0 0 3px rgba(61, 139, 255, 0.2);
+}
+.nexvio-hs .nexvio-hs__submit {
+	flex-shrink: 0;
+	display: grid;
+	place-items: center;
+	min-width: var(--nexvio-hs-ih);
+	height: var(--nexvio-hs-ih);
+	margin: 0;
+	padding: 0 14px;
+	border: 0;
+	background: var(--nexvio-hs-btn);
+	color: var(--nexvio-hs-btn-t);
+	cursor: pointer;
+	font:
+		600 15px/1 'Chakra Petch',
+		'Segoe UI',
+		sans-serif;
+	clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+	transition: background 0.15s;
+}
+.nexvio-hs .nexvio-hs__submit:hover {
+	background: var(--nexvio-hs-btn-h);
+	color: var(--nexvio-hs-btn-t);
+}
+.nexvio-hs .nexvio-hs__submit svg {
+	width: 20px;
+	height: 20px;
+}
+.nexvio-hs .nexvio-hs__close {
+	flex-shrink: 0;
+	width: 38px;
+	height: 38px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--nexvio-hs-ph);
+	font-size: 24px;
+	line-height: 1;
+	cursor: pointer;
+	display: grid;
+	place-items: center;
+}
+.nexvio-hs .nexvio-hs__close:hover {
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--nexvio-hs-itext);
+}
+@media (prefers-reduced-motion: reduce) {
+	.nexvio-hs__panel,
+	.nexvio-hs__form {
+		animation: none !important;
+	}
+}
