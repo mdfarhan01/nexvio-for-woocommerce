@@ -1,0 +1,190 @@
+/* Nexvio Product Filter */
+.nexvio-pf{
+	--nexvio-pf-bg:#1f252e;--nexvio-pf-border:#313945;--nexvio-pf-radius:8px;--nexvio-pf-pad:22px;--nexvio-pf-gap:22px;--nexvio-pf-divider:#313945;
+	--nexvio-pf-title:#e8edf4;--nexvio-pf-gtitle:#c7d0dc;
+	--nexvio-pf-ibg:#181d24;--nexvio-pf-iborder:#313945;--nexvio-pf-focus:#3d8bff;--nexvio-pf-itext:#e8edf4;--nexvio-pf-muted:#8f9aab;--nexvio-pf-ih:44px;--nexvio-pf-iradius:4px;
+	--nexvio-pf-track:#313945;--nexvio-pf-fill:#3d8bff;--nexvio-pf-handle:#fff;--nexvio-pf-handle-b:#3d8bff;--nexvio-pf-handle-s:18px;
+	--nexvio-pf-otext:#c7d0dc;--nexvio-pf-otext-a:#fff;--nexvio-pf-count:#8f9aab;--nexvio-pf-count-bg:#262d37;--nexvio-pf-box:#56606e;--nexvio-pf-check:#3d8bff;--nexvio-pf-ogap:4px;
+	--nexvio-pf-chip-bg:#181d24;--nexvio-pf-chip-bg-a:rgba(61,139,255,.18);--nexvio-pf-chip-border-a:#3d8bff;--nexvio-pf-more:#8cc8ff;--nexvio-pf-list-h:320px;
+	--nexvio-pf-btn:#3d8bff;--nexvio-pf-btn-h:#5a9dff;--nexvio-pf-btn-t:#fff;--nexvio-pf-reset:#c7d0dc;--nexvio-pf-reset-b:#424b58;
+	background:var(--nexvio-pf-bg);border:1px solid var(--nexvio-pf-border);border-radius:var(--nexvio-pf-radius);padding:var(--nexvio-pf-pad);
+	color:var(--nexvio-pf-otext);font-family:"Barlow","Segoe UI",system-ui,sans-serif;font-size:15px;line-height:1.4;transition:opacity .2s}
+.nexvio-pf *,.nexvio-pf *::before,.nexvio-pf *::after{box-sizing:border-box}
+.nexvio-pf.is-busy{cursor:progress}
+.nexvio-pf__title{color:var(--nexvio-pf-title);font:700 20px/1.2 "Chakra Petch","Segoe UI",sans-serif;margin:0 0 18px}
+.nexvio-pf__form{margin:0;display:flex;flex-direction:column}
+.nexvio-pf__group{padding:var(--nexvio-pf-gap) 0;border-top:1px solid var(--nexvio-pf-divider)}
+.nexvio-pf__group:first-child{padding-top:0;border-top:0}
+.nexvio-pf__group:last-of-type{padding-bottom:0}
+.nexvio-pf__gtitle{margin:0 0 12px;color:var(--nexvio-pf-gtitle);font:600 15px/1.2 "Chakra Petch","Segoe UI",sans-serif;letter-spacing:.02em}
+.nexvio-pf__group:not(.is-open) .nexvio-pf__gtitle{margin-bottom:0}
+.nexvio-pf .nexvio-pf__toggle{all:unset;box-sizing:border-box;display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;color:inherit;font:inherit}
+.nexvio-pf .nexvio-pf__toggle:focus-visible{outline:2px solid var(--nexvio-pf-focus);outline-offset:3px;border-radius:2px}
+.nexvio-pf__chev{width:18px;height:18px;flex-shrink:0;transition:transform .2s;color:var(--nexvio-pf-muted)}
+.nexvio-pf__group.is-open .nexvio-pf__chev{transform:rotate(180deg)}
+.nexvio-pf__gbody[hidden]{display:none}
+.nexvio-pf__note{font-size:13px;color:var(--nexvio-pf-muted);margin:8px 0}
+
+/* search */
+.nexvio-pf__search{position:relative;display:flex;align-items:center}
+.nexvio-pf__search svg{position:absolute;left:12px;width:18px;height:18px;color:var(--nexvio-pf-muted);pointer-events:none}
+.nexvio-pf input[type=search]{width:100%;height:var(--nexvio-pf-ih);margin:0;padding:0 38px 0 40px;background:var(--nexvio-pf-ibg);color:var(--nexvio-pf-itext);
+	border:1px solid var(--nexvio-pf-iborder);border-radius:var(--nexvio-pf-iradius);font:inherit;outline:none;box-shadow:none;-webkit-appearance:none;appearance:none}
+.nexvio-pf input[type=search]::-webkit-search-cancel-button{display:none}
+.nexvio-pf input[type=search]::placeholder{color:var(--nexvio-pf-muted);opacity:1}
+.nexvio-pf input[type=search]:focus,.nexvio-pf input[type=number]:focus,.nexvio-pf select:focus{border-color:var(--nexvio-pf-focus);box-shadow:0 0 0 3px rgba(61,139,255,.2)}
+.nexvio-pf .nexvio-pf__clear{position:absolute;right:6px;width:30px;height:30px;padding:0;margin:0;border:0;border-radius:50%;background:transparent;color:var(--nexvio-pf-muted);
+	font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.nexvio-pf .nexvio-pf__clear:hover{color:var(--nexvio-pf-itext);background:var(--nexvio-pf-count-bg)}
+.nexvio-pf .nexvio-pf__clear[hidden]{display:none}
+
+/* price */
+.nexvio-pf__range{position:relative;height:calc(var(--nexvio-pf-handle-s) + 6px);margin:4px calc(var(--nexvio-pf-handle-s) / 2) 14px}
+.nexvio-pf__track{position:absolute;left:0;right:0;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:var(--nexvio-pf-track)}
+.nexvio-pf__fill{position:absolute;top:0;bottom:0;left:var(--lo,0%);right:calc(100% - var(--hi,100%));background:var(--nexvio-pf-fill);border-radius:2px}
+.nexvio-pf__range input[type=range]{position:absolute;left:calc(var(--nexvio-pf-handle-s) / -2);width:calc(100% + var(--nexvio-pf-handle-s));top:0;height:100%;margin:0;padding:0;
+	background:none;pointer-events:none;-webkit-appearance:none;appearance:none;z-index:3;outline:none;border:0;box-shadow:none}
+.nexvio-pf__range input[type=range]::-webkit-slider-runnable-track{background:none;border:0;height:100%}
+.nexvio-pf__range input[type=range]::-moz-range-track{background:none;border:0}
+.nexvio-pf__range input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;pointer-events:auto;width:var(--nexvio-pf-handle-s);height:var(--nexvio-pf-handle-s);
+	margin-top:3px;border-radius:50%;background:var(--nexvio-pf-handle);border:3px solid var(--nexvio-pf-handle-b);cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.nexvio-pf__range input[type=range]::-moz-range-thumb{pointer-events:auto;width:var(--nexvio-pf-handle-s);height:var(--nexvio-pf-handle-s);border-radius:50%;
+	background:var(--nexvio-pf-handle);border:3px solid var(--nexvio-pf-handle-b);cursor:grab;box-shadow:0 2px 6px rgba(0,0,0,.4);box-sizing:border-box}
+.nexvio-pf__range input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(61,139,255,.35)}
+.nexvio-pf__range input[type=range]:active::-webkit-slider-thumb{cursor:grabbing}
+.nexvio-pf__prices{display:flex;align-items:flex-end;gap:10px}
+.nexvio-pf__pbox{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;margin:0}
+.nexvio-pf__plabel{font-size:12.5px;color:var(--nexvio-pf-muted)}
+.nexvio-pf__pfield{display:flex;align-items:center;height:var(--nexvio-pf-ih);background:var(--nexvio-pf-ibg);border:1px solid var(--nexvio-pf-iborder);border-radius:var(--nexvio-pf-iradius);padding:0 10px;gap:6px}
+.nexvio-pf__pfield:focus-within{border-color:var(--nexvio-pf-focus);box-shadow:0 0 0 3px rgba(61,139,255,.2)}
+.nexvio-pf__pfield i{font-style:normal;color:var(--nexvio-pf-muted);font-size:14px}
+.nexvio-pf input[type=number]{flex:1;min-width:0;width:100%;height:100%;margin:0;padding:0;border:0;background:transparent;color:var(--nexvio-pf-itext);font:600 15px/1 "Chakra Petch","Segoe UI",sans-serif;
+	outline:none;box-shadow:none!important;-moz-appearance:textfield;appearance:textfield}
+.nexvio-pf input[type=number]::-webkit-outer-spin-button,.nexvio-pf input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nexvio-pf__dash{color:var(--nexvio-pf-muted);padding-bottom:12px}
+
+/* option lists */
+.nexvio-pf__list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--nexvio-pf-ogap)}
+.nexvio-pf__list .is-extra{display:none}
+.nexvio-pf__list.is-open{max-height:var(--nexvio-pf-list-h);overflow-y:auto;overscroll-behavior:contain;padding-right:4px;scrollbar-width:thin;scrollbar-color:#424b58 transparent}
+.nexvio-pf__list.is-open .is-extra{display:block}
+.nexvio-pf__list--all{margin-bottom:var(--nexvio-pf-ogap)}
+.nexvio-pf__item{margin:0;padding:0}
+.nexvio-pf__item.depth-1{padding-left:18px}.nexvio-pf__item.depth-2{padding-left:36px}.nexvio-pf__item.depth-3,.nexvio-pf__item.depth-4{padding-left:54px}
+.nexvio-pf__opt{display:flex;align-items:center;gap:10px;padding:7px 8px;margin:0 -8px;border-radius:4px;cursor:pointer;color:var(--nexvio-pf-otext);transition:background .15s,color .15s;user-select:none}
+.nexvio-pf__opt:hover{background:rgba(255,255,255,.04);color:var(--nexvio-pf-otext-a)}
+.nexvio-pf__opt input{position:absolute;opacity:0;width:1px;height:1px;margin:0;pointer-events:none}
+.nexvio-pf__mark{flex-shrink:0;width:18px;height:18px;border:2px solid var(--nexvio-pf-box);border-radius:4px;display:grid;place-items:center;transition:border-color .15s,background .15s}
+.nexvio-pf input[type=radio] + .nexvio-pf__mark{border-radius:50%}
+.nexvio-pf__opt input:checked + .nexvio-pf__mark{border-color:var(--nexvio-pf-check);background:var(--nexvio-pf-check)}
+.nexvio-pf input[type=radio]:checked + .nexvio-pf__mark{background:transparent;box-shadow:inset 0 0 0 3px var(--nexvio-pf-bg),inset 0 0 0 9px var(--nexvio-pf-check)}
+.nexvio-pf input[type=checkbox]:checked + .nexvio-pf__mark::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg)}
+.nexvio-pf__opt input:focus-visible + .nexvio-pf__mark{box-shadow:0 0 0 3px rgba(61,139,255,.35)}
+.nexvio-pf__opt input:checked ~ .nexvio-pf__name{color:var(--nexvio-pf-otext-a);font-weight:600}
+.nexvio-pf__name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nexvio-pf__count{flex-shrink:0;min-width:26px;padding:2px 7px;border-radius:10px;background:var(--nexvio-pf-count-bg);color:var(--nexvio-pf-count);font-size:12px;font-weight:600;text-align:center}
+.nexvio-pf .nexvio-pf__more{all:unset;box-sizing:border-box;display:inline-flex;align-items:center;gap:6px;margin-top:10px;color:var(--nexvio-pf-more);font-weight:600;font-size:14px;cursor:pointer;
+	border-bottom:1px solid currentColor;padding-bottom:1px}
+.nexvio-pf .nexvio-pf__more:hover{opacity:.85}
+.nexvio-pf .nexvio-pf__more:focus-visible{outline:2px solid var(--nexvio-pf-focus);outline-offset:3px}
+
+/* chips */
+.nexvio-pf__list--chips{flex-direction:row;flex-wrap:wrap;gap:6px}
+.nexvio-pf__list--chips.is-open .is-extra{display:list-item}
+.nexvio-pf__list--chips .nexvio-pf__opt{margin:0;padding:7px 12px;border:1px solid var(--nexvio-pf-iborder);background:var(--nexvio-pf-chip-bg);border-radius:3px;font:600 13px/1 "Chakra Petch","Segoe UI",sans-serif;gap:6px}
+.nexvio-pf__list--chips .nexvio-pf__opt:has(input:checked){background:var(--nexvio-pf-chip-bg-a);border-color:var(--nexvio-pf-chip-border-a);color:var(--nexvio-pf-otext-a)}
+.nexvio-pf__list--chips .nexvio-pf__count{background:transparent;padding:0;min-width:0}
+
+/* dropdown */
+.nexvio-pf__select{position:relative}
+.nexvio-pf select{width:100%;height:var(--nexvio-pf-ih);margin:0;padding:0 36px 0 12px;background:var(--nexvio-pf-ibg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%238f9aab' stroke-width='1.8'/%3E%3C/svg%3E") no-repeat right 12px center;
+	color:var(--nexvio-pf-itext);border:1px solid var(--nexvio-pf-iborder);border-radius:var(--nexvio-pf-iradius);font:inherit;outline:none;-webkit-appearance:none;appearance:none;cursor:pointer}
+
+/* buttons */
+.nexvio-pf__actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:var(--nexvio-pf-gap);padding-top:var(--nexvio-pf-gap);border-top:1px solid var(--nexvio-pf-divider)}
+.nexvio-pf .nexvio-pf__apply{flex:1;height:var(--nexvio-pf-ih);border:0;margin:0;padding:0 18px;background:var(--nexvio-pf-btn);color:var(--nexvio-pf-btn-t);cursor:pointer;
+	font:600 15px/1 "Chakra Petch","Segoe UI",sans-serif;letter-spacing:.02em;clip-path:polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);transition:background .15s}
+.nexvio-pf .nexvio-pf__apply:hover{background:var(--nexvio-pf-btn-h);color:var(--nexvio-pf-btn-t)}
+.nexvio-pf .nexvio-pf__reset{height:var(--nexvio-pf-ih);margin:0;padding:0 16px;background:transparent;color:var(--nexvio-pf-reset);border:1px solid var(--nexvio-pf-reset-b);border-radius:var(--nexvio-pf-iradius);
+	cursor:pointer;font:600 14px/1 "Chakra Petch","Segoe UI",sans-serif;transition:border-color .15s,color .15s}
+
+.nexvio-pf:not(.has-active) .nexvio-pf__reset{opacity:.55}
+
+/* products container while loading */
+.nexvio-pf-loading{position:relative;opacity:.45;pointer-events:none;transition:opacity .15s}
+.nexvio-pf-loading::after{content:"";position:absolute;left:50%;top:120px;width:34px;height:34px;margin-left:-17px;border-radius:50%;border:3px solid #3d8bff;border-right-color:transparent;animation:nexvio-pf-spin .7s linear infinite;z-index:5}
+@keyframes nexvio-pf-spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.nexvio-pf-loading::after{animation:none}}
+
+/* price slider: no border or background from the theme around the two handles */
+.nexvio-pf .nexvio-pf__range input[type=range]{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;outline:none!important;padding:0!important;margin:0!important;min-height:0!important}
+.nexvio-pf .nexvio-pf__range input[type=range]:focus{border:0!important;box-shadow:none!important;outline:none!important}
+.nexvio-pf .nexvio-pf__range input[type=range]::-webkit-slider-runnable-track{border:0!important;background:transparent!important;box-shadow:none!important}
+.nexvio-pf .nexvio-pf__range input[type=range]::-moz-range-track{border:0!important;background:transparent!important;box-shadow:none!important}
+.nexvio-pf .nexvio-pf__range input[type=range]::-moz-focus-outer{border:0}
+.nexvio-pf .nexvio-pf__range input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(61,139,255,.35)}
+
+/* categories: sub-categories indented, opened with + */
+.nexvio-pf__list--tree .nexvio-pf__row{display:flex;align-items:center;gap:4px}
+.nexvio-pf__list--tree .nexvio-pf__row .nexvio-pf__opt{flex:1;min-width:0}
+.nexvio-pf__sublist{list-style:none;margin:2px 0 4px;padding:0 0 0 18px;border-left:1px solid var(--nexvio-pf-divider);margin-left:8px;display:flex;flex-direction:column;gap:var(--nexvio-pf-ogap)}
+.nexvio-pf__sublist[hidden]{display:none}
+.nexvio-pf__list.is-open .is-extra .nexvio-pf__sublist:not([hidden]){display:flex}
+.nexvio-pf .nexvio-pf__sub-toggle{flex-shrink:0;position:relative;width:28px;height:28px;margin:0;padding:0;border:1px solid var(--nexvio-pf-border);border-radius:50%;background:transparent;color:var(--nexvio-pf-otext);cursor:pointer;box-shadow:none;transition:background .15s,border-color .15s}
+.nexvio-pf .nexvio-pf__sub-toggle:hover{border-color:var(--nexvio-pf-check);background:transparent;color:var(--nexvio-pf-otext-a)}
+.nexvio-pf .nexvio-pf__sub-toggle span::before,.nexvio-pf .nexvio-pf__sub-toggle span::after{content:"";position:absolute;left:50%;top:50%;width:10px;height:1.6px;margin:-.8px 0 0 -5px;background:currentColor;border-radius:1px;transition:transform .2s}
+.nexvio-pf .nexvio-pf__sub-toggle span::after{transform:rotate(90deg)}
+.nexvio-pf .nexvio-pf__sub-toggle[aria-expanded="true"] span::after{transform:rotate(0deg)}
+.nexvio-pf .nexvio-pf__sub-toggle:focus-visible{outline:2px solid var(--nexvio-pf-focus);outline-offset:2px}
+
+/* colour circles */
+.nexvio-pf__list--swatches{flex-direction:row;flex-wrap:wrap;gap:10px}
+.nexvio-pf__list--swatches.is-open .is-extra{display:list-item}
+.nexvio-pf__swatch{position:relative;display:block;cursor:pointer;margin:0}
+.nexvio-pf__swatch input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.nexvio-pf__dot{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--sw);border:1px solid rgba(127,127,127,.35);box-shadow:inset 0 0 0 2px rgba(255,255,255,.08);
+	font-size:12px;font-weight:700;color:#374151;text-transform:uppercase;transition:transform .15s,box-shadow .15s}
+.nexvio-pf__swatch.is-light .nexvio-pf__dot{border-color:rgba(0,0,0,.25)}
+.nexvio-pf__swatch:hover .nexvio-pf__dot{transform:scale(1.08)}
+.nexvio-pf__swatch input:checked + .nexvio-pf__dot{box-shadow:0 0 0 2px var(--nexvio-pf-bg),0 0 0 4px var(--nexvio-pf-check)}
+.nexvio-pf__swatch input:checked + .nexvio-pf__dot::after{content:"";width:9px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-1px) rotate(-45deg);filter:drop-shadow(0 0 1px rgba(0,0,0,.6))}
+.nexvio-pf__swatch.is-light input:checked + .nexvio-pf__dot::after{border-color:#111;filter:none}
+.nexvio-pf__swatch input:focus-visible + .nexvio-pf__dot{box-shadow:0 0 0 2px var(--nexvio-pf-bg),0 0 0 4px var(--nexvio-pf-focus)}
+.nexvio-pf__swatch-name{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* size buttons */
+.nexvio-pf__list--sizes .nexvio-pf__opt{min-width:44px;justify-content:center;padding:9px 10px;text-align:center}
+.nexvio-pf__list--sizes .nexvio-pf__name{flex:none}
+.nexvio-pf__list--sizes .nexvio-pf__count{display:none}
+
+/* rating */
+.nexvio-pf__stars{flex-shrink:0;display:inline-block;width:70px;height:12px;
+	background:linear-gradient(90deg,#f5b301 var(--r,0%),rgba(150,160,180,.4) var(--r,0%));
+	-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 .8l3.3 6.7 7.4 1.1-5.4 5.2 1.3 7.3L12 17.6l-6.6 3.5 1.3-7.3L1.3 8.6l7.4-1.1z'/%3E%3C/svg%3E") left center/14px 12px repeat-x;
+	mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 21'%3E%3Cpath d='M12 .8l3.3 6.7 7.4 1.1-5.4 5.2 1.3 7.3L12 17.6l-6.6 3.5 1.3-7.3L1.3 8.6l7.4-1.1z'/%3E%3C/svg%3E") left center/14px 12px repeat-x}
+.nexvio-pf__list--rating .nexvio-pf__name{font-size:.92em}
+
+/* Light style (Nexvio > Filters). The main colour is added by the plugin. */
+.nexvio-pf.nexvio-pf--light{--nexvio-pf-bg:#ffffff;--nexvio-pf-border:#e7e8ec;--nexvio-pf-divider:#eceef2;--nexvio-pf-title:#111827;--nexvio-pf-gtitle:#1f2937;
+	--nexvio-pf-ibg:#f7f7f9;--nexvio-pf-iborder:#e2e4ea;--nexvio-pf-itext:#111827;--nexvio-pf-muted:#6b7280;--nexvio-pf-track:#e5e7eb;--nexvio-pf-handle:#ffffff;
+	--nexvio-pf-otext:#374151;--nexvio-pf-otext-a:#111827;--nexvio-pf-count:#6b7280;--nexvio-pf-count-bg:#f1f2f5;--nexvio-pf-box:#c4c8d0;--nexvio-pf-chip-bg:#ffffff;
+	--nexvio-pf-reset:#374151;--nexvio-pf-reset-b:#d1d5db;--nexvio-pf-more:color-mix(in srgb,var(--nexvio-pf-check) 80%,#000)}
+.nexvio-pf.nexvio-pf--dark{--nexvio-pf-more:color-mix(in srgb,var(--nexvio-pf-check) 55%,#fff)}
+.nexvio-pf--light select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%236b7280' stroke-width='1.8'/%3E%3C/svg%3E")}
+.nexvio-pf--light .nexvio-pf__dot{border-color:rgba(0,0,0,.15)}
+/* image circles */
+.nexvio-pf__dot.is-image{background:var(--sw-img) center/cover no-repeat,var(--sw,#d1d5db)}
+/* one-choice buttons (sort by, per page): selected chip */
+.nexvio-pf__list--single .nexvio-pf__opt:has(input:checked){background:var(--nexvio-pf-chip-bg-a);border-color:var(--nexvio-pf-chip-border-a);color:var(--nexvio-pf-otext-a)}
+
+/* buttons: every state readable in Light and Dark, and not changed by theme button styles */
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__reset{background:var(--nexvio-pf-reset-bg,transparent)!important;color:var(--nexvio-pf-reset)!important;border:1px solid var(--nexvio-pf-reset-b)!important;box-shadow:none!important;text-decoration:none}
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__reset:hover,.nexvio-pf .nexvio-pf__actions .nexvio-pf__reset:focus,.nexvio-pf .nexvio-pf__actions .nexvio-pf__reset:active{
+	background:var(--nexvio-pf-reset-bg-h,var(--nexvio-pf-reset-bg,transparent))!important;color:var(--nexvio-pf-reset-h,var(--nexvio-pf-otext-a))!important;border-color:var(--nexvio-pf-reset-b-h,var(--nexvio-pf-focus))!important;opacity:1}
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__reset:focus-visible{outline:2px solid var(--nexvio-pf-focus);outline-offset:2px}
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__apply{background:var(--nexvio-pf-btn)!important;color:var(--nexvio-pf-btn-t)!important;box-shadow:none!important}
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__apply:hover,.nexvio-pf .nexvio-pf__actions .nexvio-pf__apply:focus,.nexvio-pf .nexvio-pf__actions .nexvio-pf__apply:active{background:var(--nexvio-pf-btn-h)!important;color:var(--nexvio-pf-btn-t-h,var(--nexvio-pf-btn-t))!important}
+.nexvio-pf .nexvio-pf__actions .nexvio-pf__apply:focus-visible{outline:2px solid var(--nexvio-pf-focus);outline-offset:2px}
+/* group titles: no theme border / background when clicked */
+.nexvio-pf .nexvio-pf__gtitle .nexvio-pf__toggle:focus,.nexvio-pf .nexvio-pf__gtitle .nexvio-pf__toggle:hover,.nexvio-pf .nexvio-pf__gtitle .nexvio-pf__toggle:active{background:transparent!important;border:0!important;box-shadow:none!important;color:inherit!important}
+.nexvio-pf .nexvio-pf__gtitle .nexvio-pf__toggle:focus:not(:focus-visible){outline:none!important}

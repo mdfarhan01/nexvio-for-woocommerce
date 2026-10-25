@@ -1,0 +1,77 @@
+/* Nexvio Add to Cart widget */
+.nexvio-atc{
+	--nexvio-atc-h:56px; --nexvio-atc-gap:12px;
+	--nexvio-atc-qbg:#1f252e; --nexvio-atc-ibg:#181d24; --nexvio-atc-qborder:#313945; --nexvio-atc-qcolor:#e8edf4;
+	--nexvio-atc-step:#e8edf4; --nexvio-atc-step-h:#262d37; --nexvio-atc-stepw:44px; --nexvio-atc-iw:52px; --nexvio-atc-qradius:4px;
+	--nexvio-atc-bg:#3d8bff; --nexvio-atc-bg-h:#5a9dff; --nexvio-atc-tc:#fff; --nexvio-atc-tc-h:#fff; --nexvio-atc-ok:#2fae78;
+	--nexvio-atc-dis-bg:#424b58; --nexvio-atc-dis-tc:#aab3c0; --nexvio-atc-cut:10px; --nexvio-atc-bradius:0px;
+	--nexvio-atc-wbg:#13171d; --nexvio-atc-wborder:#313945; --nexvio-atc-wborder-h:#ff6b8a; --nexvio-atc-wicon:#e8edf4; --nexvio-atc-won:#ff6b8a;
+	--nexvio-atc-ww:56px; --nexvio-atc-wradius:4px; --nexvio-atc-wis:20px;
+	--nexvio-atc-mcolor:#8f9aab; --nexvio-atc-mlink:#8cc8ff; --nexvio-atc-merr:#ff6371;
+	width:100%;
+}
+.nexvio-atc *,.nexvio-atc *::before,.nexvio-atc *::after{box-sizing:border-box}
+.nexvio-atc__form{display:flex;align-items:stretch;gap:var(--nexvio-atc-gap);margin:0;height:var(--nexvio-atc-h)}
+
+/* quantity */
+.nexvio-atc__qty{display:flex;align-items:stretch;flex-shrink:0;background:var(--nexvio-atc-qbg);border:1px solid var(--nexvio-atc-qborder);border-radius:var(--nexvio-atc-qradius);overflow:hidden}
+.nexvio-atc .nexvio-atc__step{width:var(--nexvio-atc-stepw);height:auto;margin:0;padding:0;border:0;border-radius:0;background:transparent;color:var(--nexvio-atc-step);
+	font:500 20px/1 "Barlow","Segoe UI",system-ui,sans-serif;cursor:pointer;display:grid;place-items:center;transition:background .15s;box-shadow:none;min-height:0}
+.nexvio-atc .nexvio-atc__step:hover,.nexvio-atc .nexvio-atc__step:focus-visible{background:var(--nexvio-atc-step-h);color:var(--nexvio-atc-step)}
+.nexvio-atc .nexvio-atc__step[disabled]{opacity:.5;cursor:default;background:transparent}
+.nexvio-atc .nexvio-atc__input{width:var(--nexvio-atc-iw);height:auto;margin:0;padding:0;border:0;border-radius:0;background:var(--nexvio-atc-ibg);color:var(--nexvio-atc-qcolor);
+	text-align:center;font:600 17px/1 "Chakra Petch","Segoe UI",sans-serif;box-shadow:none;outline:none;-moz-appearance:textfield;appearance:textfield;min-height:0}
+.nexvio-atc .nexvio-atc__input::-webkit-outer-spin-button,.nexvio-atc .nexvio-atc__input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.nexvio-atc .nexvio-atc__input:focus{box-shadow:inset 0 0 0 2px var(--nexvio-atc-bg)}
+
+/* button */
+.nexvio-atc .nexvio-atc__btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:auto;min-height:0;margin:0;padding:0 28px;border:0;
+	background:var(--nexvio-atc-bg);color:var(--nexvio-atc-tc);font:600 16px/1.1 "Chakra Petch","Segoe UI",sans-serif;letter-spacing:.02em;cursor:pointer;text-transform:none;box-shadow:none;
+	border-radius:var(--nexvio-atc-bradius);transition:background .15s,color .15s;
+	clip-path:polygon(var(--nexvio-atc-cut) 0,100% 0,100% calc(100% - var(--nexvio-atc-cut)),calc(100% - var(--nexvio-atc-cut)) 100%,0 100%,0 var(--nexvio-atc-cut))}
+.nexvio-atc--full .nexvio-atc__btn{flex:1;min-width:0}
+.nexvio-atc .nexvio-atc__btn:hover,.nexvio-atc .nexvio-atc__btn:focus-visible{background:var(--nexvio-atc-bg-h);color:var(--nexvio-atc-tc-h)}
+.nexvio-atc .nexvio-atc__btn.is-disabled,.nexvio-atc .nexvio-atc__btn[disabled]{background:var(--nexvio-atc-dis-bg);color:var(--nexvio-atc-dis-tc);cursor:not-allowed}
+.nexvio-atc .nexvio-atc__btn.is-loading{cursor:progress;opacity:.85}
+.nexvio-atc .nexvio-atc__btn.is-loading::after{content:"";width:16px;height:16px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:nexvio-atc-spin .7s linear infinite}
+.nexvio-atc .nexvio-atc__btn.is-added{background:var(--nexvio-atc-ok)}
+.nexvio-atc__label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@keyframes nexvio-atc-spin{to{transform:rotate(360deg)}}
+
+/* wishlist heart (square, next to the button) */
+.nexvio-atc .nexvio-ps__wish.nexvio-atc__wish{position:static;flex-shrink:0;width:var(--nexvio-atc-ww);height:auto;border-radius:var(--nexvio-atc-wradius);
+	background:var(--nexvio-atc-wbg);border:1px solid var(--nexvio-atc-wborder);color:var(--nexvio-atc-wicon);transition:border-color .15s,color .15s;margin:0;padding:0}
+.nexvio-atc .nexvio-ps__wish.nexvio-atc__wish svg{width:var(--nexvio-atc-wis);height:var(--nexvio-atc-wis)}
+.nexvio-atc .nexvio-ps__wish.nexvio-atc__wish:hover{border-color:var(--nexvio-atc-wborder-h);color:var(--nexvio-atc-won)}
+.nexvio-atc .nexvio-ps__wish.nexvio-atc__wish.is-on{color:var(--nexvio-atc-won);border-color:var(--nexvio-atc-wborder-h)}
+
+/* message */
+.nexvio-atc__msg{margin:10px 0 0;font-size:14px;color:var(--nexvio-atc-mcolor);min-height:0}
+.nexvio-atc__msg:empty{display:none}
+.nexvio-atc__msg a{color:var(--nexvio-atc-mlink);text-decoration:underline;margin-left:6px}
+.nexvio-atc__msg.is-error{color:var(--nexvio-atc-merr)}
+.nexvio-atc .added_to_cart{display:none!important}
+
+/* other product types: native WooCommerce form */
+.nexvio-atc--native{display:flex;gap:var(--nexvio-atc-gap);align-items:flex-end;flex-wrap:wrap}
+.nexvio-atc--native .nexvio-atc__native{flex:1;min-width:0}
+.nexvio-atc--native .nexvio-atc__wish{height:var(--nexvio-atc-h)!important}
+.nexvio-atc--native form.cart{margin:0!important}
+.nexvio-atc--native .variations select{background:var(--nexvio-atc-ibg);color:var(--nexvio-atc-qcolor);border:1px solid var(--nexvio-atc-qborder);border-radius:var(--nexvio-atc-qradius);padding:10px 12px}
+.nexvio-atc--native .woocommerce-variation-add-to-cart,.nexvio-atc--native form.cart:not(.variations_form){display:flex;gap:var(--nexvio-atc-gap);align-items:stretch}
+.nexvio-atc--native .quantity{margin:0!important;float:none!important}
+.nexvio-atc--native .quantity input.qty{height:var(--nexvio-atc-h);width:calc(var(--nexvio-atc-iw) + 40px);background:var(--nexvio-atc-ibg);color:var(--nexvio-atc-qcolor);border:1px solid var(--nexvio-atc-qborder);border-radius:var(--nexvio-atc-qradius);text-align:center;font:600 17px/1 "Chakra Petch",sans-serif}
+.nexvio-atc--native .single_add_to_cart_button{flex:1;height:var(--nexvio-atc-h);border:0!important;background:var(--nexvio-atc-bg)!important;color:var(--nexvio-atc-tc)!important;font:600 16px/1 "Chakra Petch","Segoe UI",sans-serif!important;
+	border-radius:var(--nexvio-atc-bradius)!important;float:none!important;
+	clip-path:polygon(var(--nexvio-atc-cut) 0,100% 0,100% calc(100% - var(--nexvio-atc-cut)),calc(100% - var(--nexvio-atc-cut)) 100%,0 100%,0 var(--nexvio-atc-cut))}
+.nexvio-atc--native .single_add_to_cart_button:hover{background:var(--nexvio-atc-bg-h)!important}
+.nexvio-atc--native .single_add_to_cart_button.disabled{background:var(--nexvio-atc-dis-bg)!important;color:var(--nexvio-atc-dis-tc)!important}
+
+@media (max-width:420px){
+	.nexvio-atc .nexvio-atc__btn{padding:0 14px;font-size:15px}
+	.nexvio-atc{--nexvio-atc-stepw:38px;--nexvio-atc-iw:42px;--nexvio-atc-ww:50px}
+}
+.nexvio-atc__btn{gap:8px}
+.nexvio-atc__icon{display:inline-grid;place-items:center;font-size:1.1em;line-height:1}
+.nexvio-atc__icon svg{width:1.1em;height:1.1em;fill:currentColor}
+.nexvio-atc__native .single_add_to_cart_button.loading{opacity:.6;pointer-events:none}
