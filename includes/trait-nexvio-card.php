@@ -10,6 +10,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Elementor\Controls_Manager;
 use Elementor\Repeater;
 use Elementor\Group_Control_Typography;
+use Elementor\Group_Control_Box_Shadow;
+use Elementor\Group_Control_Border;
+use Elementor\Group_Control_Css_Filter;
+use Elementor\Group_Control_Background;
+use Elementor\Group_Control_Text_Shadow;
 
 trait Nexvio_Card_Trait {
 
@@ -108,7 +113,188 @@ trait Nexvio_Card_Trait {
 			'separator' => 'before',
 		) );
 		$this->text( 'btn_text', esc_html__( 'Button text', 'nexvio' ), 'Add to cart', array( 'condition' => array( 'btn_style!' => 'icon' ) ) );
+		$this->add_control( 'btn_action', array(
+			'label'       => esc_html__( 'When the button is clicked', 'nexvio' ),
+			'type'        => Controls_Manager::SELECT,
+			'default'     => 'default',
+			'options'     => array(
+				'default' => esc_html__( 'Design default (products with options open the product page)', 'nexvio' ),
+				'cart'    => esc_html__( 'Add to cart (do not open the product page)', 'nexvio' ),
+			),
+			'description' => esc_html__( 'Add to cart: variable products are added right from the card, with their default option (or the first one in stock). Products that cannot be added without a choice still open the product page.', 'nexvio' ),
+			'separator'   => 'before',
+		) );
+		$this->add_responsive_control( 'content_align', array(
+			'label'        => esc_html__( 'Content alignment', 'nexvio' ),
+			'type'         => Controls_Manager::CHOOSE,
+			'options'      => array(
+				'left'    => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center'  => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'right'   => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+				'justify' => array( 'title' => esc_html__( 'Justified', 'nexvio' ), 'icon' => 'eicon-text-align-justify' ),
+			),
+			'prefix_class' => 'nexvio-ca%s-',
+			'separator'    => 'before',
+			'description'  => esc_html__( 'Aligns the text, rating, colour swatches, price and button of the card. Leave empty to keep the design.', 'nexvio' ),
+		) );
+		$this->switcher( 'h_stack_mobile', esc_html__( 'Horizontal: image on top on mobile', 'nexvio' ), 'yes', array(
+			'separator'   => 'before',
+			'description' => esc_html__( 'On phones the image goes above and the details go below it. Turn off to keep image and details side by side.', 'nexvio' ),
+			'condition'   => array( 'design_layout' => 'horizontal' ),
+		) );
 		$this->end_controls_section();
+
+		$this->register_gallery_section();
+	}
+
+	/**
+	 * Which gallery hover controls a widget shows: '' (the original set), 'simple'
+	 * (on/off + animation settings) or 'full' (simple + the several-images options).
+	 */
+	protected function gallery_ui() {
+		return '';
+	}
+
+	/** Second image shown when the pointer is over the card. */
+	protected function register_gallery_section() {
+		$ui = $this->gallery_ui();
+		$this->start_controls_section( 'section_hover_gallery', array( 'label' => esc_html__( 'Hover gallery image', 'nexvio' ) ) );
+		$this->switcher( 'gal_on', '' !== $ui ? esc_html__( 'Enable Gallery Image on Hover', 'nexvio' ) : esc_html__( 'Show gallery image on hover', 'nexvio' ), '', array(
+			'description' => esc_html__( 'When the pointer is over the card, the product\'s gallery image replaces the main image. Products without gallery images keep their main image. Desktop (mouse) only.', 'nexvio' ),
+		) );
+		$on = array( 'gal_on' => 'yes' );
+		if ( '' === $ui || 'full' === $ui ) {
+		$this->add_control( 'gal_mode', array(
+			'label'     => esc_html__( 'Images', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => 'first',
+			'options'   => array(
+				'first' => esc_html__( 'First gallery image', 'nexvio' ),
+				'cycle' => esc_html__( 'Go through the gallery images while hovering', 'nexvio' ),
+			),
+			'condition' => $on,
+		) );
+		$this->add_control( 'gal_count', array(
+			'label'     => esc_html__( 'Number of gallery images', 'nexvio' ),
+			'type'      => Controls_Manager::NUMBER,
+			'min'       => 1,
+			'max'       => 5,
+			'default'   => 3,
+			'condition' => array( 'gal_on' => 'yes', 'gal_mode' => 'cycle' ),
+		) );
+		$this->add_control( 'gal_interval', array(
+			'label'     => esc_html__( 'Time per image (ms)', 'nexvio' ),
+			'type'      => Controls_Manager::NUMBER,
+			'min'       => 400,
+			'max'       => 6000,
+			'step'      => 100,
+			'default'   => 1200,
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-gal-interval: {{VALUE}};' ),
+			'condition' => array( 'gal_on' => 'yes', 'gal_mode' => 'cycle' ),
+		) );
+		}
+		if ( '' !== $ui ) {
+			$this->register_gallery_animation_controls( $ui );
+			$this->end_controls_section();
+			return;
+		}
+		$this->add_control( 'gal_effect', array(
+			'label'     => esc_html__( 'Change effect', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => 'fade',
+			'options'   => array(
+				'fade'        => esc_html__( 'Fade', 'nexvio' ),
+				'zoom-in'     => esc_html__( 'Zoom in', 'nexvio' ),
+				'zoom-out'    => esc_html__( 'Zoom out', 'nexvio' ),
+				'slide-left'  => esc_html__( 'Slide in from the left', 'nexvio' ),
+				'slide-right' => esc_html__( 'Slide in from the right', 'nexvio' ),
+				'slide-up'    => esc_html__( 'Slide in from the bottom', 'nexvio' ),
+				'slide-down'  => esc_html__( 'Slide in from the top', 'nexvio' ),
+			),
+			'condition' => $on,
+		) );
+		$this->add_control( 'gal_duration', array(
+			'label'      => esc_html__( 'Effect speed (ms)', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 100, 'max' => 2000, 'step' => 50 ) ),
+			'default'    => array( 'size' => 500, 'unit' => 'px' ),
+			'selectors'  => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-gal-dur: {{SIZE}}ms;' ),
+			'condition'  => $on,
+		) );
+		$this->add_control( 'gal_ease', array(
+			'label'     => esc_html__( 'Motion', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => 'cubic-bezier(.4,0,.2,1)',
+			'options'   => array(
+				'cubic-bezier(.4,0,.2,1)'  => esc_html__( 'Smooth', 'nexvio' ),
+				'cubic-bezier(.22,1,.36,1)' => esc_html__( 'Soft landing', 'nexvio' ),
+				'ease-in-out'              => esc_html__( 'Ease in and out', 'nexvio' ),
+				'ease-out'                 => esc_html__( 'Ease out', 'nexvio' ),
+				'linear'                   => esc_html__( 'Linear', 'nexvio' ),
+			),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-gal-ease: {{VALUE}};' ),
+			'condition' => $on,
+		) );
+		$this->end_controls_section();
+	}
+
+	/** Animation settings of the gallery hover (Products Card and the widgets that share its settings). */
+	protected function register_gallery_animation_controls( $ui ) {
+		$on   = array( 'gal_on' => 'yes' );
+		$full = 'full' === $ui;
+		$this->switcher( 'gal_anim', esc_html__( 'Enable Hover Animation', 'nexvio' ), 'yes', array( 'condition' => $on ) );
+		$an = array( 'gal_on' => 'yes', 'gal_anim' => 'yes' );
+		$effects = array(
+			'fade'     => esc_html__( 'Fade', 'nexvio' ),
+			'zoom-in'  => esc_html__( 'Zoom In', 'nexvio' ),
+			'zoom-out' => esc_html__( 'Zoom Out', 'nexvio' ),
+			'slide'    => esc_html__( 'Slide', 'nexvio' ),
+		);
+		if ( $full ) {
+			/* the directions saved by earlier versions stay selectable */
+			$effects['slide-left']  = esc_html__( 'Slide in from the left', 'nexvio' );
+			$effects['slide-right'] = esc_html__( 'Slide in from the right', 'nexvio' );
+			$effects['slide-up']    = esc_html__( 'Slide in from the bottom', 'nexvio' );
+			$effects['slide-down']  = esc_html__( 'Slide in from the top', 'nexvio' );
+		}
+		$effects['none'] = esc_html__( 'None', 'nexvio' );
+		$this->add_control( 'gal_effect', array(
+			'label'     => esc_html__( 'Animation Effect', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => 'fade',
+			'options'   => $effects,
+			'condition' => $an,
+		) );
+		$this->add_control( 'gal_duration', array(
+			'label'      => esc_html__( 'Animation Duration (ms)', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 100, 'max' => 2000, 'step' => 50 ) ),
+			'default'    => array( 'size' => 500, 'unit' => 'px' ),
+			'selectors'  => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-gal-dur: {{SIZE}}ms;' ),
+			'condition'  => $an,
+		) );
+		$ease = array(
+			'ease'        => esc_html__( 'Ease', 'nexvio' ),
+			'ease-in'     => esc_html__( 'Ease In', 'nexvio' ),
+			'ease-out'    => esc_html__( 'Ease Out', 'nexvio' ),
+			'ease-in-out' => esc_html__( 'Ease In Out', 'nexvio' ),
+		);
+		if ( $full ) {
+			$ease = array_merge( array(
+				'cubic-bezier(.4,0,.2,1)'   => esc_html__( 'Smooth', 'nexvio' ),
+				'cubic-bezier(.22,1,.36,1)' => esc_html__( 'Soft landing', 'nexvio' ),
+			), $ease, array( 'linear' => esc_html__( 'Linear', 'nexvio' ) ) );
+		}
+		$this->add_control( 'gal_ease', array(
+			'label'     => esc_html__( 'Animation Easing', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => $full ? 'cubic-bezier(.4,0,.2,1)' : 'ease',
+			'options'   => $ease,
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-gal-ease: {{VALUE}};' ),
+			'condition' => $an,
+		) );
 	}
 
 	/** Style controls for the new designs (hidden for Classic Vault). */
@@ -156,7 +342,8 @@ trait Nexvio_Card_Trait {
 		$ln( 'l_bw', esc_html__( 'Border width (px)', 'nexvio' ), '--nexvio-l-bw', 0, 10 );
 		$ln( 'l_radius', esc_html__( 'Corner radius (px)', 'nexvio' ), '--nexvio-l-radius', 0, 60 );
 		$this->add_control( 'l_shadow', array(
-			'label'     => esc_html__( 'Shadow', 'nexvio' ),
+			'label'       => esc_html__( 'Shadow preset', 'nexvio' ),
+			'description' => esc_html__( 'For your own shadow (colour, offset, blur, spread) use Style > Card > Box Shadow.', 'nexvio' ),
 			'type'      => Controls_Manager::SELECT,
 			'default'   => '',
 			'options'   => array(
@@ -207,11 +394,6 @@ trait Nexvio_Card_Trait {
 		$lc( 'l_price', esc_html__( 'Price', 'nexvio' ), '--nexvio-l-price' );
 		$lc( 'l_old', esc_html__( 'Old price (on sale)', 'nexvio' ), '--nexvio-l-old' );
 
-		$this->add_control( 'l_h_btn', array( 'label' => esc_html__( 'Button', 'nexvio' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$lc( 'l_accent', esc_html__( 'Button background', 'nexvio' ), '--nexvio-l-accent' );
-		$lc( 'l_accent_text', esc_html__( 'Button text / icon', 'nexvio' ), '--nexvio-l-accent-text' );
-		$ln( 'l_btn_radius', esc_html__( 'Button corner radius (px)', 'nexvio' ), '--nexvio-l-btn-radius', 0, 60 );
-
 		$this->add_control( 'l_h_special', array( 'label' => esc_html__( 'Design effect', 'nexvio' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before', 'condition' => array( 'design_layout' => array( 'overlay', 'glass', 'neon', 'pricetag', 'spotlight' ) ) ) );
 		$lc( 'l_overlay', esc_html__( 'Overlay colour', 'nexvio' ), '--nexvio-l-overlay', array( 'design_layout' => 'overlay' ) );
 		$ln( 'l_blur', esc_html__( 'Glass blur (px)', 'nexvio' ), '--nexvio-l-blur', 0, 40, 'px', array( 'design_layout' => 'glass' ) );
@@ -254,6 +436,33 @@ trait Nexvio_Card_Trait {
 		}
 		if ( isset( $s['rating_number'] ) && 'yes' === $s['rating_number'] ) {
 			$out[] = 'nexvio-ps--rating-number';
+		}
+		if ( 'horizontal' === $layout ) {
+			if ( ! isset( $s['h_stack_mobile'] ) || 'yes' === $s['h_stack_mobile'] ) {
+				$out[] = 'nexvio-ps--h-stack';
+			}
+			foreach ( array( 'img_gap', 'img_gap_tablet', 'img_gap_mobile' ) as $key ) {
+				if ( isset( $s[ $key ]['size'] ) && '' !== (string) $s[ $key ]['size'] ) {
+					$out[] = 'nexvio-ps--img-gap';
+					break;
+				}
+			}
+		}
+		if ( isset( $s['gal_on'] ) && 'yes' === $s['gal_on'] ) {
+			$fx    = isset( $s['gal_effect'] ) ? $s['gal_effect'] : 'fade';
+			if ( isset( $s['gal_anim'] ) && 'yes' !== $s['gal_anim'] ) {
+				$fx = 'none'; /* hover animation off: the images swap without a transition */
+			}
+			$out[] = 'nexvio-ps--gal';
+			$out[] = 'nexvio-ps--gal-fx-' . ( in_array( $fx, array( 'fade', 'zoom-in', 'zoom-out', 'slide', 'slide-left', 'slide-right', 'slide-up', 'slide-down', 'none' ), true ) ? $fx : 'fade' );
+			if ( isset( $s['gal_mode'] ) && 'cycle' === $s['gal_mode'] ) {
+				$out[] = 'nexvio-ps--gal-cycle';
+			}
+		}
+		/* a hover background chosen in Style > Button is shown as picked (no brightness tint) */
+		$hbg = isset( $s['btn_bg_h_background'] ) ? $s['btn_bg_h_background'] : '';
+		if ( 'gradient' === $hbg || ( 'classic' === $hbg && ! empty( $s['btn_bg_h_color'] ) ) ) {
+			$out[] = 'nexvio-ps--btn-hbg';
 		}
 		$style = isset( $s['btn_style'] ) ? $s['btn_style'] : 'auto';
 		if ( 'text' === $style || ( 'auto' === $style && Nexvio_Layouts::text_button_default( $layout ) ) ) {
@@ -608,6 +817,119 @@ trait Nexvio_Card_Trait {
 			'default'    => array( 'top' => 14, 'right' => 14, 'bottom' => 16, 'left' => 14, 'unit' => 'px', 'isLinked' => false ),
 			'selectors'  => array( '{{WRAPPER}} .nexvio-ps__body' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
 		) );
+
+		/* full box-shadow control (colour, horizontal, vertical, blur, spread, inset) */
+		$this->add_control( 'h_card_shadow', array( 'label' => esc_html__( 'Box Shadow', 'nexvio' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
+		$this->start_controls_tabs( 'card_shadow_tabs' );
+		$this->start_controls_tab( 'card_shadow_normal', array( 'label' => esc_html__( 'Normal', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'card_bshadow',
+			'selector' => '{{WRAPPER}} .nexvio-ps .nexvio-ps__card',
+		) );
+		$this->end_controls_tab();
+		$this->start_controls_tab( 'card_shadow_hover', array( 'label' => esc_html__( 'Hover', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'card_bshadow_h',
+			'selector' => '{{WRAPPER}} .nexvio-ps .nexvio-ps__card:hover',
+		) );
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+		$this->end_controls_section();
+
+		/* ============ STYLE: IMAGE (same controls as the Elementor Image widget) ============ */
+		$img   = '{{WRAPPER}} .nexvio-ps .nexvio-ps__media .nexvio-ps__img';
+		$img_h = '{{WRAPPER}} .nexvio-ps .nexvio-ps__card:hover .nexvio-ps__media .nexvio-ps__img';
+		$this->start_controls_section( 'style_image', array( 'label' => esc_html__( 'Image', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_responsive_control( 'img_align', array(
+			'label'                => esc_html__( 'Alignment', 'nexvio' ),
+			'type'                 => Controls_Manager::CHOOSE,
+			'options'              => array(
+				'left'   => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center' => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'right'  => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+			),
+			'selectors_dictionary' => array(
+				'left'   => 'margin-left:0;margin-right:auto;',
+				'center' => 'margin-left:auto;margin-right:auto;',
+				'right'  => 'margin-left:auto;margin-right:0;',
+			),
+			'selectors'            => array( $img => '{{VALUE}}' ),
+		) );
+		$this->add_responsive_control( 'img_width', array(
+			'label'          => esc_html__( 'Width', 'nexvio' ),
+			'type'           => Controls_Manager::SLIDER,
+			'size_units'     => array( '%', 'px', 'vw' ),
+			'range'          => array( '%' => array( 'min' => 1, 'max' => 100 ), 'px' => array( 'min' => 1, 'max' => 1000 ), 'vw' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'      => array( $img => 'width: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'img_maxw', array(
+			'label'      => esc_html__( 'Max Width', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( '%', 'px', 'vw' ),
+			'range'      => array( '%' => array( 'min' => 1, 'max' => 100 ), 'px' => array( 'min' => 1, 'max' => 1000 ), 'vw' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'  => array( $img => 'max-width: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'img_height', array(
+			'label'      => esc_html__( 'Height', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px', '%', 'vh' ),
+			'range'      => array( 'px' => array( 'min' => 1, 'max' => 1000 ), '%' => array( 'min' => 1, 'max' => 100 ), 'vh' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'  => array( $img => 'height: {{SIZE}}{{UNIT}};' ),
+		) );
+
+		$this->start_controls_tabs( 'img_fx_tabs' );
+		$this->start_controls_tab( 'img_fx_normal', array( 'label' => esc_html__( 'Normal', 'nexvio' ) ) );
+		$this->add_control( 'img_opacity', array(
+			'label'     => esc_html__( 'Opacity', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'max' => 1, 'min' => 0.05, 'step' => 0.01 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-img-op: {{SIZE}};' ),
+		) );
+		$this->add_group_control( Group_Control_Css_Filter::get_type(), array(
+			'name'     => 'img_filters',
+			'selector' => $img,
+		) );
+		$this->end_controls_tab();
+		$this->start_controls_tab( 'img_fx_hover', array( 'label' => esc_html__( 'Hover', 'nexvio' ) ) );
+		$this->add_control( 'img_opacity_h', array(
+			'label'     => esc_html__( 'Opacity', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'max' => 1, 'min' => 0.05, 'step' => 0.01 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-img-op-h: {{SIZE}};' ),
+		) );
+		$this->add_group_control( Group_Control_Css_Filter::get_type(), array(
+			'name'     => 'img_filters_h',
+			'selector' => $img_h,
+		) );
+		$this->add_control( 'img_td', array(
+			'label'     => esc_html__( 'Transition Duration (s)', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'min' => 0, 'max' => 3, 'step' => 0.1 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps .nexvio-ps__media .nexvio-ps__img:not(.nexvio-ps__alt)' => 'transition-duration: {{SIZE}}s;' ),
+		) );
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+
+		$this->add_group_control( Group_Control_Border::get_type(), array(
+			'name'      => 'img_border',
+			'selector'  => $img,
+			'separator' => 'before',
+		) );
+		$this->add_responsive_control( 'img_br', array(
+			'label'      => esc_html__( 'Border Radius', 'nexvio' ),
+			'type'       => Controls_Manager::DIMENSIONS,
+			'size_units' => array( 'px', '%', 'em', 'rem' ),
+			'selectors'  => array( $img => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+		) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'img_bshadow',
+			'selector' => $img,
+		) );
+		$this->add_control( 'img_note', array(
+			'type'            => Controls_Manager::RAW_HTML,
+			'raw'             => esc_html__( 'The image area clips what goes outside it. To see a border, radius or shadow around the image itself, make the image smaller than its area with Width or Max Width.', 'nexvio' ),
+			'content_classes' => 'elementor-descriptor',
+		) );
 		$this->end_controls_section();
 
 		/* ============ STYLE: IMAGE AREA ============ */
@@ -662,6 +984,49 @@ trait Nexvio_Card_Trait {
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'stock_typo', 'label' => esc_html__( 'Stock typography', 'nexvio' ), 'selector' => '{{WRAPPER}} .nexvio-ps__stock' ) );
 		$this->add_control( 'price_color', array( 'label' => esc_html__( 'Price colour', 'nexvio' ), 'type' => Controls_Manager::COLOR, 'default' => '#e8edf4', 'selectors' => array( '{{WRAPPER}} .nexvio-ps__price' => 'color: {{VALUE}};' ), 'separator' => 'before' ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'price_typo', 'label' => esc_html__( 'Price typography', 'nexvio' ), 'selector' => '{{WRAPPER}} .nexvio-ps__price' ) );
+		$this->end_controls_section();
+
+		/* ============ STYLE: SPACING ============ */
+		$this->start_controls_section( 'style_spacing', array( 'label' => esc_html__( 'Spacing', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_control( 'h_sp_text', array( 'label' => esc_html__( 'Title and text', 'nexvio' ), 'type' => Controls_Manager::HEADING ) );
+		$this->add_responsive_control( 'title_gap', array(
+			'label'       => esc_html__( 'Space between title and text', 'nexvio' ),
+			'description' => esc_html__( 'Space under the product name, before the description, rating, stock or price.', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+			'selectors'   => array( '{{WRAPPER}} .nexvio-ps .nexvio-ps__name' => 'margin-bottom: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'text_gap', array(
+			'label'       => esc_html__( 'Space between all text lines', 'nexvio' ),
+			'description' => esc_html__( 'Space between set line, name, rating, description, stock and price row.', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+			'selectors'   => array( '{{WRAPPER}} .nexvio-ps .nexvio-ps__card .nexvio-ps__body' => 'gap: {{SIZE}}{{UNIT}}; row-gap: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'price_gap', array(
+			'label'      => esc_html__( 'Space above price and button', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 60 ) ),
+			'selectors'  => array( '{{WRAPPER}} .nexvio-ps .nexvio-ps__card .nexvio-ps__row' => 'padding-top: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_control( 'h_sp_img', array(
+			'label'      => esc_html__( 'Image and details', 'nexvio' ),
+			'type'       => Controls_Manager::HEADING,
+			'separator'  => 'before',
+			'condition'  => array( 'design_layout' => 'horizontal' ),
+		) );
+		$this->add_responsive_control( 'img_gap', array(
+			'label'       => esc_html__( 'Space between image and details', 'nexvio' ),
+			'description' => esc_html__( 'Exact distance from the image to the text. Works with the Horizontal design (when the image is beside the details).', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+			'selectors'   => array( '{{WRAPPER}} .nexvio-ps.nexvio-ps--layout-horizontal .nexvio-ps__card' => 'column-gap: {{SIZE}}{{UNIT}};' ),
+			'condition'   => array( 'design_layout' => 'horizontal' ),
+		) );
 		$this->end_controls_section();
 
 		/* ============ STYLE: BADGES ============ */
@@ -817,6 +1182,45 @@ trait Nexvio_Card_Trait {
 
 		/* ============ STYLE: BUTTON ============ */
 		$this->start_controls_section( 'style_button', array( 'label' => esc_html__( 'Add-to-cart button', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE, 'condition' => array( 'show_button' => 'yes' ) ) );
+		/* New designs (everything except Classic Vault): colours of the button and its icon */
+		$new = array( 'design_layout!' => 'classic' );
+		$this->add_control( 'l_accent', array(
+			'label'     => esc_html__( 'Button background', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-accent: {{VALUE}};' ),
+			'condition' => $new,
+		) );
+		$this->add_control( 'l_accent_text', array(
+			'label'     => esc_html__( 'Icon / text colour', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-accent-text: {{VALUE}};' ),
+			'condition' => $new,
+		) );
+		$this->add_control( 'l_accent_h', array(
+			'label'     => esc_html__( 'Button background on hover', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps.nexvio-ps--l .nexvio-ps__add:hover, {{WRAPPER}} .nexvio-ps.nexvio-ps--l .nexvio-ps__add:focus-visible' => 'background: {{VALUE}}; filter: none;' ),
+			'condition' => $new,
+		) );
+		$this->add_control( 'l_accent_text_h', array(
+			'label'     => esc_html__( 'Icon / text colour on hover', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps.nexvio-ps--l .nexvio-ps__add:hover, {{WRAPPER}} .nexvio-ps.nexvio-ps--l .nexvio-ps__add:focus-visible' => 'color: {{VALUE}};' ),
+			'condition' => $new,
+		) );
+		$this->add_control( 'l_btn_radius', array(
+			'label'     => esc_html__( 'Corner radius (px)', 'nexvio' ),
+			'type'      => Controls_Manager::NUMBER,
+			'default'   => '',
+			'min'       => 0,
+			'max'       => 60,
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-btn-radius: {{VALUE}}px;' ),
+			'condition' => $new,
+		) );
 		$this->color_var( 'btn_bg', esc_html__( 'Background', 'nexvio' ), '--nexvio-ps-accent', '#3d8bff' );
 		$this->color_var( 'btn_bg_h', esc_html__( 'Background on hover', 'nexvio' ), '--nexvio-ps-accent-hover', '#5a9dff' );
 		$this->color_var( 'btn_icon', esc_html__( 'Icon colour', 'nexvio' ), '--nexvio-ps-btn-icon', '#ffffff' );
@@ -912,6 +1316,11 @@ trait Nexvio_Card_Trait {
 	/**
 	 * Paginated custom query. Returns object with products, total, max_num_pages.
 	 */
+	/** Does this widget's list follow the Nexvio Product Filter? (Products Grid shows chosen products and does not.) */
+	protected function follows_filter() {
+		return method_exists( $this, 'extra_root_classes' ) && class_exists( 'Nexvio_Filter_Query' ) && ! in_array( 'nexvio-pg--grid', $this->extra_root_classes(), true ) && Nexvio_Filter_Query::active();
+	}
+
 	protected function get_products_paged( $s, $per_page, $page ) {
 		$empty = (object) array( 'products' => array(), 'total' => 0, 'max_num_pages' => 0 );
 		if ( ! function_exists( 'wc_get_products' ) ) {
@@ -924,6 +1333,9 @@ trait Nexvio_Card_Trait {
 		$args['limit']    = max( 1, (int) $per_page );
 		$args['page']     = max( 1, (int) $page );
 		$args['paginate'] = true;
+		if ( $this->follows_filter() ) {
+			$args['nexvio_filter'] = true; /* colour / size / price… chosen in the Product Filter (see Nexvio_Filter_Query::wc_query) */
+		}
 		return wc_get_products( $args );
 	}
 
@@ -1063,11 +1475,61 @@ trait Nexvio_Card_Trait {
 		return isset( $icons[ $name ] ) ? $icons[ $name ] : '';
 	}
 
+	/**
+	 * "Add to cart" without opening the product page: the variation to add for a variable product.
+	 * The default selection if there is one, otherwise the first variation in stock. Only variations
+	 * with every option fixed qualify (an "any" option would need a choice from the shopper).
+	 * Returns a WC_Product_Variation or null.
+	 */
+	protected function quick_variation( $product ) {
+		static $cache = array();
+		$pid = $product->get_id();
+		if ( array_key_exists( $pid, $cache ) ) {
+			return $cache[ $pid ];
+		}
+		$cache[ $pid ] = null;
+		$defaults      = (array) $product->get_default_attributes();
+		$first         = null;
+		foreach ( $product->get_children() as $vid ) {
+			$v = wc_get_product( $vid );
+			if ( ! $v || ! $v->is_type( 'variation' ) || ! $v->variation_is_visible() || ! $v->is_purchasable() || ! $v->is_in_stock() ) {
+				continue;
+			}
+			$attrs = (array) $v->get_variation_attributes( false );
+			if ( ! $attrs || in_array( '', array_map( 'strval', $attrs ), true ) ) {
+				continue;
+			}
+			if ( null === $first ) {
+				$first = $v;
+			}
+			if ( ! $defaults ) {
+				break;
+			}
+			$match = true;
+			foreach ( $defaults as $key => $val ) {
+				if ( '' !== (string) $val && ( ! isset( $attrs[ $key ] ) || (string) $attrs[ $key ] !== (string) $val ) ) {
+					$match = false;
+					break;
+				}
+			}
+			if ( $match ) {
+				$first = $v;
+				break;
+			}
+		}
+		$cache[ $pid ] = $first;
+		return $first;
+	}
+
 	protected function render_card( $product, $s, $rules, $wrap = 'slide' ) {
 		$id    = $product->get_id();
 		$link  = $product->get_permalink();
 		$name  = $product->get_name();
 		$style = '';
+
+		/* an attribute filter is on (colour, size, image…): show the chosen value on the card */
+		$pick      = class_exists( 'Nexvio_Swatches' ) ? Nexvio_Swatches::filter_pick( $product ) : null;
+		$card_link = ( $pick && $pick['query'] ) ? add_query_arg( $pick['query'], $link ) : $link;
 
 		foreach ( $rules as $rule ) {
 			if ( ! empty( $rule['cat'] ) && has_term( $rule['cat'], 'product_cat', $id ) ) {
@@ -1149,9 +1611,45 @@ trait Nexvio_Card_Trait {
 		/* image */
 		$size   = $s['image_size'] ? $s['image_size'] : 'woocommerce_thumbnail';
 		$img_id = $product->get_image_id();
-		$img    = $img_id
-			? wp_get_attachment_image( $img_id, $size, false, array( 'class' => 'nexvio-ps__img', 'loading' => 'lazy', 'alt' => $name ) )
+		$show_id = ( $pick && ! empty( $pick['image_id'] ) ) ? (int) $pick['image_id'] : (int) $img_id;
+		$img_att = array( 'class' => 'nexvio-ps__img', 'loading' => 'lazy', 'alt' => $name );
+		if ( $show_id && $show_id !== (int) $img_id && $img_id ) {
+			/* the swatches can go back to the main image */
+			$img_att['data-orig-src']    = (string) wp_get_attachment_image_url( $img_id, $size );
+			$img_att['data-orig-srcset'] = (string) wp_get_attachment_image_srcset( $img_id, $size );
+		}
+		$img    = $show_id
+			? wp_get_attachment_image( $show_id, $size, false, $img_att )
 			: wc_placeholder_img( $size, array( 'class' => 'nexvio-ps__img' ) );
+
+		/* hover gallery: the product's gallery images, shown over the main image while hovering */
+		$gal_html = '';
+		if ( isset( $s['gal_on'] ) && 'yes' === $s['gal_on'] ) {
+			$cycle = isset( $s['gal_mode'] ) && 'cycle' === $s['gal_mode'];
+			$max   = $cycle ? min( 5, max( 1, isset( $s['gal_count'] ) ? (int) $s['gal_count'] : 3 ) ) : 1;
+			$n     = 0;
+			foreach ( (array) $product->get_gallery_image_ids() as $gid ) {
+				$gid = absint( $gid );
+				if ( ! $gid || (int) $gid === (int) $img_id ) {
+					continue;
+				}
+				$pic = wp_get_attachment_image( $gid, $size, false, array(
+					'class'       => 'nexvio-ps__img nexvio-ps__alt',
+					'loading'     => 'lazy',
+					'decoding'    => 'async',
+					'alt'         => '',
+					'aria-hidden' => 'true',
+					'data-n'      => (string) ( $n + 1 ),
+				) );
+				if ( $pic ) {
+					$gal_html .= $pic;
+					$n++;
+				}
+				if ( $n >= $max ) {
+					break;
+				}
+			}
+		}
 
 		/* wishlist */
 		$wish = 'none' !== $this->wish_mode( $s ) ? $this->heart_button( $id, $s['wish_label'] ) : '';
@@ -1199,8 +1697,9 @@ trait Nexvio_Card_Trait {
 					$bg     = $it['color'] ? $it['color'] : '#d1d5db';
 					$light  = in_array( strtolower( $bg ), array( '#fff', '#ffffff', '#fffff0', '#f6f3ea', '#f5ecd7' ), true );
 					$pic            = ! empty( $it['swatch'] ) ? $it['swatch'] : '';
+					$chosen = $pick && ! empty( $sw['taxonomy'] ) && isset( $pick['picks'][ $sw['taxonomy'] ] ) && ! empty( $it['slug'] ) && $pick['picks'][ $sw['taxonomy'] ] === $it['slug'];
 					$swatches_html .= '<button type="button" class="nexvio-ps__sw' . ( $it['color'] || $pic ? '' : ' is-unknown' ) . ( $light ? ' is-light' : '' ) . ( $pic ? ' is-image' : '' ) . '" style="--sw:' . esc_attr( $bg ) . ( $pic ? ';--sw-img:url(' . esc_url( $pic ) . ')' : '' ) . '"'
-						. ' title="' . esc_attr( $it['name'] ) . '" aria-label="' . esc_attr( $it['name'] ) . '" aria-pressed="false"'
+						. ' title="' . esc_attr( $it['name'] ) . '" aria-label="' . esc_attr( $it['name'] ) . '" aria-pressed="' . ( $chosen ? 'true' : 'false' ) . '"'
 						. ( $it['img'] ? ' data-img="' . esc_url( $it['img'] ) . '" data-srcset="' . esc_attr( $it['srcset'] ) . '"' : '' )
 						. ( $use_link && $it['link'] ? ' data-link="' . esc_url( $it['link'] ) . '"' : '' )
 						. '>' . ( $it['color'] || $pic ? '' : '<span>' . esc_html( function_exists( 'mb_substr' ) ? mb_substr( $it['name'], 0, 1 ) : substr( $it['name'], 0, 1 ) ) . '</span>' ) . '</button>';
@@ -1236,8 +1735,21 @@ trait Nexvio_Card_Trait {
 		$lbl_out   = isset( $s['txt_out'] ) ? $s['txt_out'] : __( 'Sold out', 'nexvio' );
 		$label_tpl = '<span class="nexvio-ps__add-label">%s</span>';
 		if ( 'yes' === $s['show_button'] ) {
+			$quick = ( isset( $s['btn_action'] ) && 'cart' === $s['btn_action'] && $product->is_type( 'variable' ) && $product->is_purchasable() && $product->is_in_stock() ) ? $this->quick_variation( $product ) : null;
 			if ( ! $product->is_purchasable() || ! $product->is_in_stock() ) {
 				$button = '<span class="nexvio-ps__add is-disabled" aria-hidden="true">' . $this->svg( 'plus' ) . sprintf( $label_tpl, esc_html( $lbl_out ) ) . '</span>';
+			} elseif ( $quick ) {
+				/* WooCommerce's own AJAX add to cart takes a variation ID as the product ID */
+				$button = sprintf(
+					'<a href="%s" data-quantity="1" data-product_id="%d" data-product_sku="%s" class="nexvio-ps__add add_to_cart_button ajax_add_to_cart product_type_variable" rel="nofollow" aria-label="%s">%s%s%s</a>',
+					esc_url( $quick->add_to_cart_url() ),
+					(int) $quick->get_id(),
+					esc_attr( $product->get_sku() ),
+					esc_attr( $s['btn_label'] . ' : ' . $name ),
+					$this->svg( 'plus' ),
+					$this->svg( 'ok' ),
+					sprintf( $label_tpl, esc_html( $lbl_add ) )
+				);
 			} elseif ( $product->is_type( 'simple' ) && $product->supports( 'ajax_add_to_cart' ) ) {
 				$button = sprintf(
 					'<a href="%s" data-quantity="1" data-product_id="%d" data-product_sku="%s" class="nexvio-ps__add add_to_cart_button ajax_add_to_cart product_type_simple" rel="nofollow" aria-label="%s">%s%s%s</a>',
@@ -1265,20 +1777,21 @@ trait Nexvio_Card_Trait {
 		<?php else : ?>
 		<div class="nexvio-ps__slide">
 		<?php endif; ?>
-			<article class="nexvio-ps__card">
+			<article class="nexvio-ps__card<?php echo $gal_html ? ' nexvio-ps__card--gal' : ''; ?><?php echo ( $pick && ! empty( $pick['image_id'] ) ) ? ' is-sw' : ''; ?>">
 				<?php if ( $badges ) : ?>
 					<div class="nexvio-ps__badges"><?php echo wp_kses( implode( '', $badges ), Nexvio_Plugin::allowed_html() ); ?></div>
 				<?php endif; ?>
 				<?php echo wp_kses( $wish, Nexvio_Plugin::allowed_html() ); ?>
-				<a class="nexvio-ps__media" href="<?php echo esc_url( $link ); ?>" tabindex="-1" aria-hidden="true"<?php echo $style ? ' style="' . esc_attr( $style ) . '"' : ''; ?>>
+				<a class="nexvio-ps__media" href="<?php echo esc_url( $card_link ); ?>"<?php echo $card_link !== $link ? ' data-orig-href="' . esc_url( $link ) . '"' : ''; ?> tabindex="-1" aria-hidden="true"<?php echo $style ? ' style="' . esc_attr( $style ) . '"' : ''; ?>>
 					<?php echo wp_kses( $img, Nexvio_Plugin::allowed_html() ); ?>
+					<?php echo wp_kses( $gal_html, Nexvio_Plugin::allowed_html() ); ?>
 				</a>
 				<div class="nexvio-ps__body">
 					<?php echo wp_kses( $swatches_html, Nexvio_Plugin::allowed_html() ); ?>
 					<?php if ( $meta ) : ?>
 						<span class="nexvio-ps__meta"><?php echo esc_html( implode( $s['meta_sep'], $meta ) ); ?></span>
 					<?php endif; ?>
-					<h3 class="nexvio-ps__name"><a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $name ); ?></a></h3>
+					<h3 class="nexvio-ps__name"><a href="<?php echo esc_url( $card_link ); ?>"<?php echo $card_link !== $link ? ' data-orig-href="' . esc_url( $link ) . '"' : ''; ?>><?php echo esc_html( $name ); ?></a></h3>
 					<?php echo wp_kses( $rating_html, Nexvio_Plugin::allowed_html() ); ?>
 					<?php if ( '' !== $excerpt ) : ?>
 						<p class="nexvio-ps__excerpt"><?php echo esc_html( $excerpt ); ?></p>
@@ -1299,4 +1812,782 @@ trait Nexvio_Card_Trait {
 		<?php echo 'li' === $wrap ? '</li>' : '</div>'; ?>
 		<?php
 	}
+
+	/* ------------------------------------------------------------------
+	 * Small helpers for the Style tab
+	 * ------------------------------------------------------------------ */
+
+	/** Colour control that writes real CSS (works for every design). */
+	protected function gs_color( $id, $label, $selectors, $condition = array(), $extra = array() ) {
+		$args = array_merge( array(
+			'label'     => $label,
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => $selectors,
+		), $extra );
+		if ( $condition ) {
+			$args['condition'] = $condition;
+		}
+		$this->add_control( $id, $args );
+	}
+
+	protected function gs_heading( $id, $label, $condition = array(), $separator = 'before' ) {
+		$args = array(
+			'label' => $label,
+			'type'  => Controls_Manager::HEADING,
+		);
+		if ( $separator ) {
+			$args['separator'] = $separator;
+		}
+		if ( $condition ) {
+			$args['condition'] = $condition;
+		}
+		$this->add_control( $id, $args );
+	}
+
+	protected function gs_typo( $id, $label, $selector, $condition = array() ) {
+		$args = array( 'name' => $id, 'label' => $label, 'selector' => $selector );
+		if ( $condition ) {
+			$args['condition'] = $condition;
+		}
+		$this->add_group_control( Group_Control_Typography::get_type(), $args );
+	}
+
+	/** Space above / below (margin top and bottom). */
+	protected function gs_space( $id, $label, $selector, $condition = array() ) {
+		$args = array(
+			'label'              => $label,
+			'type'               => Controls_Manager::DIMENSIONS,
+			'size_units'         => array( 'px' ),
+			'allowed_dimensions' => 'vertical',
+			'selectors'          => array( $selector => 'margin-top: {{TOP}}{{UNIT}}; margin-bottom: {{BOTTOM}}{{UNIT}};' ),
+		);
+		if ( $condition ) {
+			$args['condition'] = $condition;
+		}
+		$this->add_responsive_control( $id, $args );
+	}
+
+	/** Four-side box control (top, right, bottom, left). */
+	protected function gs_box( $id, $label, $selector, $property, $units = array( 'px', '%', 'em' ), $condition = array(), $extra_css = '' ) {
+		$args = array(
+			'label'      => $label,
+			'type'       => Controls_Manager::DIMENSIONS,
+			'size_units' => $units,
+			'selectors'  => array( $selector => $property . ': {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' . $extra_css ),
+		);
+		if ( $condition ) {
+			$args['condition'] = $condition;
+		}
+		$this->add_responsive_control( $id, $args );
+	}
+
+	/* ------------------------------------------------------------------
+	 * 1. Layout design: card background, border, radius, text padding, shadow
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_layout_section() {
+		$card = '{{WRAPPER}} .nexvio-ps .nexvio-ps__card';
+
+		$this->start_controls_section( 'style_layout_design', array(
+			'label' => esc_html__( 'Layout design', 'nexvio' ),
+			'tab'   => Controls_Manager::TAB_STYLE,
+		) );
+
+		$this->add_control( 'gs_card_bg', array(
+			'label'     => esc_html__( 'Card background', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-ps-card-bg: {{VALUE}}; --nexvio-l-card: {{VALUE}};' ),
+		) );
+
+		$this->add_group_control( Group_Control_Border::get_type(), array(
+			'name'      => 'gs_card_border',
+			'label'     => esc_html__( 'Border (top, right, bottom, left)', 'nexvio' ),
+			'selector'  => $card,
+			'separator' => 'before',
+		) );
+		$this->gs_color( 'gs_card_border_h', esc_html__( 'Border colour on hover', 'nexvio' ), array( $card . ':hover' => 'border-color: {{VALUE}};' ) );
+		$this->gs_box( 'gs_card_radius', esc_html__( 'Corner radius', 'nexvio' ), $card, 'border-radius', array( 'px', '%' ) );
+
+		$this->gs_box( 'gs_body_pad', esc_html__( 'Text area padding', 'nexvio' ), '{{WRAPPER}} .nexvio-ps .nexvio-ps__card .nexvio-ps__body', 'padding', array( 'px', '%', 'em' ) );
+
+		$this->gs_heading( 'gs_h_shadow', esc_html__( 'Box Shadow', 'nexvio' ) );
+		$this->start_controls_tabs( 'gs_shadow_tabs' );
+		$this->start_controls_tab( 'gs_shadow_normal', array( 'label' => esc_html__( 'Normal', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'gs_card_shadow',
+			'selector' => $card,
+		) );
+		$this->end_controls_tab();
+		$this->start_controls_tab( 'gs_shadow_hover', array( 'label' => esc_html__( 'Hover', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'gs_card_shadow_h',
+			'selector' => $card . ':hover',
+		) );
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+
+		$this->end_controls_section();
+	}
+
+	/* ------------------------------------------------------------------
+	 * 2. Image (image controls + image area + fit)
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_image_section() {
+		$img   = '{{WRAPPER}} .nexvio-ps .nexvio-ps__media .nexvio-ps__img';
+		$img_h = '{{WRAPPER}} .nexvio-ps .nexvio-ps__card:hover .nexvio-ps__media .nexvio-ps__img';
+
+		$this->start_controls_section( 'style_image', array(
+			'label' => esc_html__( 'Image', 'nexvio' ),
+			'tab'   => Controls_Manager::TAB_STYLE,
+		) );
+
+		/* --- fit: default / cover / contain --- */
+		$this->add_control( 'l_fit', array(
+			'label'     => esc_html__( 'Image fit', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => '',
+			'options'   => array(
+				''        => esc_html__( 'Default (design)', 'nexvio' ),
+				'cover'   => esc_html__( 'Cover (fill, crop)', 'nexvio' ),
+				'contain' => esc_html__( 'Contain (whole image)', 'nexvio' ),
+			),
+			'selectors' => array(
+				'{{WRAPPER}} .nexvio-ps' => '--nexvio-l-fit: {{VALUE}};',
+				$img                     => 'object-fit: {{VALUE}};',
+			),
+		) );
+
+		/* --- same controls as the Elementor Image widget --- */
+		$this->add_responsive_control( 'img_align', array(
+			'label'                => esc_html__( 'Alignment', 'nexvio' ),
+			'type'                 => Controls_Manager::CHOOSE,
+			'options'              => array(
+				'left'   => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center' => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'right'  => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+			),
+			'selectors_dictionary' => array(
+				'left'   => 'margin-left:0;margin-right:auto;',
+				'center' => 'margin-left:auto;margin-right:auto;',
+				'right'  => 'margin-left:auto;margin-right:0;',
+			),
+			'selectors'            => array( $img => '{{VALUE}}' ),
+			'separator'            => 'before',
+		) );
+		$this->add_responsive_control( 'img_width', array(
+			'label'      => esc_html__( 'Width', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( '%', 'px', 'vw' ),
+			'range'      => array( '%' => array( 'min' => 1, 'max' => 100 ), 'px' => array( 'min' => 1, 'max' => 1000 ), 'vw' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'  => array( $img => 'width: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'img_maxw', array(
+			'label'      => esc_html__( 'Max Width', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( '%', 'px', 'vw' ),
+			'range'      => array( '%' => array( 'min' => 1, 'max' => 100 ), 'px' => array( 'min' => 1, 'max' => 1000 ), 'vw' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'  => array( $img => 'max-width: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'img_height', array(
+			'label'      => esc_html__( 'Height', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px', '%', 'vh' ),
+			'range'      => array( 'px' => array( 'min' => 1, 'max' => 1000 ), '%' => array( 'min' => 1, 'max' => 100 ), 'vh' => array( 'min' => 1, 'max' => 100 ) ),
+			'selectors'  => array( $img => 'height: {{SIZE}}{{UNIT}};' ),
+		) );
+
+		$this->start_controls_tabs( 'img_fx_tabs' );
+		$this->start_controls_tab( 'img_fx_normal', array( 'label' => esc_html__( 'Normal', 'nexvio' ) ) );
+		$this->add_control( 'img_opacity', array(
+			'label'     => esc_html__( 'Opacity', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'max' => 1, 'min' => 0.05, 'step' => 0.01 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-img-op: {{SIZE}};' ),
+		) );
+		$this->add_group_control( Group_Control_Css_Filter::get_type(), array(
+			'name'     => 'img_filters',
+			'selector' => $img,
+		) );
+		$this->end_controls_tab();
+		$this->start_controls_tab( 'img_fx_hover', array( 'label' => esc_html__( 'Hover', 'nexvio' ) ) );
+		$this->add_control( 'img_opacity_h', array(
+			'label'     => esc_html__( 'Opacity', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'max' => 1, 'min' => 0.05, 'step' => 0.01 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-img-op-h: {{SIZE}};' ),
+		) );
+		$this->add_group_control( Group_Control_Css_Filter::get_type(), array(
+			'name'     => 'img_filters_h',
+			'selector' => $img_h,
+		) );
+		$this->add_control( 'img_td', array(
+			'label'     => esc_html__( 'Transition Duration (s)', 'nexvio' ),
+			'type'      => Controls_Manager::SLIDER,
+			'range'     => array( 'px' => array( 'min' => 0, 'max' => 3, 'step' => 0.1 ) ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps .nexvio-ps__media .nexvio-ps__img:not(.nexvio-ps__alt)' => 'transition-duration: {{SIZE}}s;' ),
+		) );
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
+
+		$this->add_group_control( Group_Control_Border::get_type(), array(
+			'name'      => 'img_border',
+			'selector'  => $img,
+			'separator' => 'before',
+		) );
+		$this->add_responsive_control( 'img_br', array(
+			'label'      => esc_html__( 'Border Radius', 'nexvio' ),
+			'type'       => Controls_Manager::DIMENSIONS,
+			'size_units' => array( 'px', '%', 'em', 'rem' ),
+			'selectors'  => array( $img => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+		) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'img_bshadow',
+			'selector' => $img,
+		) );
+		$this->add_control( 'img_note', array(
+			'type'            => Controls_Manager::RAW_HTML,
+			'raw'             => esc_html__( 'The image area clips what goes outside it. To see a border, radius or shadow around the image itself, make the image smaller than its area with Width or Max Width.', 'nexvio' ),
+			'content_classes' => 'elementor-descriptor',
+		) );
+
+		/* --- image area (was a separate section; now part of Image) --- */
+		$this->gs_heading( 'gs_h_area', esc_html__( 'Image area', 'nexvio' ) );
+
+		/* classic design (limit_classic_controls adds the "classic" condition) */
+		$this->add_control( 'ratio', array(
+			'label'     => esc_html__( 'Shape', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => '1/1',
+			'options'   => array( '1/1' => esc_html__( 'Square', 'nexvio' ), '4/5' => '4:5', '3/4' => '3:4', '63/88' => esc_html__( 'Card (63:88)', 'nexvio' ), '4/3' => '4:3' ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-ps-ratio: {{VALUE}};' ),
+		) );
+		/* every other design */
+		$this->add_control( 'l_ratio', array(
+			'label'     => esc_html__( 'Shape', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => '',
+			'options'   => array( '' => esc_html__( 'Design default', 'nexvio' ), '1/1' => esc_html__( 'Square', 'nexvio' ), '4/5' => '4:5', '3/4' => '3:4', '63/88' => esc_html__( 'Card (63:88)', 'nexvio' ), '4/3' => '4:3', '16/9' => '16:9' ),
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-ratio: {{VALUE}};' ),
+			'condition' => array( 'design_layout!' => array( 'classic', 'horizontal' ) ),
+		) );
+		$this->add_responsive_control( 'l_media_w', array(
+			'label'      => esc_html__( 'Image width (beside the details)', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( '%' ),
+			'range'      => array( '%' => array( 'min' => 25, 'max' => 60 ) ),
+			'selectors'  => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-media-w: {{SIZE}}%;' ),
+			'condition'  => array( 'design_layout' => 'horizontal' ),
+		) );
+		$this->add_responsive_control( 'img_gap', array(
+			'label'       => esc_html__( 'Space between image and details', 'nexvio' ),
+			'description' => esc_html__( 'Exact distance from the image to the text. Works with the Horizontal design (when the image is beside the details).', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+			'selectors'   => array( '{{WRAPPER}} .nexvio-ps.nexvio-ps--layout-horizontal .nexvio-ps__card' => 'column-gap: {{SIZE}}{{UNIT}};' ),
+			'condition'   => array( 'design_layout' => 'horizontal' ),
+		) );
+		$this->add_control( 'l_img_pad', array(
+			'label'     => esc_html__( 'Space around the image (%)', 'nexvio' ),
+			'type'      => Controls_Manager::NUMBER,
+			'default'   => '',
+			'min'       => 0,
+			'max'       => 30,
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-img-pad: {{VALUE}}%;' ),
+			'condition' => array( 'design_layout!' => 'classic' ),
+		) );
+		$this->add_control( 'l_img_radius', array(
+			'label'     => esc_html__( 'Image area corner radius (px)', 'nexvio' ),
+			'type'      => Controls_Manager::NUMBER,
+			'default'   => '',
+			'min'       => 0,
+			'max'       => 60,
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-img-radius: {{VALUE}}px;' ),
+			'condition' => array( 'design_layout!' => 'classic' ),
+		) );
+		$this->add_control( 'l_media', array(
+			'label'     => esc_html__( 'Image area background', 'nexvio' ),
+			'type'      => Controls_Manager::COLOR,
+			'default'   => '',
+			'selectors' => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-l-media: {{VALUE}};' ),
+			'condition' => array( 'design_layout!' => 'classic' ),
+		) );
+
+		/* classic design: glow, gradient, pattern, framed product image */
+		$this->color_var( 'c1', esc_html__( 'Glow colour', 'nexvio' ), '--nexvio-ps-c1', '#4d8dff' );
+		$this->color_var( 'c2', esc_html__( 'Gradient colour', 'nexvio' ), '--nexvio-ps-c2', '#5b2fb0' );
+		$this->color_var( 'base', esc_html__( 'Base colour', 'nexvio' ), '--nexvio-ps-base', '#141920' );
+		$this->switcher( 'pattern', esc_html__( 'Hexagon pattern', 'nexvio' ), 'yes', array( 'separator' => 'before' ) );
+		$this->number_var( 'pattern_op', esc_html__( 'Pattern strength (0 to 3)', 'nexvio' ), '--nexvio-ps-pattern-op', 1, 0, 3, 0.1, '', array( 'pattern' => 'yes' ) );
+		$this->add_control( 'h_img', array( 'label' => esc_html__( 'Product image', 'nexvio' ), 'type' => Controls_Manager::HEADING, 'separator' => 'before', 'condition' => array( 'image_mode' => 'contain' ) ) );
+		$this->add_responsive_control( 'img_w', array(
+			'label'      => esc_html__( 'Image width', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( '%' ),
+			'range'      => array( '%' => array( 'min' => 20, 'max' => 100 ) ),
+			'default'    => array( 'size' => 52, 'unit' => '%' ),
+			'selectors'  => array( '{{WRAPPER}} .nexvio-ps' => '--nexvio-ps-img-w: {{SIZE}}%;' ),
+			'condition'  => array( 'image_mode' => 'contain' ),
+		) );
+		$this->number_var( 'img_radius', esc_html__( 'Image corner radius (px)', 'nexvio' ), '--nexvio-ps-img-radius', 8, 0, 40, 1, 'px', array( 'image_mode' => 'contain' ) );
+		$this->switcher( 'frame', esc_html__( 'Gold frame', 'nexvio' ), 'yes', array( 'condition' => array( 'image_mode' => 'contain' ) ) );
+		$this->color_var( 'frame_c', esc_html__( 'Frame colour', 'nexvio' ), '--nexvio-ps-frame-c', 'rgba(255,236,170,0.75)', array( 'image_mode' => 'contain', 'frame' => 'yes' ) );
+		$this->number_var( 'frame_w', esc_html__( 'Frame thickness (px)', 'nexvio' ), '--nexvio-ps-frame-w', 4, 0, 20, 1, 'px', array( 'image_mode' => 'contain', 'frame' => 'yes' ) );
+		$this->switcher( 'img_shadow', esc_html__( 'Image shadow', 'nexvio' ), 'yes', array( 'condition' => array( 'image_mode' => 'contain' ) ) );
+		$this->add_control( 'hover_fx', array(
+			'label'     => esc_html__( 'Hover effect', 'nexvio' ),
+			'type'      => Controls_Manager::SELECT,
+			'default'   => 'lift',
+			'options'   => array( 'lift' => esc_html__( 'Lift and tilt', 'nexvio' ), 'zoom' => esc_html__( 'Zoom', 'nexvio' ), 'none' => esc_html__( 'None', 'nexvio' ) ),
+			'separator' => 'before',
+			'condition' => array( 'design_layout' => 'classic' ),
+		) );
+
+		$this->end_controls_section();
+	}
+
+	/* ------------------------------------------------------------------
+	 * 3. Card Content: everything the card shows about a product
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_content_section() {
+		$ps = '{{WRAPPER}} .nexvio-ps';
+
+		$this->start_controls_section( 'style_card_content', array(
+			'label' => esc_html__( 'Card Content', 'nexvio' ),
+			'tab'   => Controls_Manager::TAB_STYLE,
+		) );
+
+		$this->add_responsive_control( 'text_gap', array(
+			'label'       => esc_html__( 'Space between all text lines', 'nexvio' ),
+			'description' => esc_html__( 'Space between set line, name, rating, description, stock and price row.', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+			'selectors'   => array( $ps . ' .nexvio-ps__card .nexvio-ps__body' => 'gap: {{SIZE}}{{UNIT}}; row-gap: {{SIZE}}{{UNIT}};' ),
+		) );
+
+		/* ---- Title ---- */
+		$name = $ps . ' .nexvio-ps__card .nexvio-ps__name';
+		$this->gs_heading( 'gs_h_title', esc_html__( 'Title', 'nexvio' ) );
+		$this->gs_typo( 'name_typo', esc_html__( 'Title typography', 'nexvio' ), $name );
+		$this->gs_color( 'gs_title_color', esc_html__( 'Title colour', 'nexvio' ), array( $name => 'color: {{VALUE}};' ) );
+		$this->gs_color( 'gs_title_color_h', esc_html__( 'Title colour on hover', 'nexvio' ), array( $name . ' a:hover' => 'color: {{VALUE}};' ) );
+		$this->add_group_control( Group_Control_Text_Shadow::get_type(), array(
+			'name'     => 'gs_title_shadow',
+			'selector' => $name,
+		) );
+		$this->gs_space( 'gs_title_space', esc_html__( 'Title spacing (top / bottom)', 'nexvio' ), $name );
+
+		/* ---- Set / condition line ---- */
+		$meta = $ps . ' .nexvio-ps__card .nexvio-ps__meta';
+		$cm   = array( 'show_meta' => 'yes' );
+		$this->gs_heading( 'gs_h_meta', esc_html__( 'Set / condition line', 'nexvio' ), $cm );
+		$this->gs_typo( 'meta_typo', esc_html__( 'Typography', 'nexvio' ), $meta, $cm );
+		$this->gs_color( 'gs_meta_color', esc_html__( 'Colour', 'nexvio' ), array( $meta => 'color: {{VALUE}};' ), $cm );
+		$this->gs_space( 'gs_meta_space', esc_html__( 'Spacing (top / bottom)', 'nexvio' ), $meta, $cm );
+
+		/* ---- Description ---- */
+		$exc = $ps . ' .nexvio-ps__card .nexvio-ps__excerpt';
+		$cd  = $this->get_controls( 'list_excerpt' ) ? array() : array( 'show_desc' => 'yes' );
+		$this->gs_heading( 'gs_h_desc', esc_html__( 'Description', 'nexvio' ), $cd );
+		$this->gs_typo( 'desc_typo', esc_html__( 'Description typography', 'nexvio' ), $exc, $cd );
+		$this->gs_color( 'desc_color', esc_html__( 'Description colour', 'nexvio' ), array( $exc => 'color: {{VALUE}};' ), $cd );
+		$this->add_responsive_control( 'desc_align', array(
+			'label'     => esc_html__( 'Alignment', 'nexvio' ),
+			'type'      => Controls_Manager::CHOOSE,
+			'options'   => array(
+				'left'    => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center'  => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'right'   => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+				'justify' => array( 'title' => esc_html__( 'Justify', 'nexvio' ), 'icon' => 'eicon-text-align-justify' ),
+			),
+			'selectors' => array( $exc => 'text-align: {{VALUE}};' ),
+			'condition' => $cd,
+		) );
+		$this->gs_space( 'desc_space', esc_html__( 'Description spacing (top / bottom)', 'nexvio' ), $exc, $cd );
+		$this->add_responsive_control( 'desc_lines', array(
+			'label'       => esc_html__( 'Maximum lines', 'nexvio' ),
+			'type'        => Controls_Manager::NUMBER,
+			'min'         => 0,
+			'max'         => 10,
+			'default'     => 3,
+			'description' => esc_html__( 'Longer text ends with "…". 0 = no limit.', 'nexvio' ),
+			'selectors'   => array( $ps => '--nexvio-desc-lines: {{VALUE}};' ),
+			'condition'   => $cd,
+		) );
+		$this->switcher( 'desc_even', esc_html__( 'Same height on every card', 'nexvio' ), 'yes', array_merge( array(
+			'description' => esc_html__( 'Keeps names, prices and buttons lined up across a row, even when some descriptions are shorter.', 'nexvio' ),
+		), $cd ? array( 'condition' => $cd ) : array() ) );
+
+		/* ---- Price ---- */
+		$price = $ps . ' .nexvio-ps__card .nexvio-ps__price';
+		$this->gs_heading( 'gs_h_price', esc_html__( 'Price', 'nexvio' ) );
+		$this->gs_typo( 'price_typo', esc_html__( 'Price typography', 'nexvio' ), $price );
+		$this->gs_color( 'gs_price_color', esc_html__( 'Price colour', 'nexvio' ), array( $price . ', ' . $price . ' ins' => 'color: {{VALUE}};' ) );
+		$this->gs_color( 'gs_old_color', esc_html__( 'Old price colour (on sale)', 'nexvio' ), array( $price . ' del, ' . $price . ' del .amount' => 'color: {{VALUE}};' ) );
+		$this->gs_space( 'gs_price_space', esc_html__( 'Price spacing (top / bottom)', 'nexvio' ), $price );
+
+		/* ---- Stock ---- */
+		$stock = $ps . ' .nexvio-ps__card .nexvio-ps__stock';
+		$cs    = array( 'show_stock' => 'yes' );
+		$this->gs_heading( 'gs_h_stock', esc_html__( 'Stock', 'nexvio' ), $cs );
+		$this->gs_typo( 'stock_typo', esc_html__( 'Stock typography', 'nexvio' ), $stock, $cs );
+		$this->gs_color( 'ok_c', esc_html__( 'In stock', 'nexvio' ), array( $ps => '--nexvio-ps-ok: {{VALUE}};' ), $cs );
+		$this->gs_color( 'low_c', esc_html__( 'Low stock / pre-order', 'nexvio' ), array( $ps => '--nexvio-ps-low: {{VALUE}};' ), $cs );
+		$this->gs_color( 'out_c', esc_html__( 'Sold out', 'nexvio' ), array( $ps => '--nexvio-ps-out: {{VALUE}};' ), $cs );
+		$this->gs_space( 'gs_stock_space', esc_html__( 'Stock spacing (top / bottom)', 'nexvio' ), $stock, $cs );
+
+		/* ---- Rating ---- */
+		$rate = $ps . ' .nexvio-ps__card .nexvio-ps__rating';
+		$cr   = array( 'show_rating' => 'yes' );
+		$this->gs_heading( 'gs_h_rating', esc_html__( 'Rating', 'nexvio' ), $cr );
+		$this->add_control( 'rating_pos', array(
+			'label'                => esc_html__( 'Position', 'nexvio' ),
+			'type'                 => Controls_Manager::SELECT,
+			'default'              => '',
+			'options'              => array(
+				''      => esc_html__( 'Below the title (default)', 'nexvio' ),
+				'above' => esc_html__( 'Above the title', 'nexvio' ),
+				'image' => esc_html__( 'On the image', 'nexvio' ),
+			),
+			'selectors_dictionary' => array(
+				'above' => 'order: -1;',
+				'image' => 'position: absolute; z-index: 3; margin: 0; width: auto;',
+			),
+			'selectors'            => array( $rate => '{{VALUE}}' ),
+			'condition'            => $cr,
+		) );
+		$ci = array( 'show_rating' => 'yes', 'rating_pos' => 'image' );
+		$this->add_control( 'rating_side', array(
+			'label'                => esc_html__( 'Side of the image', 'nexvio' ),
+			'type'                 => Controls_Manager::CHOOSE,
+			'default'              => 'left',
+			'options'              => array(
+				'left'  => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-h-align-left' ),
+				'right' => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-h-align-right' ),
+			),
+			'selectors_dictionary' => array(
+				'left'  => 'left: var(--nexvio-r-x, 10px); right: auto;',
+				'right' => 'right: var(--nexvio-r-x, 10px); left: auto;',
+			),
+			'selectors'            => array( $rate => '{{VALUE}}' ),
+			'condition'            => $ci,
+		) );
+		$this->add_responsive_control( 'rating_x', array(
+			'label'      => esc_html__( 'Distance from the side', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 120 ) ),
+			'selectors'  => array( $rate => '--nexvio-r-x: {{SIZE}}{{UNIT}};' ),
+			'condition'  => $ci,
+		) );
+		$this->add_responsive_control( 'rating_y', array(
+			'label'       => esc_html__( 'Distance from the top', 'nexvio' ),
+			'description' => esc_html__( 'Badges are at the top, so the default leaves room for them.', 'nexvio' ),
+			'type'        => Controls_Manager::SLIDER,
+			'size_units'  => array( 'px' ),
+			'range'       => array( 'px' => array( 'min' => 0, 'max' => 300 ) ),
+			'default'     => array( 'size' => 44, 'unit' => 'px' ),
+			'selectors'   => array( $rate => 'top: {{SIZE}}{{UNIT}};' ),
+			'condition'   => $ci,
+		) );
+		$this->gs_color( 'rating_bg', esc_html__( 'Background', 'nexvio' ), array( $rate => 'background-color: {{VALUE}};' ), $ci );
+		$this->gs_box( 'rating_pad', esc_html__( 'Padding', 'nexvio' ), $rate, 'padding', array( 'px', 'em' ), $ci );
+		$this->gs_box( 'rating_rad', esc_html__( 'Border radius', 'nexvio' ), $rate, 'border-radius', array( 'px', '%' ), $ci );
+		$this->gs_color( 'star_color', esc_html__( 'Star colour', 'nexvio' ), array( $ps => '--nexvio-l-star: {{VALUE}};' ), $cr );
+		$this->gs_color( 'star_empty', esc_html__( 'Empty star colour', 'nexvio' ), array( $ps => '--nexvio-star-empty: {{VALUE}};' ), $cr );
+		$this->add_responsive_control( 'star_size', array(
+			'label'      => esc_html__( 'Star size', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 8, 'max' => 32 ) ),
+			'selectors'  => array( $ps => '--nexvio-star-size: {{SIZE}}{{UNIT}};' ),
+			'condition'  => $cr,
+		) );
+		$this->add_responsive_control( 'rating_align', array(
+			'label'     => esc_html__( 'Alignment', 'nexvio' ),
+			'type'      => Controls_Manager::CHOOSE,
+			'options'   => array(
+				'flex-start' => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center'     => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'flex-end'   => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+			),
+			'selectors' => array( $rate => 'justify-content: {{VALUE}};' ),
+			'condition' => $cr,
+		) );
+		$this->add_responsive_control( 'rating_gap', array(
+			'label'      => esc_html__( 'Space between stars and count', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 20 ) ),
+			'selectors'  => array( $rate => 'gap: {{SIZE}}{{UNIT}};' ),
+			'condition'  => $cr,
+		) );
+		$this->gs_space( 'rating_space', esc_html__( 'Rating spacing (top / bottom)', 'nexvio' ), $rate, $cr );
+		$this->gs_color( 'rating_text_color', esc_html__( 'Count / average colour', 'nexvio' ), array( $rate => 'color: {{VALUE}};' ), $cr );
+		$this->gs_typo( 'rating_typo', esc_html__( 'Count / average typography', 'nexvio' ), $rate, $cr );
+
+		/* ---- Colour swatches ---- */
+		$csw = array( 'show_swatches' => 'yes' );
+		$this->gs_heading( 'gs_h_sw', esc_html__( 'Colour swatches', 'nexvio' ), $csw );
+		$this->add_responsive_control( 'sw_size', array(
+			'label'      => esc_html__( 'Size', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 10, 'max' => 40 ) ),
+			'default'    => array( 'size' => 16, 'unit' => 'px' ),
+			'selectors'  => array( $ps => '--nexvio-sw-size: {{SIZE}}{{UNIT}};' ),
+			'condition'  => $csw,
+		) );
+		$this->add_responsive_control( 'sw_gap', array(
+			'label'      => esc_html__( 'Space between', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 20 ) ),
+			'default'    => array( 'size' => 6, 'unit' => 'px' ),
+			'selectors'  => array( $ps => '--nexvio-sw-gap: {{SIZE}}{{UNIT}};' ),
+			'condition'  => $csw,
+		) );
+		$this->add_control( 'sw_shape', array(
+			'label'                => esc_html__( 'Shape', 'nexvio' ),
+			'type'                 => Controls_Manager::SELECT,
+			'default'              => 'circle',
+			'options'              => array( 'circle' => esc_html__( 'Circle', 'nexvio' ), 'rounded' => esc_html__( 'Rounded square', 'nexvio' ), 'square' => esc_html__( 'Square', 'nexvio' ) ),
+			'selectors_dictionary' => array( 'circle' => '50%', 'rounded' => '4px', 'square' => '0' ),
+			'selectors'            => array( $ps => '--nexvio-sw-radius: {{VALUE}};' ),
+			'condition'            => $csw,
+		) );
+		$this->add_responsive_control( 'sw_align', array(
+			'label'     => esc_html__( 'Alignment', 'nexvio' ),
+			'type'      => Controls_Manager::CHOOSE,
+			'options'   => array(
+				'flex-start' => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-text-align-left' ),
+				'center'     => array( 'title' => esc_html__( 'Center', 'nexvio' ), 'icon' => 'eicon-text-align-center' ),
+				'flex-end'   => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-text-align-right' ),
+			),
+			'selectors' => array( $ps => '--nexvio-sw-justify: {{VALUE}};' ),
+			'condition' => $csw,
+		) );
+		$this->gs_color( 'sw_border', esc_html__( 'Border', 'nexvio' ), array( $ps => '--nexvio-sw-border: {{VALUE}};' ), $csw );
+		$this->gs_color( 'sw_ring', esc_html__( 'Selected ring', 'nexvio' ), array( $ps => '--nexvio-sw-ring: {{VALUE}};' ), $csw );
+		$this->gs_color( 'sw_more', esc_html__( '"+3" text', 'nexvio' ), array( $ps => '--nexvio-sw-more: {{VALUE}};' ), $csw );
+
+		$this->end_controls_section();
+	}
+
+	/* ------------------------------------------------------------------
+	 * 4. Button (shown only when the add-to-cart button is on)
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_button_section() {
+		$btn   = '{{WRAPPER}} .nexvio-ps .nexvio-ps__add';
+		$on    = $btn . ':not(.is-disabled)';
+		$on_h  = $on . ':hover';
+
+		$this->start_controls_section( 'style_button', array(
+			'label'     => esc_html__( 'Button', 'nexvio' ),
+			'tab'       => Controls_Manager::TAB_STYLE,
+			'condition' => array( 'show_button' => 'yes' ),
+		) );
+
+		$this->gs_typo( 'gs_btn_typo', esc_html__( 'Font (family, size, weight…)', 'nexvio' ), $btn . ' .nexvio-ps__add-label' );
+		$this->add_control( 'gs_btn_typo_note', array(
+			'type'            => Controls_Manager::RAW_HTML,
+			'raw'             => esc_html__( 'Font applies to the button text. Turn on the text button in Design Layout > Add-to-cart button.', 'nexvio' ),
+			'content_classes' => 'elementor-descriptor',
+		) );
+
+		$this->start_controls_tabs( 'gs_btn_tabs' );
+
+		/* normal */
+		$this->start_controls_tab( 'gs_btn_normal', array( 'label' => esc_html__( 'Normal', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Background::get_type(), array(
+			'name'           => 'btn_bg',
+			'label'          => esc_html__( 'Background', 'nexvio' ),
+			'types'          => array( 'classic', 'gradient' ),
+			'selector'       => $on,
+			'fields_options' => array(
+				'background' => array( 'label' => esc_html__( 'Background type', 'nexvio' ) ),
+			),
+		) );
+		$this->gs_color( 'gs_btn_text', esc_html__( 'Text colour', 'nexvio' ), array( $on => 'color: {{VALUE}};' ) );
+		$this->gs_color( 'gs_btn_icon', esc_html__( 'Icon colour', 'nexvio' ), array( $on . ' svg' => 'color: {{VALUE}};' ) );
+		$this->end_controls_tab();
+
+		/* hover */
+		$this->start_controls_tab( 'gs_btn_hover', array( 'label' => esc_html__( 'Hover', 'nexvio' ) ) );
+		$this->add_group_control( Group_Control_Background::get_type(), array(
+			'name'           => 'btn_bg_h',
+			'label'          => esc_html__( 'Background', 'nexvio' ),
+			'types'          => array( 'classic', 'gradient' ),
+			'selector'       => $on_h,
+			'fields_options' => array(
+				'background' => array( 'label' => esc_html__( 'Background type', 'nexvio' ) ),
+			),
+		) );
+		$this->gs_color( 'gs_btn_text_h', esc_html__( 'Text colour', 'nexvio' ), array( $on_h => 'color: {{VALUE}};' ) );
+		$this->gs_color( 'gs_btn_icon_h', esc_html__( 'Icon colour', 'nexvio' ), array( $on_h . ' svg' => 'color: {{VALUE}};' ) );
+		$this->end_controls_tab();
+
+		$this->end_controls_tabs();
+
+		$this->gs_box( 'gs_btn_pad', esc_html__( 'Padding', 'nexvio' ), $btn, 'padding', array( 'px', 'em', '%' ), array(), '' );
+		$this->gs_space( 'gs_btn_space', esc_html__( 'Spacing (top / bottom)', 'nexvio' ), $btn );
+		$this->gs_box( 'gs_btn_radius', esc_html__( 'Border radius', 'nexvio' ), $btn, 'border-radius', array( 'px', '%' ), array(), 'clip-path: none;' );
+
+		$this->number_var( 'btn_size', esc_html__( 'Button size (px)', 'nexvio' ), '--nexvio-ps-btn-size', '', 24, 80, 1, 'px' );
+		$this->number_var( 'btn_cut', esc_html__( 'Cut corner (px, 0 = square)', 'nexvio' ), '--nexvio-ps-btn-cut', '', 0, 30, 1, 'px' );
+
+		$this->end_controls_section();
+	}
+
+	/* ------------------------------------------------------------------
+	 * 5. Badges: colours + full text control, padding, margin, radius
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_badges_section() {
+		$ps = '{{WRAPPER}} .nexvio-ps';
+
+		$this->start_controls_section( 'style_badges', array(
+			'label' => esc_html__( 'Badges', 'nexvio' ),
+			'tab'   => Controls_Manager::TAB_STYLE,
+		) );
+
+		$this->gs_heading( 'h_badge_all', esc_html__( 'All badges', 'nexvio' ), array(), '' );
+		$this->gs_typo( 'badge_typo', esc_html__( 'Text (font family, size, weight…)', 'nexvio' ), $ps . ' .nexvio-ps__badge' );
+
+		/* [ key, title, class, colour ids ] */
+		$badges = array(
+			array( 'lang', esc_html__( 'Language', 'nexvio' ), 'lang', array( 'bg' => 'lang_bg', 'text' => 'lang_text', 'border' => 'lang_border' ), array( 'show_lang' => 'yes' ) ),
+			array( 'cat', esc_html__( 'Category', 'nexvio' ), 'cat', array( 'bg' => 'cat_bg', 'text' => 'cat_tc', 'border' => 'cat_border' ), array( 'show_cat' => 'yes' ) ),
+			array( 'new', esc_html__( 'New', 'nexvio' ), 'new', array( 'bg' => 'new_bg', 'text' => 'new_tc' ), array( 'show_new' => 'yes' ) ),
+			array( 'sale', esc_html__( 'Sale', 'nexvio' ), 'sale', array( 'bg' => 'sale_bg', 'text' => 'sale_tc' ), array( 'show_sale' => 'yes' ) ),
+			array( 'pre', esc_html__( 'Pre-order', 'nexvio' ), 'pre', array( 'bg' => 'pre_bg', 'text' => 'pre_tc' ), array( 'show_pre' => 'yes' ) ),
+		);
+
+		foreach ( $badges as $b ) {
+			list( $key, $title, $cls, $ids, $cond ) = $b;
+			$sel = $ps . ' .nexvio-ps__badge.nexvio-ps__badge--' . $cls;
+
+			$this->gs_heading( 'h_' . $key, $title, $cond );
+			$this->gs_color( $ids['bg'], esc_html__( 'Background', 'nexvio' ), array( $sel => 'background-color: {{VALUE}};' ), $cond );
+			$this->gs_color( $ids['text'], esc_html__( 'Text colour', 'nexvio' ), array( $sel => 'color: {{VALUE}};' ), $cond );
+			if ( isset( $ids['border'] ) ) {
+				$this->gs_color( $ids['border'], esc_html__( 'Border colour', 'nexvio' ), array( $sel => 'border-color: {{VALUE}};' ), $cond );
+			}
+			$this->gs_typo( $key . '_typo', esc_html__( 'Text (font family, size, weight…)', 'nexvio' ), $sel, $cond );
+			$this->gs_box( $key . '_pad', esc_html__( 'Padding', 'nexvio' ), $sel, 'padding', array( 'px', 'em', '%' ), $cond );
+			$this->gs_box( $key . '_mar', esc_html__( 'Margin', 'nexvio' ), $sel, 'margin', array( 'px', 'em', '%' ), $cond );
+			$this->gs_box( $key . '_rad', esc_html__( 'Border radius', 'nexvio' ), $sel, 'border-radius', array( 'px', '%' ), $cond );
+		}
+
+		$this->end_controls_section();
+	}
+
+	/* ------------------------------------------------------------------
+	 * 6. Wishlist heart: full control
+	 * ------------------------------------------------------------------ */
+
+	protected function register_gs_heart_section() {
+		$w  = '{{WRAPPER}} .nexvio-ps .nexvio-ps__card .nexvio-ps__wish';
+		$on = array( 'wish_mode!' => 'none' );
+
+		$this->start_controls_section( 'style_heart', array(
+			'label'     => esc_html__( 'Wishlist heart', 'nexvio' ),
+			'tab'       => Controls_Manager::TAB_STYLE,
+			'condition' => $on,
+		) );
+
+		/* position */
+		$this->add_control( 'heart_side', array(
+			'label'                => esc_html__( 'Position (side)', 'nexvio' ),
+			'type'                 => Controls_Manager::CHOOSE,
+			'default'              => 'right',
+			'options'              => array(
+				'left'  => array( 'title' => esc_html__( 'Left', 'nexvio' ), 'icon' => 'eicon-h-align-left' ),
+				'right' => array( 'title' => esc_html__( 'Right', 'nexvio' ), 'icon' => 'eicon-h-align-right' ),
+			),
+			'selectors_dictionary' => array(
+				'left'  => 'left: var(--nexvio-w-x, 6px); right: auto;',
+				'right' => 'right: var(--nexvio-w-x, 6px); left: auto;',
+			),
+			'selectors'            => array( $w => '{{VALUE}}' ),
+		) );
+		$this->add_responsive_control( 'heart_x', array(
+			'label'      => esc_html__( 'Distance from the side', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 80 ) ),
+			'selectors'  => array( $w => '--nexvio-w-x: {{SIZE}}{{UNIT}};' ),
+		) );
+		$this->add_responsive_control( 'heart_y', array(
+			'label'      => esc_html__( 'Distance from the top', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 0, 'max' => 300 ) ),
+			'selectors'  => array( $w => 'top: {{SIZE}}{{UNIT}};' ),
+		) );
+
+		/* size */
+		$this->add_responsive_control( 'heart_size', array(
+			'label'      => esc_html__( 'Button size', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 16, 'max' => 80 ) ),
+			'selectors'  => array( $w => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+			'separator'  => 'before',
+		) );
+		$this->add_responsive_control( 'heart_icon', array(
+			'label'      => esc_html__( 'Icon size', 'nexvio' ),
+			'type'       => Controls_Manager::SLIDER,
+			'size_units' => array( 'px' ),
+			'range'      => array( 'px' => array( 'min' => 8, 'max' => 48 ) ),
+			'selectors'  => array( $w . ' svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+		) );
+
+		/* colours */
+		$this->start_controls_tabs( 'heart_tabs' );
+		$states = array(
+			'n' => array( esc_html__( 'Normal', 'nexvio' ), $w, '' ),
+			'h' => array( esc_html__( 'Hover', 'nexvio' ), $w . ':hover', '_h' ),
+			'a' => array( esc_html__( 'In wishlist', 'nexvio' ), $w . '.is-on', '_a' ),
+		);
+		foreach ( $states as $k => $st ) {
+			$this->start_controls_tab( 'heart_tab_' . $k, array( 'label' => $st[0] ) );
+			$this->gs_color( 'heart_bg' . $st[2], esc_html__( 'Background', 'nexvio' ), array( $st[1] => 'background-color: {{VALUE}};' ) );
+			$this->gs_color( 'heart_c' . $st[2], esc_html__( 'Icon colour', 'nexvio' ), array( $st[1] => 'color: {{VALUE}};' ) );
+			$this->gs_color( 'heart_bc' . $st[2], esc_html__( 'Border colour', 'nexvio' ), array( $st[1] => 'border-color: {{VALUE}};' ) );
+			$this->end_controls_tab();
+		}
+		$this->end_controls_tabs();
+
+		/* border, radius, shadow */
+		$this->add_group_control( Group_Control_Border::get_type(), array(
+			'name'      => 'heart_border',
+			'selector'  => $w,
+			'separator' => 'before',
+		) );
+		$this->gs_box( 'heart_radius', esc_html__( 'Border radius', 'nexvio' ), $w, 'border-radius', array( 'px', '%' ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array(
+			'name'     => 'heart_shadow',
+			'selector' => $w,
+		) );
+
+		$this->end_controls_section();
+	}
+
+	/** All card style sections, in order: Layout design, Image, Card Content, Button, Badges. */
+	protected function register_gs_card_styles() {
+		$this->register_gs_layout_section();
+		$this->register_gs_image_section();
+		$this->register_gs_content_section();
+		$this->register_gs_button_section();
+		$this->register_gs_badges_section();
+		$this->register_gs_heart_section();
+	}
+
 }

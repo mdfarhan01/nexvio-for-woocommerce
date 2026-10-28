@@ -4,25 +4,29 @@
 .nexvio-sc,
 .nexvio-fc {
 	--mc: var(--wsc-mc, #b08d57);
-	--mct: var(--wsc-mc-text, #fff);
+	--mct: var(--wsc-mc-text, #fff)
 }
+
 .nexvio-sc--light {
 	--bg: #ffffff;
 	--tx: #141414;
 	--mu: #8a8a8f;
 	--ln: #ececec;
-	--sf: #f6f5f3;
+	--sf: #f6f5f3
 }
+
 .nexvio-sc--dark {
 	--bg: #121214;
 	--tx: #f2f2f3;
 	--mu: #9b9ba3;
 	--ln: #25252b;
-	--sf: #1b1b20;
+	--sf: #1b1b20
 }
+
 .nexvio-sc {
-	--serif: 'Cormorant Garamond', 'Playfair Display', Georgia, 'Times New Roman', serif;
+	--serif: var(--wsc-hf, "Cormorant Garamond", "Playfair Display", Georgia, "Times New Roman", serif);
 	--dur: 380ms;
+	font-family: var(--wsc-bf, inherit);
 	position: fixed;
 	inset: 0;
 	z-index: 999990;
@@ -32,18 +36,21 @@
 	color: var(--tx);
 	line-height: 1.45;
 	font-size: 14px;
-	-webkit-font-smoothing: antialiased;
+	-webkit-font-smoothing: antialiased
 }
+
 .nexvio-sc *,
 .nexvio-sc *::before,
 .nexvio-sc *::after {
-	box-sizing: border-box;
+	box-sizing: border-box
 }
+
 .nexvio-sc.is-open {
 	pointer-events: auto;
 	visibility: visible;
-	transition: visibility 0s;
+	transition: visibility 0s
 }
+
 .nexvio-sc__overlay {
 	position: absolute;
 	inset: 0;
@@ -51,11 +58,13 @@
 	opacity: 0;
 	transition: opacity var(--dur) ease;
 	-webkit-backdrop-filter: blur(2px);
-	backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px)
 }
+
 .nexvio-sc.is-open .nexvio-sc__overlay {
-	opacity: 0.42;
+	opacity: .42
 }
+
 .nexvio-sc__panel {
 	position: absolute;
 	top: 0;
@@ -67,26 +76,31 @@
 	display: flex;
 	flex-direction: column;
 	transform: translateX(102%);
-	transition: transform var(--dur) cubic-bezier(0.22, 0.8, 0.24, 1);
+	transition: transform var(--dur) cubic-bezier(.22, .8, .24, 1);
 	outline: none;
 	overflow: hidden;
-	box-shadow: -24px 0 60px rgba(0, 0, 0, 0.16);
+	box-shadow: -24px 0 60px rgba(0, 0, 0, .16)
 }
+
 .nexvio-sc.is-open .nexvio-sc__panel {
-	transform: none;
+	transform: none
 }
+
 .nexvio-sc__inner {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
-	min-height: 0;
+	min-height: 0
 }
+
 html.nexvio-sc-lock {
-	overflow: hidden;
+	overflow: hidden
 }
+
 html.nexvio-sc-lock body {
-	padding-right: var(--nexvio-sb, 0);
+	padding-right: var(--nexvio-sb, 0)
 }
+
 .nexvio-sc .screen-reader-text {
 	position: absolute !important;
 	width: 1px;
@@ -96,21 +110,24 @@ html.nexvio-sc-lock body {
 	overflow: hidden;
 	clip: rect(0, 0, 0, 0);
 	white-space: nowrap;
-	border: 0;
+	border: 0
 }
+
 .nexvio-sc button,
 .nexvio-sc input {
-	font-family: inherit;
+	font-family: inherit
 }
+
 .nexvio-sc a {
-	box-shadow: none;
+	box-shadow: none
 }
+
 .nexvio-sc button:focus-visible,
 .nexvio-sc a:focus-visible,
 .nexvio-sc input:focus-visible,
 .nexvio-sc summary:focus-visible {
 	outline: 2px solid var(--mc);
-	outline-offset: 2px;
+	outline-offset: 2px
 }
 
 /* loading line */
@@ -122,25 +139,29 @@ html.nexvio-sc-lock body {
 	height: 2px;
 	overflow: hidden;
 	opacity: 0;
-	transition: opacity 0.2s;
-	z-index: 3;
+	transition: opacity .2s;
+	z-index: 3
 }
+
 .nexvio-sc__loading span {
 	position: absolute;
 	inset: 0;
 	width: 40%;
 	background: var(--mc);
-	animation: nexvio-sc-load 1s ease-in-out infinite;
+	animation: nexvio-sc-load 1s ease-in-out infinite
 }
+
 .nexvio-sc.is-loading .nexvio-sc__loading {
-	opacity: 1;
+	opacity: 1
 }
+
 @keyframes nexvio-sc-load {
 	0% {
-		transform: translateX(-100%);
+		transform: translateX(-100%)
 	}
+
 	100% {
-		transform: translateX(260%);
+		transform: translateX(260%)
 	}
 }
 
@@ -152,21 +173,23 @@ html.nexvio-sc-lock body {
 	gap: 12px;
 	padding: 22px 24px 16px;
 	border-bottom: 1px solid var(--ln);
-	flex-shrink: 0;
+	flex-shrink: 0
 }
+
 .nexvio-sc__title {
 	margin: 0;
 	font-family: var(--serif);
 	font-size: 26px;
 	font-weight: 500;
 	line-height: 1.1;
-	letter-spacing: 0.005em;
+	letter-spacing: .005em;
 	color: var(--tx);
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	flex-wrap: wrap;
+	flex-wrap: wrap
 }
+
 .nexvio-sc__badge {
 	display: inline-grid;
 	place-items: center;
@@ -176,21 +199,19 @@ html.nexvio-sc-lock body {
 	border-radius: 999px;
 	background: var(--mc);
 	color: var(--mct);
-	font:
-		600 11.5px/1 system-ui,
-		-apple-system,
-		'Segoe UI',
-		sans-serif;
+	font: 600 11.5px/1 system-ui, -apple-system, "Segoe UI", sans-serif;
 	letter-spacing: 0;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-sc__sub {
 	margin: 6px 0 0;
 	color: var(--mu);
 	font-size: 11px;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
+	letter-spacing: .14em;
+	text-transform: uppercase
 }
+
 .nexvio-sc .nexvio-sc__close {
 	flex-shrink: 0;
 	display: grid;
@@ -204,48 +225,53 @@ html.nexvio-sc-lock body {
 	background: var(--bg);
 	color: var(--tx);
 	cursor: pointer;
-	transition:
-		transform 0.25s,
-		border-color 0.2s;
-	box-shadow: none;
+	transition: transform .25s, border-color .2s;
+	box-shadow: none
 }
+
 .nexvio-sc .nexvio-sc__close:hover {
 	transform: rotate(90deg);
 	border-color: var(--tx);
 	background: var(--bg);
-	color: var(--tx);
+	color: var(--tx)
 }
+
 .nexvio-sc .nexvio-sc__close svg {
 	width: 16px;
-	height: 16px;
+	height: 16px
 }
 
 /* messages */
 .nexvio-sc__msgs:empty {
-	display: none;
+	display: none
 }
+
 .nexvio-sc__msgs {
-	padding: 10px 24px 0;
+	padding: 10px 24px 0
 }
+
 .nexvio-sc__msg {
 	margin: 0 0 4px;
 	padding: 9px 12px;
 	border-radius: 6px;
 	font-size: 12.5px;
 	background: var(--sf);
-	border-left: 2px solid var(--mc);
+	border-left: 2px solid var(--mc)
 }
+
 .nexvio-sc__msg--error {
 	border-left-color: #d4452b;
 	color: #b42318;
-	background: #fef3f2;
+	background: #fef3f2
 }
+
 .nexvio-sc--dark .nexvio-sc__msg--error {
 	background: #2a1513;
-	color: #fda29b;
+	color: #fda29b
 }
+
 .nexvio-sc__msg--success {
-	border-left-color: #16a34a;
+	border-left-color: #16a34a
 }
 
 /* products: compact rows, the only part that scrolls */
@@ -256,52 +282,60 @@ html.nexvio-sc-lock body {
 	overscroll-behavior: contain;
 	padding: 2px 24px;
 	scrollbar-width: thin;
-	scrollbar-color: var(--ln) transparent;
+	scrollbar-color: var(--ln) transparent
 }
+
 .nexvio-sc__items {
 	list-style: none;
 	margin: 0;
-	padding: 0;
+	padding: 0
 }
+
 .nexvio-sc__item {
 	display: grid;
-	grid-template-columns: 56px minmax(0, 1fr);
-	gap: 13px;
-	padding: 12px 0;
+	grid-template-columns: var(--wsc-img, 96px) minmax(0, 1fr);
+	gap: 14px;
+	align-items: start;
+	padding: 14px 0;
 	border-bottom: 1px solid var(--ln);
-	transition:
-		opacity 0.25s,
-		transform 0.25s;
-	animation: nexvio-sc-in 0.35s ease both;
+	transition: opacity .25s, transform .25s;
+	animation: nexvio-sc-in .35s ease both
 }
+
 .nexvio-sc__item:last-child {
-	border-bottom: 0;
+	border-bottom: 0
 }
+
 .nexvio-sc__item.is-busy {
-	opacity: 0.5;
+	opacity: .5
 }
+
 .nexvio-sc__item.is-leaving {
 	opacity: 0;
-	transform: translateX(14px);
+	transform: translateX(14px)
 }
+
 @keyframes nexvio-sc-in {
 	from {
 		opacity: 0;
-		transform: translateY(4px);
+		transform: translateY(4px)
 	}
+
 	to {
 		opacity: 1;
-		transform: none;
+		transform: none
 	}
 }
+
 .nexvio-sc__thumb {
 	display: block;
-	width: 56px;
-	aspect-ratio: 4/5;
+	width: var(--wsc-img, 96px);
+	aspect-ratio: 5/4;
 	border-radius: 6px;
 	overflow: hidden;
-	background: var(--sf);
+	background: var(--sf)
 }
+
 .nexvio-sc__thumb img {
 	width: 100%;
 	height: 100%;
@@ -309,80 +343,116 @@ html.nexvio-sc-lock body {
 	display: block;
 	margin: 0;
 	border-radius: 0;
-	max-width: none;
+	max-width: none
 }
+
 .nexvio-sc__info {
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
-	gap: 2px;
+	gap: 2px
 }
+
 .nexvio-sc__top {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
-	gap: 12px;
+	gap: 12px
 }
-.nexvio-sc__name {
+
+.nexvio-sc .nexvio-sc__name {
+	flex: 1 1 auto;
+	min-width: 0;
 	font-size: 14.5px;
 	font-weight: 500;
 	line-height: 1.3;
 	color: var(--tx);
 	text-decoration: none;
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
+	display: -webkit-box !important;
+	-webkit-line-clamp: var(--wsc-lines, 2);
+	line-clamp: var(--wsc-lines, 2);
 	-webkit-box-orient: vertical;
 	overflow: hidden;
+	overflow-wrap: anywhere;
+	text-overflow: ellipsis
 }
+
 a.nexvio-sc__name:hover {
-	color: var(--mc);
+	color: var(--mc)
 }
+
 .nexvio-sc__line {
 	flex-shrink: 0;
 	font-size: 14px;
 	font-weight: 600;
 	color: var(--tx);
 	white-space: nowrap;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-sc__meta {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 2px 8px;
 	font-size: 12px;
 	color: var(--mu);
-	line-height: 1.35;
+	line-height: 1.35
 }
+
 .nexvio-sc__var {
-	letter-spacing: 0.02em;
+	letter-spacing: .02em;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	overflow-wrap: anywhere
 }
-.nexvio-sc__var + .nexvio-sc__unit::before {
-	content: '·';
-	margin-right: 8px;
+
+.nexvio-sc__var+.nexvio-sc__unit::before {
+	content: "·";
+	margin-right: 8px
 }
-.nexvio-sc__unit del {
-	opacity: 0.75;
-	margin-right: 3px;
+
+.nexvio-sc__unit {
+	font-size: 12.5px
 }
-.nexvio-sc__unit ins {
+
+/* regular price: quiet and struck through; sale price: a little bolder and tinted, so the difference is clear without shouting */
+.nexvio-sc .nexvio-sc__unit del {
+	color: var(--mu);
+	opacity: .85;
+	font-weight: 400;
+	font-size: 11.5px;
+	text-decoration: line-through;
+	margin-right: 5px
+}
+
+.nexvio-sc .nexvio-sc__unit ins,
+.nexvio-sc .nexvio-sc__sale {
 	text-decoration: none;
-	color: var(--tx);
+	background: none;
+	font-weight: 600;
+	color: color-mix(in srgb, var(--mc) 78%, var(--tx))
 }
+
 .nexvio-sc__bottom {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 10px;
-	margin-top: 4px;
+	margin-top: 4px
 }
+
 .nexvio-sc__qty {
 	display: inline-flex;
 	align-items: center;
 	height: 30px;
 	border: 1px solid var(--ln);
 	border-radius: 999px;
-	background: var(--bg);
+	background: var(--bg)
 }
+
 .nexvio-sc .nexvio-sc__qty button {
 	width: 30px;
 	height: 28px;
@@ -395,16 +465,19 @@ a.nexvio-sc__name:hover {
 	font-size: 15px;
 	line-height: 1;
 	cursor: pointer;
-	box-shadow: none;
+	box-shadow: none
 }
+
 .nexvio-sc .nexvio-sc__qty button:hover:not(:disabled) {
 	background: var(--sf);
-	color: var(--tx);
+	color: var(--tx)
 }
+
 .nexvio-sc .nexvio-sc__qty button:disabled {
-	opacity: 0.28;
-	cursor: not-allowed;
+	opacity: .28;
+	cursor: not-allowed
 }
+
 .nexvio-sc .nexvio-sc__qty input {
 	width: 28px;
 	height: 28px;
@@ -419,17 +492,20 @@ a.nexvio-sc__name:hover {
 	-moz-appearance: textfield;
 	appearance: textfield;
 	box-shadow: none;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-sc .nexvio-sc__qty input::-webkit-outer-spin-button,
 .nexvio-sc .nexvio-sc__qty input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
-	margin: 0;
+	margin: 0
 }
+
 .nexvio-sc__qty-text {
 	font-size: 12.5px;
-	color: var(--mu);
+	color: var(--mu)
 }
+
 .nexvio-sc .nexvio-sc__remove {
 	display: inline-grid;
 	place-items: center;
@@ -443,25 +519,26 @@ a.nexvio-sc__name:hover {
 	color: var(--mu);
 	cursor: pointer;
 	box-shadow: none;
-	transition:
-		color 0.2s,
-		background 0.2s;
+	transition: color .2s, background .2s
 }
+
 .nexvio-sc .nexvio-sc__remove svg {
 	width: 15px;
-	height: 15px;
+	height: 15px
 }
+
 .nexvio-sc .nexvio-sc__remove span {
 	position: absolute;
 	width: 1px;
 	height: 1px;
 	overflow: hidden;
 	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
+	white-space: nowrap
 }
+
 .nexvio-sc .nexvio-sc__remove:hover {
 	color: #d4452b;
-	background: var(--sf);
+	background: var(--sf)
 }
 
 /* footer: always visible */
@@ -470,11 +547,13 @@ a.nexvio-sc__name:hover {
 	padding: 14px 24px calc(18px + env(safe-area-inset-bottom, 0px));
 	border-top: 1px solid var(--ln);
 	background: var(--bg);
-	box-shadow: 0 -12px 24px -18px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 -12px 24px -18px rgba(0, 0, 0, .25)
 }
+
 .nexvio-sc__coupon {
-	margin: 0 0 10px;
+	margin: 0 0 10px
 }
+
 .nexvio-sc__coupon summary {
 	display: inline-flex;
 	align-items: center;
@@ -483,25 +562,30 @@ a.nexvio-sc__name:hover {
 	list-style: none;
 	font-size: 12px;
 	color: var(--mu);
-	letter-spacing: 0.06em;
+	letter-spacing: .06em
 }
+
 .nexvio-sc__coupon summary:hover,
 .nexvio-sc__coupon[open] summary {
-	color: var(--tx);
+	color: var(--tx)
 }
+
 .nexvio-sc__coupon summary::-webkit-details-marker {
-	display: none;
+	display: none
 }
+
 .nexvio-sc__coupon summary svg {
 	width: 14px;
 	height: 14px;
-	color: var(--mc);
+	color: var(--mc)
 }
+
 .nexvio-sc__coupon-form {
 	display: flex;
 	gap: 6px;
-	margin-top: 10px;
+	margin-top: 10px
 }
+
 .nexvio-sc .nexvio-sc__coupon-form input {
 	flex: 1;
 	min-width: 0;
@@ -514,16 +598,19 @@ a.nexvio-sc__name:hover {
 	color: var(--tx);
 	font-size: 13px;
 	box-shadow: none;
-	letter-spacing: 0.06em;
+	letter-spacing: .06em
 }
+
 .nexvio-sc .nexvio-sc__coupon-form input::placeholder {
 	color: var(--mu);
-	letter-spacing: 0;
+	letter-spacing: 0
 }
+
 .nexvio-sc .nexvio-sc__coupon-form input:focus {
 	border-color: var(--mc);
-	outline: none;
+	outline: none
 }
+
 .nexvio-sc .nexvio-sc__coupon-form button {
 	height: 40px;
 	margin: 0;
@@ -534,45 +621,53 @@ a.nexvio-sc__name:hover {
 	color: var(--bg);
 	font-size: 11.5px;
 	font-weight: 600;
-	letter-spacing: 0.1em;
+	letter-spacing: .1em;
 	text-transform: uppercase;
 	cursor: pointer;
-	box-shadow: none;
+	box-shadow: none
 }
+
 .nexvio-sc .nexvio-sc__coupon-form button:hover {
-	opacity: 0.85;
+	opacity: .85;
 	background: var(--tx);
-	color: var(--bg);
+	color: var(--bg)
 }
+
 .nexvio-sc__totals {
 	margin: 0 0 12px;
-	padding: 0;
+	padding: 0
 }
+
 .nexvio-sc__row {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
 	gap: 12px;
 	padding: 3px 0;
-	font-size: 13px;
+	font-size: 13px
 }
+
 .nexvio-sc__row dt {
 	margin: 0;
 	color: var(--mu);
-	font-weight: 400;
+	font-weight: 400
 }
+
 .nexvio-sc__row dd {
 	margin: 0;
 	text-align: right;
 	color: var(--tx);
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-sc__row--coupon dd {
-	color: #15803d;
+	color: #15803d
 }
+
 .nexvio-sc--dark .nexvio-sc__row--coupon dd {
-	color: #86efac;
+	color: #86efac
 }
+
 .nexvio-sc .nexvio-sc__coupon-remove {
 	margin: 0 0 0 4px;
 	padding: 0;
@@ -582,29 +677,34 @@ a.nexvio-sc__name:hover {
 	font-size: 11px;
 	text-decoration: underline;
 	cursor: pointer;
-	box-shadow: none;
+	box-shadow: none
 }
+
 .nexvio-sc__row--total {
 	margin-top: 6px;
 	padding-top: 10px;
-	border-top: 1px solid var(--ln);
+	border-top: 1px solid var(--ln)
 }
+
 .nexvio-sc__row--total dt {
 	color: var(--tx);
 	font-family: var(--serif);
 	font-size: 20px;
-	font-weight: 500;
+	font-weight: 500
 }
+
 .nexvio-sc__row--total dd {
 	font-size: 17px;
-	font-weight: 700;
+	font-weight: 700
 }
+
 .nexvio-sc__actions {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 10px;
+	gap: 10px
 }
+
 .nexvio-sc .nexvio-sc__btn {
 	display: flex;
 	align-items: center;
@@ -619,40 +719,58 @@ a.nexvio-sc__name:hover {
 	color: var(--mct);
 	font-size: 12.5px;
 	font-weight: 600;
-	letter-spacing: 0.16em;
+	letter-spacing: .16em;
 	text-transform: uppercase;
 	text-decoration: none;
-	transition:
-		filter 0.2s,
-		transform 0.2s;
-	box-shadow: 0 10px 24px -14px var(--mc);
+	transition: filter .2s, transform .2s;
+	box-shadow: 0 10px 24px -14px var(--mc)
 }
+
 .nexvio-sc .nexvio-sc__btn svg {
 	width: 17px;
 	height: 17px;
-	transition: transform 0.25s;
+	transition: transform .25s
 }
+
 .nexvio-sc .nexvio-sc__btn:hover {
 	filter: brightness(1.06);
-	color: var(--mct);
+	color: var(--mct)
 }
+
 .nexvio-sc .nexvio-sc__btn:hover svg {
-	transform: translateX(4px);
+	transform: translateX(4px)
 }
+
+.nexvio-sc .nexvio-sc__btn--ghost {
+	background: transparent;
+	color: var(--tx);
+	border: 1px solid var(--ln);
+	box-shadow: none;
+	min-height: 46px
+}
+
+.nexvio-sc .nexvio-sc__btn--ghost:hover {
+	filter: none;
+	color: var(--mc);
+	border-color: var(--mc);
+	background: transparent
+}
+
 .nexvio-sc .nexvio-sc__link {
 	font-size: 11.5px;
 	font-weight: 600;
-	letter-spacing: 0.16em;
+	letter-spacing: .16em;
 	text-transform: uppercase;
 	color: var(--tx);
 	text-decoration: none;
 	border-bottom: 1px solid var(--ln);
 	padding-bottom: 2px;
-	transition: border-color 0.2s;
+	transition: border-color .2s
 }
+
 .nexvio-sc .nexvio-sc__link:hover {
 	color: var(--tx);
-	border-bottom-color: var(--tx);
+	border-bottom-color: var(--tx)
 }
 
 /* empty cart */
@@ -663,8 +781,10 @@ a.nexvio-sc__name:hover {
 	align-items: center;
 	justify-content: center;
 	text-align: center;
-	padding: 40px 36px calc(40px + env(safe-area-inset-bottom, 0px));
+	gap: 0;
+	padding: 40px 36px calc(40px + env(safe-area-inset-bottom, 0px))
 }
+
 .nexvio-sc__empty-icon {
 	position: relative;
 	width: 88px;
@@ -674,85 +794,108 @@ a.nexvio-sc__name:hover {
 	place-items: center;
 	background: var(--sf);
 	color: var(--mc);
-	margin-bottom: 22px;
+	margin-bottom: 22px
 }
+
 .nexvio-sc__empty-icon::after {
-	content: '';
+	content: "";
 	position: absolute;
 	inset: -8px;
 	border-radius: 50%;
-	border: 1px solid var(--ln);
+	border: 1px solid var(--ln)
 }
+
 .nexvio-sc__empty-icon svg {
 	width: 36px;
-	height: 36px;
+	height: 36px
 }
-.nexvio-sc__empty-title {
-	margin: 0 0 8px;
+
+.nexvio-sc .nexvio-sc__empty-title {
+	margin: 0 0 12px !important;
+	padding: 0;
 	font-family: var(--serif);
 	font-size: 25px;
 	font-weight: 500;
-	color: var(--tx);
+	line-height: 1.25;
+	color: var(--tx)
 }
-.nexvio-sc__empty-text {
-	margin: 0 0 26px;
+
+.nexvio-sc .nexvio-sc__empty-text {
+	margin: 0 0 30px !important;
+	padding: 0;
 	max-width: 280px;
 	color: var(--mu);
 	font-size: 13.5px;
-}
-.nexvio-sc__empty .nexvio-sc__btn {
-	max-width: 290px;
+	line-height: 1.65
 }
 
-@media (max-width: 767px) {
+.nexvio-sc .nexvio-sc__empty .nexvio-sc__btn {
+	max-width: 290px;
+	margin: 0
+}
+
+@media (max-width:767px) {
 	.nexvio-sc__panel {
-		width: var(--wsc-wm, 100%);
+		width: var(--wsc-wm, 100%)
 	}
+
 	.nexvio-sc__head {
-		padding: 18px 16px 12px;
+		padding: 18px 16px 12px
 	}
+
 	.nexvio-sc__title {
-		font-size: 23px;
+		font-size: 23px
 	}
+
 	.nexvio-sc__body {
-		padding: 2px 16px;
+		padding: 2px 16px
 	}
+
 	.nexvio-sc__foot {
-		padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+		padding: 12px 16px calc(14px + env(safe-area-inset-bottom, 0px))
 	}
+
 	.nexvio-sc__msgs {
-		padding: 10px 16px 0;
+		padding: 10px 16px 0
 	}
+
 	.nexvio-sc__qty {
-		height: 42px;
+		height: 42px
 	}
+
 	.nexvio-sc .nexvio-sc__qty button {
 		width: 40px;
-		height: 40px;
+		height: 40px
 	}
+
 	.nexvio-sc .nexvio-sc__qty input {
 		height: 40px;
-		width: 32px;
+		width: 32px
 	}
+
 	.nexvio-sc .nexvio-sc__remove {
 		width: 40px;
-		height: 40px;
+		height: 40px
 	}
+
 	.nexvio-sc .nexvio-sc__close {
 		width: 40px;
-		height: 40px;
+		height: 40px
 	}
 }
-@media (prefers-reduced-motion: reduce) {
+
+@media (prefers-reduced-motion:reduce) {
+
 	.nexvio-sc,
 	.nexvio-sc__panel,
 	.nexvio-sc__overlay,
 	.nexvio-sc__item {
 		transition: none !important;
-		animation: none !important;
+		animation: none !important
 	}
+
 	.nexvio-sc__loading span {
-		animation: none;
+		animation: none
 	}
 }
 
@@ -763,35 +906,39 @@ a.nexvio-sc__name:hover {
 	border-left: 2px solid #d4452b;
 	background: #fef3f2;
 	color: #b42318;
-	font-size: 14px;
+	font-size: 14px
 }
+
 .nexvio-atc-msg[hidden] {
-	display: none;
+	display: none
 }
 
 /* ---------- counters ---------- */
 .nexvio-cart-count.is-zero-hidden {
-	display: none !important;
+	display: none !important
 }
+
 .nexvio-cart-count.is-bump {
-	animation: nexvio-bump 0.35s ease;
+	animation: nexvio-bump .35s ease
 }
+
 @keyframes nexvio-bump {
 	40% {
-		transform: scale(1.3);
+		transform: scale(1.3)
 	}
 }
 
 /* ---------- header cart ---------- */
 .nexvio-hc-wrap {
-	display: flex;
+	display: flex
 }
+
 .nexvio-hc {
 	--hc-size: 24px;
 	--hc-color: #111827;
 	--hc-color-h: #111827;
 	--hc-bg: transparent;
-	--hc-bg-h: rgba(0, 0, 0, 0.05);
+	--hc-bg-h: rgba(0, 0, 0, .05);
 	--hc-pad: 9px;
 	--hc-radius: 10px;
 	--hc-c-bg: var(--wsc-mc, #111827);
@@ -809,28 +956,30 @@ a.nexvio-sc__name:hover {
 	color: var(--hc-color);
 	text-decoration: none;
 	line-height: 1;
-	transition:
-		background 0.2s,
-		color 0.2s;
+	transition: background .2s, color .2s
 }
+
 .nexvio-hc:hover,
 .nexvio-hc:focus-visible {
 	background: var(--hc-bg-h);
-	color: var(--hc-color-h);
+	color: var(--hc-color-h)
 }
+
 .nexvio-hc__icon {
 	position: relative;
 	display: grid;
 	place-items: center;
 	width: var(--hc-size);
 	height: var(--hc-size);
-	font-size: var(--hc-size);
+	font-size: var(--hc-size)
 }
+
 .nexvio-hc__icon svg {
 	width: 100%;
 	height: 100%;
-	display: block;
+	display: block
 }
+
 .nexvio-hc__count {
 	position: absolute;
 	top: var(--hc-c-top);
@@ -842,28 +991,28 @@ a.nexvio-sc__name:hover {
 	border-radius: 999px;
 	background: var(--hc-c-bg);
 	color: var(--hc-c-color);
-	font:
-		600 11px / var(--hc-c-size) system-ui,
-		-apple-system,
-		'Segoe UI',
-		sans-serif;
-	text-align: center;
+	font: 600 11px/var(--hc-c-size) system-ui, -apple-system, "Segoe UI", sans-serif;
+	text-align: center
 }
+
 .nexvio-hc__count.is-bump {
-	animation: nexvio-bump-hc 0.35s ease;
+	animation: nexvio-bump-hc .35s ease
 }
+
 @keyframes nexvio-bump-hc {
 	40% {
-		transform: translate(40%, -35%) scale(1.3);
+		transform: translate(40%, -35%) scale(1.3)
 	}
 }
+
 .nexvio-hc__label {
 	font-size: 14px;
-	font-weight: 500;
+	font-weight: 500
 }
+
 .nexvio-hc__total {
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 600
 }
 
 /* ---------- floating cart: colours come from the style + main colour ---------- */
@@ -873,90 +1022,128 @@ a.nexvio-sc__name:hover {
 	position: fixed;
 	bottom: var(--wfc-y, 24px);
 	z-index: 999980;
+	box-sizing: border-box;
+	line-height: 1;
+	padding: 0;
+	margin: 0;
 	display: grid;
 	place-items: center;
 	width: var(--fc-size);
 	height: var(--fc-size);
 	border-radius: 50%;
 	text-decoration: none;
-	transition:
-		transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1),
-		box-shadow 0.25s,
-		color 0.2s;
-	-webkit-tap-highlight-color: transparent;
+	transition: transform .25s cubic-bezier(.3, 1.4, .5, 1), box-shadow .25s, color .2s;
+	-webkit-tap-highlight-color: transparent
 }
+
 .nexvio-fc--light {
 	background: #fff;
 	color: #141414;
-	border: 1px solid rgba(0, 0, 0, 0.06);
-	box-shadow:
-		0 14px 34px -12px rgba(0, 0, 0, 0.28),
-		0 2px 6px rgba(0, 0, 0, 0.06);
+	border: 1px solid rgba(0, 0, 0, .06);
+	box-shadow: 0 14px 34px -12px rgba(0, 0, 0, .28), 0 2px 6px rgba(0, 0, 0, .06)
 }
+
 .nexvio-fc--dark {
 	background: #141416;
 	color: #f4f4f5;
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	box-shadow: 0 14px 34px -10px rgba(0, 0, 0, 0.55);
+	border: 1px solid rgba(255, 255, 255, .08);
+	box-shadow: 0 14px 34px -10px rgba(0, 0, 0, .55)
 }
+
 .nexvio-fc--right {
-	right: var(--wfc-x, 24px);
+	right: var(--wfc-x, 24px)
 }
+
 .nexvio-fc--left {
-	left: var(--wfc-x, 24px);
+	left: var(--wfc-x, 24px)
 }
-.nexvio-fc:hover,
+
+/* the icon keeps its colour in every state (hover only on devices that really hover), so it never turns blue after the cart closes */
+.nexvio-fc.nexvio-fc--light,
+.nexvio-fc.nexvio-fc--light:visited,
+.nexvio-fc.nexvio-fc--light:focus,
+.nexvio-fc.nexvio-fc--light:active {
+	color: #141414 !important;
+	text-decoration: none !important
+}
+
+.nexvio-fc.nexvio-fc--dark,
+.nexvio-fc.nexvio-fc--dark:visited,
+.nexvio-fc.nexvio-fc--dark:focus,
+.nexvio-fc.nexvio-fc--dark:active {
+	color: #f4f4f5 !important;
+	text-decoration: none !important
+}
+
+.nexvio-fc:focus:not(:focus-visible) {
+	outline: none !important
+}
+
 .nexvio-fc:focus-visible {
-	transform: translateY(-3px) scale(1.03);
-	color: var(--mc);
+	outline: 2px solid var(--mc) !important;
+	outline-offset: 3px
 }
-.nexvio-fc--light:hover {
-	box-shadow:
-		0 20px 40px -14px rgba(0, 0, 0, 0.32),
-		0 0 0 4px color-mix(in srgb, var(--mc) 18%, transparent);
+
+@media (hover:hover) {
+	.nexvio-fc:hover {
+		transform: translateY(-3px) scale(1.03)
+	}
+
+	.nexvio-fc.nexvio-fc--light:hover,
+	.nexvio-fc.nexvio-fc--dark:hover {
+		color: var(--mc) !important
+	}
+
+	.nexvio-fc--light:hover {
+		box-shadow: 0 20px 40px -14px rgba(0, 0, 0, .32), 0 0 0 4px color-mix(in srgb, var(--mc) 18%, transparent)
+	}
+
+	.nexvio-fc--dark:hover {
+		box-shadow: 0 20px 40px -12px rgba(0, 0, 0, .6), 0 0 0 4px color-mix(in srgb, var(--mc) 25%, transparent)
+	}
 }
-.nexvio-fc--dark:hover {
-	box-shadow:
-		0 20px 40px -12px rgba(0, 0, 0, 0.6),
-		0 0 0 4px color-mix(in srgb, var(--mc) 25%, transparent);
-}
-.nexvio-fc:focus-visible {
-	outline: 2px solid var(--mc);
-	outline-offset: 3px;
-}
+
 .nexvio-fc__ring {
 	position: absolute;
 	inset: -1px;
 	border-radius: 50%;
 	border: 1.5px solid var(--mc);
 	opacity: 0;
-	pointer-events: none;
+	pointer-events: none
 }
+
 .nexvio-fc.is-pulse .nexvio-fc__ring {
-	animation: nexvio-fc-pulse 1s ease-out;
+	animation: nexvio-fc-pulse 1s ease-out
 }
+
 @keyframes nexvio-fc-pulse {
 	0% {
-		opacity: 0.9;
-		transform: scale(1);
+		opacity: .9;
+		transform: scale(1)
 	}
+
 	100% {
 		opacity: 0;
-		transform: scale(1.45);
+		transform: scale(1.45)
 	}
 }
+
 .nexvio-fc__icon {
 	display: grid;
 	place-items: center;
 	width: var(--fc-icon);
 	height: var(--fc-icon);
-	font-size: var(--fc-icon);
+	font-size: var(--fc-icon)
 }
-.nexvio-fc__icon svg {
+
+.nexvio-fc__icon svg,
+.nexvio-fc__icon img {
 	width: 100%;
 	height: 100%;
 	display: block;
+	object-fit: contain
 }
+
 .nexvio-fc__count {
 	position: absolute;
 	top: -3px;
@@ -967,55 +1154,105 @@ a.nexvio-sc__name:hover {
 	border-radius: 999px;
 	background: var(--mc);
 	color: var(--mct);
-	font:
-		700 11.5px/22px system-ui,
-		-apple-system,
-		'Segoe UI',
-		sans-serif;
+	font: 700 11.5px/22px system-ui, -apple-system, "Segoe UI", sans-serif;
 	text-align: center;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-fc--light .nexvio-fc__count {
-	box-shadow: 0 0 0 2.5px #fff;
+	box-shadow: 0 0 0 2.5px #fff
 }
+
 .nexvio-fc--dark .nexvio-fc__count {
-	box-shadow: 0 0 0 2.5px #141416;
+	box-shadow: 0 0 0 2.5px #141416
 }
+
 .nexvio-fc--count-left .nexvio-fc__count {
 	right: auto;
-	left: -3px;
+	left: -3px
 }
+
 html.nexvio-sc-lock .nexvio-fc {
 	opacity: 0;
 	pointer-events: none;
-	transform: scale(0.8);
+	transform: scale(.8)
 }
-@media (min-width: 1025px) {
+
+@media (min-width:1025px) {
 	.nexvio-hide-desktop {
-		display: none !important;
+		display: none !important
 	}
 }
-@media (min-width: 768px) and (max-width: 1024px) {
+
+@media (min-width:768px) and (max-width:1024px) {
 	.nexvio-hide-tablet {
-		display: none !important;
+		display: none !important
 	}
 }
-@media (max-width: 767px) {
+
+@media (max-width:767px) {
 	.nexvio-hide-mobile {
-		display: none !important;
+		display: none !important
 	}
+
 	.nexvio-fc {
-		bottom: calc(var(--wfc-y-m, 84px) + env(safe-area-inset-bottom, 0px));
-		--fc-size: 54px;
+		bottom: calc(var(--wfc-y-m, 24px) + env(safe-area-inset-bottom, 0px))
 	}
 }
-@media (prefers-reduced-motion: reduce) {
+
+/* one slow, soft ring (transform + opacity only, so it stays smooth); it rests between waves */
+.nexvio-fc--pulse::before {
+	content: "";
+	position: absolute;
+	inset: -1px;
+	border-radius: 50%;
+	pointer-events: none;
+	border: 1.5px solid color-mix(in srgb, var(--mc) 55%, transparent);
+	opacity: 0;
+	will-change: transform, opacity;
+	animation: nexvio-fc-ripple 4.2s cubic-bezier(.25, .46, .45, .94) infinite
+}
+
+@keyframes nexvio-fc-ripple {
+	0% {
+		transform: scale(1);
+		opacity: 0
+	}
+
+	12% {
+		opacity: .5
+	}
+
+	60% {
+		transform: scale(1.55);
+		opacity: 0
+	}
+
+	100% {
+		transform: scale(1.55);
+		opacity: 0
+	}
+}
+
+.nexvio-fc--pulse:hover::before,
+.nexvio-fc--pulse:focus-visible::before {
+	animation-play-state: paused
+}
+
+@media (prefers-reduced-motion:reduce) {
+
 	.nexvio-fc,
 	.nexvio-fc__ring {
 		transition: none;
+		animation: none !important
+	}
+
+	.nexvio-fc--pulse::before {
 		animation: none !important;
+		display: none
 	}
 }
+
 /* Bengali, Arabic, Hindi, CJK…: no letter-spacing or capitals (they have none) */
 .nexvio-sc--script .nexvio-sc__sub,
 .nexvio-sc--script .nexvio-sc__btn,
@@ -1023,11 +1260,100 @@ html.nexvio-sc-lock .nexvio-fc {
 .nexvio-sc--script .nexvio-sc__coupon summary,
 .nexvio-sc--script .nexvio-sc__coupon-form button {
 	letter-spacing: 0;
-	text-transform: none;
+	text-transform: none
 }
+
 .nexvio-sc--script .nexvio-sc__sub {
-	font-size: 12.5px;
+	font-size: 12.5px
 }
+
 .nexvio-sc--script .nexvio-sc__btn {
-	font-size: 14.5px;
+	font-size: 14.5px
+}
+
+/* ---------- Cart Panel widget: the cart shown on a page ---------- */
+.nexvio-sc.nexvio-icart {
+	position: relative;
+	inset: auto;
+	z-index: auto;
+	pointer-events: auto;
+	visibility: visible;
+	transition: none;
+	display: block;
+	width: 100%;
+	background: var(--bg);
+	border-radius: 10px;
+	overflow: hidden
+}
+
+.nexvio-icart .nexvio-sc__inner {
+	display: flex;
+	flex-direction: column
+}
+
+.nexvio-icart .nexvio-sc__close {
+	display: none
+}
+
+.nexvio-icart .nexvio-sc__body {
+	flex: none;
+	overflow-y: visible
+}
+
+.nexvio-icart .nexvio-sc__foot {
+	box-shadow: none
+}
+
+.nexvio-icart .nexvio-sc__empty {
+	padding-top: 56px;
+	padding-bottom: 56px
+}
+
+.nexvio-icart--no-head .nexvio-sc__head {
+	display: none
+}
+
+.nexvio-icart--no-sub .nexvio-sc__sub {
+	display: none
+}
+
+.nexvio-icart--no-thumb .nexvio-sc__thumb {
+	display: none
+}
+
+.nexvio-icart--no-thumb .nexvio-sc__item {
+	grid-template-columns: minmax(0, 1fr)
+}
+
+.nexvio-icart--no-var .nexvio-sc__var {
+	display: none
+}
+
+.nexvio-icart--no-var .nexvio-sc__unit::before {
+	display: none
+}
+
+.nexvio-icart--no-unit .nexvio-sc__unit {
+	display: none
+}
+
+.nexvio-icart--no-qty .nexvio-sc__qty,
+.nexvio-icart--no-qty .nexvio-sc__qty-text {
+	display: none
+}
+
+.nexvio-icart--no-remove .nexvio-sc__remove {
+	display: none
+}
+
+.nexvio-icart--no-coupon .nexvio-sc__coupon {
+	display: none
+}
+
+.nexvio-icart--no-checkout .nexvio-sc__actions .nexvio-sc__btn--primary {
+	display: none
+}
+
+.nexvio-icart--no-more .nexvio-sc__btn--ghost {
+	display: none
 }

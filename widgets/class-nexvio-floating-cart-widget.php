@@ -63,7 +63,7 @@ class Nexvio_Floating_Cart_Widget extends Widget_Base {
 			'default'     => array( 'value' => '', 'library' => '' ),
 			'skin'        => 'inline',
 			'label_block' => false,
-			'description' => esc_html__( 'Empty = shopping bag.', 'nexvio' ),
+			'description' => esc_html__( 'Empty = the icon chosen in Nexvio > Add to Cart.', 'nexvio' ),
 		) );
 		$this->text( 'a11y', esc_html__( 'Screen reader text', 'nexvio' ), 'Open cart' );
 		$this->switcher( 'show_count', esc_html__( 'Show item counter', 'nexvio' ), 'yes', array( 'separator' => 'before' ) );
@@ -150,7 +150,7 @@ class Nexvio_Floating_Cart_Widget extends Widget_Base {
 		if ( 'yes' !== $s['enabled'] || ! Nexvio_Cart_Settings::on( 'floating_enabled' ) ) {
 			return;
 		}
-		$icon = Nexvio_Side_Cart::icon( 'bag' );
+		$icon = Nexvio_Side_Cart::floating_icon();
 		if ( ! empty( $s['icon']['value'] ) ) {
 			ob_start();
 			Icons_Manager::render_icon( $s['icon'], array( 'aria-hidden' => 'true' ) );

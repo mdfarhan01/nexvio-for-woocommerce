@@ -66,7 +66,33 @@ class Nexvio_Swatches {
 			return;
 		}
 		wp_enqueue_media();
-		wp_enqueue_script( 'nexvio-swatch-media', NEXVIO_URL . 'admin/assets/swatch-media.js', array( 'jquery' ), Nexvio_Plugin::ver( 'admin/assets/swatch-media.js' ), true );
+		$js = <<<'NEXVIOJS'
+jQuery(function($){
+	var frame;
+	$(document).on('click','.nexvio-swimg-pick',function(e){
+		e.preventDefault();
+		var w=$(this).closest('.nexvio-swimg');
+		frame=wp.media({title:w.data('title'),multiple:false,library:{type:'image'}});
+		frame.on('select',function(){
+			var a=frame.state().get('selection').first().toJSON();
+			var url=a.sizes&&a.sizes.thumbnail?a.sizes.thumbnail.url:a.url;
+			w.find('input').val(a.id);
+			w.find('.nexvio-swimg-preview').empty().append($('<img alt="">').attr('src',url).css({width:48,height:48,borderRadius:'50%',objectFit:'cover'}));
+			w.find('.nexvio-swimg-remove').show();
+		});
+		frame.open();
+	});
+	$(document).on('click','.nexvio-swimg-remove',function(e){
+		e.preventDefault();
+		var w=$(this).closest('.nexvio-swimg');
+		w.find('input').val('');w.find('.nexvio-swimg-preview').empty();$(this).hide();
+	});
+	$(document).ajaxComplete(function(ev,x,o){
+		if(o&&o.data&&String(o.data).indexOf('action=add-tag')>-1){$('.nexvio-swimg input').val('');$('.nexvio-swimg-preview').empty();$('.nexvio-swimg-remove').hide();}
+	});
+});
+NEXVIOJS;
+		wp_add_inline_script( 'jquery-core', $js );
 	}
 
 	private static function image_field( $value ) {
@@ -296,6 +322,7 @@ class Nexvio_Swatches {
 		foreach ( $values as $value => $v ) {
 			$img_id  = isset( $images[ $value ] ) ? $images[ $value ] : 0;
 			$items[] = array(
+				'slug'   => (string) $value,
 				'name'   => $v['name'],
 				'color'  => self::color_for( $v['name'], $v['term_id'] ),
 				'swatch' => self::image_for( $v['term_id'] ),
@@ -306,8 +333,88 @@ class Nexvio_Swatches {
 		}
 
 		return array(
-			'label' => $is_tax ? wc_attribute_label( $taxonomy ) : $attr->get_name(),
-			'items' => $items,
+			'label'    => $is_tax ? wc_attribute_label( $taxonomy ) : $attr->get_name(),
+			'taxonomy' => $taxonomy,
+			'items'    => $items,
 		);
+	}
+
+	/**
+	 * What the shop filter asked for, for one product: the value of each filtered attribute
+	 * (colour, size, image…) this product has (the one ticked last wins), and for a variable
+	 * product the variation that matches them, with its image.
+	 * Returns null when no attribute filter is active, otherwise
+	 * [ 'picks' => [ taxonomy => slug ], 'query' => [ attribute_x => slug ], 'image_id' => int ].
+	 */
+	public static function filter_pick( $product ) {
+		if ( ! class_exists( 'Nexvio_Filter_Query' ) || empty( $_GET ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return null;
+		}
+		$picks = array();
+		foreach ( array_keys( $_GET ) as $k ) { // phpcs:ignore WordPress.Security.NonceVerification
+			$k = (string) $k;
+			if ( 0 !== strpos( $k, 'nexvio_tax_pa_' ) || '_all' === substr( $k, -4 ) ) {
+				continue;
+			}
+			$tax = sanitize_key( substr( $k, strlen( 'nexvio_tax_' ) ) );
+			if ( ! taxonomy_exists( $tax ) ) {
+				continue;
+			}
+			$slugs = Nexvio_Filter_Query::slugs( $k );
+			$have  = $slugs ? wc_get_product_terms( $product->get_id(), $tax, array( 'fields' => 'slugs' ) ) : array();
+			foreach ( array_reverse( $slugs ) as $sl ) {
+				if ( in_array( $sl, (array) $have, true ) ) {
+					$picks[ $tax ] = $sl;
+					break;
+				}
+			}
+		}
+		if ( ! $picks ) {
+			return null;
+		}
+		$out = array( 'picks' => $picks, 'query' => array(), 'image_id' => 0 );
+		if ( ! $product->is_type( 'variable' ) ) {
+			return $out;
+		}
+		$var_attrs = $product->get_variation_attributes();
+		foreach ( $picks as $tax => $sl ) {
+			if ( isset( $var_attrs[ $tax ] ) ) {
+				$out['query'][ 'attribute_' . $tax ] = $sl;
+			}
+		}
+		if ( ! $out['query'] ) {
+			return $out;
+		}
+		$best = null;
+		$rank = 0;
+		foreach ( $product->get_children() as $child_id ) {
+			$v = wc_get_product( $child_id );
+			if ( ! $v || ! $v->is_purchasable() || 'publish' !== get_post_status( $child_id ) ) {
+				continue;
+			}
+			$va    = $v->get_attributes();
+			$score = 0;
+			$ok    = true;
+			foreach ( $out['query'] as $key => $sl ) {
+				$val = isset( $va[ substr( $key, 10 ) ] ) ? (string) $va[ substr( $key, 10 ) ] : '';
+				if ( $val === $sl ) {
+					$score++;
+				} elseif ( '' !== $val ) {
+					$ok = false;
+				}
+			}
+			if ( ! $ok || ! $score ) {
+				continue;
+			}
+			$r = $score * 4 + ( $v->get_image_id() ? 2 : 0 ) + ( $v->is_in_stock() ? 1 : 0 );
+			if ( $r > $rank ) {
+				$rank = $r;
+				$best = $v;
+			}
+		}
+		if ( $best ) {
+			$out['image_id'] = (int) $best->get_image_id();
+		}
+		return $out;
 	}
 }

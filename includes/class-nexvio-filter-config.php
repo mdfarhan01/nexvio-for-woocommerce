@@ -54,7 +54,7 @@ class Nexvio_Filter_Config {
 		$saved = is_array( $saved ) ? $saved : array();
 		$main  = isset( $saved['main_color'] ) ? sanitize_hex_color( $saved['main_color'] ) : '';
 		return array(
-			'preset'     => isset( $saved['preset'] ) && 'light' === $saved['preset'] ? 'light' : 'dark',
+			'preset'     => isset( $saved['preset'] ) && 'dark' === $saved['preset'] ? 'dark' : 'light',
 			'main_color' => $main ? $main : '#3d8bff',
 		);
 	}
@@ -63,7 +63,7 @@ class Nexvio_Filter_Config {
 		$in   = is_array( $in ) ? $in : array();
 		$main = isset( $in['main_color'] ) ? sanitize_hex_color( trim( (string) $in['main_color'] ) ) : '';
 		return array(
-			'preset'     => isset( $in['preset'] ) && 'light' === $in['preset'] ? 'light' : 'dark',
+			'preset'     => isset( $in['preset'] ) && 'dark' === $in['preset'] ? 'dark' : 'light',
 			'main_color' => $main ? $main : '#3d8bff',
 		);
 	}

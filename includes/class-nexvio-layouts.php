@@ -28,12 +28,17 @@ class Nexvio_Layouts {
 			'pricetag'  => array( __( 'Price Tag', 'nexvio' ), true, __( 'Price badge on the image, centred details.', 'nexvio' ) ),
 			'spotlight' => array( __( 'Spotlight', 'nexvio' ), true, __( 'Dark showcase with a glowing round stage.', 'nexvio' ) ),
 			'boutique'  => array( __( 'Boutique', 'nexvio' ), false, __( 'Soft image tile, colour swatches, outlined price and rating.', 'nexvio' ) ),
+			/* 4th value true: not offered in the design picker; used by the Products Card widget only */
+			'simple'    => array( __( 'Simple', 'nexvio' ), true, __( 'Plain card: image on top, title, description, price and a full-width button.', 'nexvio' ), true ),
 		);
 	}
 
 	public static function options_for_control() {
 		$out = array();
 		foreach ( self::all() as $key => $l ) {
+			if ( ! empty( $l[3] ) ) {
+				continue;
+			}
 			$out[ $key ] = array(
 				'title' => $l[0],
 				'desc'  => $l[2],
@@ -47,6 +52,9 @@ class Nexvio_Layouts {
 	public static function titles() {
 		$out = array();
 		foreach ( self::all() as $key => $l ) {
+			if ( ! empty( $l[3] ) ) {
+				continue;
+			}
 			$out[ $key ] = $l[0];
 		}
 		return $out;

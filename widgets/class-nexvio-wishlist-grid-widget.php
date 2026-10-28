@@ -21,8 +21,14 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 	}
 
 	public function get_title() {
-		return esc_html__( 'Wishlist Grid (My favorites)', 'nexvio' );
+		return esc_html__( 'Wishlist Card Layouts', 'nexvio' );
 	}
+
+	/** Gallery hover controls (see the card trait). */
+	protected function gallery_ui() {
+		return 'full';
+	}
+
 
 	public function get_icon() {
 		return 'eicon-heart';
@@ -47,6 +53,28 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 	protected function register_controls() {
 		$this->register_design_section();
 
+		$this->register_wl_title_section();
+
+		$this->register_wl_products_section();
+
+		$this->register_wl_empty_section();
+
+		$this->register_card_sections();
+
+		/* "New" badge: keep but off (same as other widgets) */
+
+		$this->register_wl_layout_section();
+
+		$this->register_wl_title_style_section();
+
+		$this->register_gs_card_styles();
+
+		$this->register_wl_empty_style_section();
+
+		$this->limit_classic_controls();
+	}
+
+	protected function register_wl_title_section() {
 		/* ============ TITLE ============ */
 		$this->start_controls_section( 'section_title', array( 'label' => esc_html__( 'Title', 'nexvio' ) ) );
 		$this->switcher( 'show_title', esc_html__( 'Show title', 'nexvio' ) );
@@ -62,7 +90,9 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 		$this->switcher( 'show_count', esc_html__( 'Show number of products', 'nexvio' ), '', array( 'condition' => array( 'show_title' => 'yes' ) ) );
 		$this->text( 'count_text', esc_html__( 'Count text ({n} = number)', 'nexvio' ), '{n} product(s)', array( 'condition' => array( 'show_title' => 'yes', 'show_count' => 'yes' ) ) );
 		$this->end_controls_section();
+	}
 
+	protected function register_wl_products_section() {
 		/* ============ PRODUCTS ============ */
 		$this->start_controls_section( 'section_products', array( 'label' => esc_html__( 'Products', 'nexvio' ) ) );
 		$this->add_control( 'products_note', array(
@@ -88,7 +118,9 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 			'separator' => 'before',
 		) );
 		$this->end_controls_section();
+	}
 
+	protected function register_wl_empty_section() {
 		/* ============ EMPTY ============ */
 		$this->start_controls_section( 'section_empty', array( 'label' => esc_html__( 'Empty wishlist', 'nexvio' ) ) );
 		$this->add_control( 'empty_text', array(
@@ -107,11 +139,9 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 			'condition'   => array( 'empty_btn' => 'yes' ),
 		) );
 		$this->end_controls_section();
+	}
 
-		$this->register_card_sections();
-
-		/* "New" badge: keep but off (same as other widgets) */
-
+	protected function register_wl_layout_section() {
 		/* ============ LAYOUT ============ */
 		$this->start_controls_section( 'section_layout', array( 'label' => esc_html__( 'Grid layout', 'nexvio' ) ) );
 		$this->add_responsive_control( 'columns', array(
@@ -143,7 +173,9 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 			'selectors'      => array( '{{WRAPPER}} .nexvio-pg' => '--nexvio-pg-row-gap: {{SIZE}}{{UNIT}};' ),
 		) );
 		$this->end_controls_section();
+	}
 
+	protected function register_wl_title_style_section() {
 		/* ============ STYLE: TITLE ============ */
 		$this->start_controls_section( 'style_title', array( 'label' => esc_html__( 'Title', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE, 'condition' => array( 'show_title' => 'yes' ) ) );
 		$this->add_control( 't_color', array( 'label' => esc_html__( 'Colour', 'nexvio' ), 'type' => Controls_Manager::COLOR, 'default' => '#e8edf4', 'selectors' => array( '{{WRAPPER}} .nexvio-wlg__title' => 'color: {{VALUE}};' ) ) );
@@ -166,10 +198,9 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 			'selectors'  => array( '{{WRAPPER}} .nexvio-wlg__head' => 'margin-bottom: {{SIZE}}{{UNIT}};' ),
 		) );
 		$this->end_controls_section();
+	}
 
-		$this->register_layout_style_section();
-		$this->register_card_style_sections();
-
+	protected function register_wl_empty_style_section() {
 		/* ============ STYLE: EMPTY ============ */
 		$this->start_controls_section( 'style_empty', array( 'label' => esc_html__( 'Empty wishlist', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE ) );
 		$this->add_control( 'e_color', array( 'label' => esc_html__( 'Text', 'nexvio' ), 'type' => Controls_Manager::COLOR, 'default' => '#8f9aab', 'selectors' => array( '{{WRAPPER}} .nexvio-wlg__empty' => 'color: {{VALUE}};' ) ) );
@@ -179,11 +210,21 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 		$this->add_control( 'e_btn_c', array( 'label' => esc_html__( 'Button text', 'nexvio' ), 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .nexvio-wlg__btn, {{WRAPPER}} .nexvio-wlg__btn:hover' => 'color: {{VALUE}};' ) ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'e_typo', 'selector' => '{{WRAPPER}} .nexvio-wlg__empty p' ) );
 		$this->end_controls_section();
-		$this->limit_classic_controls();
 	}
 
-	private function is_edit() {
+	protected function is_edit() {
 		return class_exists( '\Elementor\Plugin' ) && \Elementor\Plugin::$instance->editor->is_edit_mode();
+	}
+
+	/** Id of the Elementor document (page or template) this widget sits in. */
+	protected function document_id() {
+		if ( class_exists( '\\Elementor\\Plugin' ) ) {
+			$document = \Elementor\Plugin::$instance->documents->get_current();
+			if ( $document ) {
+				return (int) $document->get_main_id();
+			}
+		}
+		return (int) get_the_ID();
 	}
 
 	protected function render() {
@@ -213,6 +254,8 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 		if ( wp_script_is( 'wc-add-to-cart', 'registered' ) ) {
 			wp_enqueue_script( 'wc-add-to-cart' );
 		}
+
+		Nexvio_Wishlist::no_cache_page(); /* the list differs per visitor: never serve it from a page cache */
 
 		$classes   = array( 'nexvio-ps', 'nexvio-pg', 'nexvio-wlg' );
 		$classes[] = 'cover' === $s['image_mode'] ? 'nexvio-ps--cover' : 'nexvio-ps--contain';
@@ -247,7 +290,7 @@ class Nexvio_Wishlist_Grid_Widget extends Widget_Base {
 		$btn_url = ! empty( $s['empty_btn_link']['url'] ) ? $s['empty_btn_link']['url'] : ( function_exists( 'wc_get_page_permalink' ) ? wc_get_page_permalink( 'shop' ) : home_url( '/' ) );
 		$count_t = (string) $s['count_text'];
 		?>
-		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-settings="<?php echo esc_attr( wp_json_encode( $js ) ); ?>" data-count-text="<?php echo esc_attr( $count_t ); ?>">
+		<div class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>" data-settings="<?php echo esc_attr( wp_json_encode( $js ) ); ?>" data-count-text="<?php echo esc_attr( $count_t ); ?>" data-limit="<?php echo esc_attr( max( 0, (int) $s['limit'] ) ); ?>" data-nexvio-post="<?php echo esc_attr( $this->document_id() ); ?>" data-nexvio-el="<?php echo esc_attr( $this->get_id() ); ?>">
 			<?php if ( 'yes' === $s['show_title'] ) : ?>
 				<div class="nexvio-wlg__head<?php echo 'yes' === $s['title_bar'] ? ' has-line' : ''; ?>">
 					<<?php echo esc_html( $tag ); ?> class="nexvio-wlg__title"><?php echo esc_html( $s['title'] ); ?></<?php echo esc_html( $tag ); ?>>

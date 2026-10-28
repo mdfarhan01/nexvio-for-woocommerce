@@ -434,6 +434,78 @@ class Nexvio_Product_Filter_Widget extends Widget_Base {
 		$this->cv( 'm_color', esc_html__( 'Colour', 'nexvio' ), '--nexvio-pf-more', '#8cc8ff' );
 		$this->end_controls_section();
 
+		/* ============ STYLE: ATTRIBUTES (one block per product attribute: colour, size, image…) ============ */
+		$attrs = class_exists( 'Nexvio_Filter_Config' ) ? Nexvio_Filter_Config::attributes() : array();
+		/* attributes added on Nexvio > Filters get their block automatically; with "Set here" fields every attribute has one */
+		$used = array();
+		if ( class_exists( 'Nexvio_Filter_Config' ) ) {
+			foreach ( Nexvio_Filter_Config::fields() as $fld ) {
+				if ( isset( $fld['type'], $fld['taxonomy'] ) && 'attribute' === $fld['type'] ) {
+					$used[] = $fld['taxonomy'];
+				}
+			}
+		}
+		if ( $attrs ) {
+			$this->start_controls_section( 'style_attributes', array( 'label' => esc_html__( 'Attribute circles and buttons', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE ) );
+			$this->add_control( 'attr_note', array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'raw'             => esc_html__( 'Every attribute you add to the filter (colour, size, image…) gets its own block here with size and radius. Add an attribute on Nexvio > Filters and it appears here. Circles are for colour / image attributes, buttons for size and other attributes shown as buttons.', 'nexvio' ),
+				'content_classes' => 'elementor-descriptor',
+			) );
+			$first = true;
+			foreach ( $attrs as $tax => $info ) {
+				$key  = sanitize_key( $tax );
+				$cond = in_array( $tax, $used, true ) ? array() : array( 'fields_source' => 'widget' );
+				$grp  = '{{WRAPPER}} .nexvio-pf .nexvio-pf__group[data-param="nexvio_tax_' . $tax . '"]';
+				$this->add_control( 'attr_h_' . $key, array(
+					'label'     => $info[0],
+					'type'      => Controls_Manager::HEADING,
+					'condition' => $cond,
+					'separator' => $first ? 'default' : 'before',
+				) );
+				$first = false;
+				$this->add_responsive_control( 'attr_dot_' . $key, array(
+					'label'      => esc_html__( 'Circle size', 'nexvio' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( 'px' ),
+					'range'      => array( 'px' => array( 'min' => 12, 'max' => 90 ) ),
+					'condition'  => $cond,
+					'selectors'  => array( $grp . ' .nexvio-pf__dot' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+				) );
+				$this->add_responsive_control( 'attr_dot_r_' . $key, array(
+					'label'      => esc_html__( 'Circle radius', 'nexvio' ),
+					'type'       => Controls_Manager::DIMENSIONS,
+					'size_units' => array( 'px', '%' ),
+					'condition'  => $cond,
+					'selectors'  => array( $grp . ' .nexvio-pf__dot' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+				) );
+				$this->add_responsive_control( 'attr_btn_w_' . $key, array(
+					'label'      => esc_html__( 'Button min width', 'nexvio' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( 'px' ),
+					'range'      => array( 'px' => array( 'min' => 20, 'max' => 200 ) ),
+					'condition'  => $cond,
+					'selectors'  => array( $grp . ' .nexvio-pf__list--chips .nexvio-pf__opt, ' . $grp . ' .nexvio-pf__list--sizes .nexvio-pf__opt' => 'min-width: {{SIZE}}{{UNIT}};' ),
+				) );
+				$this->add_responsive_control( 'attr_btn_h_' . $key, array(
+					'label'      => esc_html__( 'Button height', 'nexvio' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( 'px' ),
+					'range'      => array( 'px' => array( 'min' => 20, 'max' => 100 ) ),
+					'condition'  => $cond,
+					'selectors'  => array( $grp . ' .nexvio-pf__list--chips .nexvio-pf__opt, ' . $grp . ' .nexvio-pf__list--sizes .nexvio-pf__opt' => 'min-height: {{SIZE}}{{UNIT}}; box-sizing: border-box;' ),
+				) );
+				$this->add_responsive_control( 'attr_btn_r_' . $key, array(
+					'label'      => esc_html__( 'Button radius', 'nexvio' ),
+					'type'       => Controls_Manager::DIMENSIONS,
+					'size_units' => array( 'px', '%' ),
+					'condition'  => $cond,
+					'selectors'  => array( $grp . ' .nexvio-pf__list--chips .nexvio-pf__opt, ' . $grp . ' .nexvio-pf__list--sizes .nexvio-pf__opt' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+				) );
+			}
+			$this->end_controls_section();
+		}
+
 		/* ============ STYLE: BUTTONS ============ */
 		$this->start_controls_section( 'style_buttons', array( 'label' => esc_html__( 'Buttons', 'nexvio' ), 'tab' => Controls_Manager::TAB_STYLE ) );
 		$this->add_control( 'h_apply', array( 'label' => esc_html__( 'Apply button', 'nexvio' ), 'type' => Controls_Manager::HEADING ) );
@@ -764,7 +836,7 @@ class Nexvio_Product_Filter_Widget extends Widget_Base {
 			'bounds'   => $bounds,
 		);
 		?>
-		<?php $nexvio_style = class_exists( 'Nexvio_Filter_Config' ) ? Nexvio_Filter_Config::style() : array( 'preset' => 'dark' ); ?>
+		<?php $nexvio_style = class_exists( 'Nexvio_Filter_Config' ) ? Nexvio_Filter_Config::style() : array( 'preset' => 'light' ); ?>
 		<div class="nexvio-pf nexvio-pf--<?php echo esc_attr( $nexvio_style['preset'] ); ?><?php echo 'yes' === $s['collapsible'] ? ' nexvio-pf--collapsible' : ''; ?><?php echo $extra_class ? ' ' . esc_attr( $extra_class ) : ''; ?>" data-config="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
 			<?php if ( $head_html ) : ?>
 				<?php echo wp_kses( $head_html, Nexvio_Plugin::allowed_html() ); ?>

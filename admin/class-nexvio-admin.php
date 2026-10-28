@@ -19,8 +19,27 @@ class Nexvio_Admin {
 	const FILTERS  = 'nexvio-filters';
 	const WISHLIST = 'nexvio-wishlist';
 
+	/** After the plugin is activated, open the Nexvio dashboard (not on bulk activation, not for other roles). */
+	public static function activation_redirect() {
+		if ( ! get_option( 'nexvio_do_activation_redirect' ) ) {
+			return;
+		}
+		/* background requests (AJAX, cron, REST) must not use up the one-time redirect */
+		if ( wp_doing_ajax() || wp_doing_cron() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || is_network_admin() || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		delete_option( 'nexvio_do_activation_redirect' );
+		if ( isset( $_GET['activate-multi'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- only checks whether WordPress is activating several plugins at once.
+			return;
+		}
+		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SLUG ) );
+		exit;
+	}
+
 	public static function init() {
+		add_action( 'admin_init', array( __CLASS__, 'activation_redirect' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'menu' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'menu_icon_css' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'wp_ajax_nexvio_toggle_widget', array( __CLASS__, 'ajax_toggle' ) );
 		add_action( 'wp_ajax_nexvio_bulk_widgets', array( __CLASS__, 'ajax_bulk' ) );
@@ -45,15 +64,23 @@ class Nexvio_Admin {
 	}
 
 	private static function menu_icon() {
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill="black" d="M7 6V5a3 3 0 0 1 6 0v1h2.2a1 1 0 0 1 1 .9l.8 10A1 1 0 0 1 16 18H4a1 1 0 0 1-1-1.1l.8-10a1 1 0 0 1 1-.9H7zm1.6 0h2.8V5a1.4 1.4 0 0 0-2.8 0v1zM7.5 10v4h5v-4h-5zm0 1.6h5v.8h-5v-.8z"/></svg>';
-		return 'data:image/svg+xml;base64,' . base64_encode( $svg ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions
+		/* 'none': the logo is drawn by menu_icon_css() so it has the menu colour from the first paint */
+		return 'none';
+	}
+
+	/** The menu logo as a CSS mask: it takes the colour of the menu text (grey, white on hover / active) at once, with no script. */
+	public static function menu_icon_css() {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M7 6V5a3 3 0 0 1 6 0v1h2.2a1 1 0 0 1 1 .9l.8 10A1 1 0 0 1 16 18H4a1 1 0 0 1-1-1.1l.8-10a1 1 0 0 1 1-.9H7zm1.6 0h2.8V5a1.4 1.4 0 0 0-2.8 0v1zM7.5 10v4h5v-4h-5zm0 1.6h5v.8h-5v-.8z"/></svg>';
+		$url = 'url("data:image/svg+xml,' . rawurlencode( $svg ) . '")';
+		$css = '#adminmenu .toplevel_page_' . self::SLUG . ' div.wp-menu-image:before{content:"";display:block;width:20px;height:20px;margin:7px auto 0;padding:0;background-color:currentColor;-webkit-mask:' . $url . ' center/contain no-repeat;mask:' . $url . ' center/contain no-repeat}';
+		wp_add_inline_style( 'wp-admin', $css );
 	}
 
 	public static function menu() {
 		/* 55.4: just above the WooCommerce menu */
 		add_menu_page(
-			__( 'Nexvio', 'nexvio' ),
-			__( 'Nexvio', 'nexvio' ),
+			__( 'Nexvio for Woo', 'nexvio' ),
+			__( 'Nexvio for Woo', 'nexvio' ),
 			'manage_options',
 			self::SLUG,
 			array( __CLASS__, 'page_dashboard' ),
@@ -94,6 +121,7 @@ class Nexvio_Admin {
 			wp_localize_script( 'nexvio-filters', 'NEXVIO_FILTERS', self::filters_data() );
 		}
 		if ( self::CART === self::is_ours() ) {
+			wp_enqueue_media();
 			wp_enqueue_style( 'nexvio-side-cart-preview', NEXVIO_URL . 'assets/css/side-cart.css', array(), Nexvio_Plugin::ver( 'assets/css/side-cart.css' ) );
 		}
 		wp_enqueue_style( 'nexvio-admin', NEXVIO_URL . 'admin/assets/admin.css', array( 'dashicons', 'wp-color-picker' ), Nexvio_Plugin::ver( 'admin/assets/admin.css' ) );
@@ -458,7 +486,7 @@ class Nexvio_Admin {
 				<div class="nexvio-row">
 					<div class="nexvio-row__label">
 						<label for="nexvio_wishlist_page"><?php esc_html_e( 'Wishlist page', 'nexvio' ); ?></label>
-						<p><?php esc_html_e( 'Add the "Wishlist Grid" widget to this page with Elementor. The header heart and the "View my wishlist" link open it.', 'nexvio' ); ?></p>
+						<p><?php esc_html_e( 'Add the "Wishlist Card" widget to this page with Elementor. The header heart and the "View my wishlist" link open it.', 'nexvio' ); ?></p>
 					</div>
 					<div class="nexvio-row__control">
 						<?php
@@ -505,7 +533,7 @@ class Nexvio_Admin {
 			</section>
 
 			<div class="nexvio-glass nexvio-savebar">
-				<span><?php esc_html_e( 'Widgets: Wishlist Icon (header) and Wishlist Grid (wishlist page).', 'nexvio' ); ?></span>
+				<span><?php esc_html_e( 'Widgets: Wishlist Icon (header), Wishlist Card and Wishlist Card Layouts (wishlist page).', 'nexvio' ); ?></span>
 				<button type="submit" class="nexvio-btn"><span class="dashicons dashicons-saved" aria-hidden="true"></span><?php esc_html_e( 'Save settings', 'nexvio' ); ?></button>
 			</div>
 		</form>
@@ -630,7 +658,7 @@ class Nexvio_Admin {
 						</div>
 					</header>
 					<?php
-					self::cart_field( 'preset', array( 'style', __( 'Style', 'nexvio' ), 'dark', array( 'options' => array( 'light' => __( 'Light', 'nexvio' ), 'dark' => __( 'Dark', 'nexvio' ) ) ) ), $fst['preset'], 'nexvio_filter_style' );
+					self::cart_field( 'preset', array( 'style', __( 'Style', 'nexvio' ), 'light', array( 'options' => array( 'light' => __( 'Light', 'nexvio' ), 'dark' => __( 'Dark', 'nexvio' ) ) ) ), $fst['preset'], 'nexvio_filter_style' );
 					self::cart_field( 'main_color', array( 'color', __( 'Main colour', 'nexvio' ), '#3d8bff', array( 'help' => __( 'Text on it turns black or white automatically so it stays readable.', 'nexvio' ) ) ), $fst['main_color'], 'nexvio_filter_style' );
 					?>
 				</section>
@@ -663,20 +691,14 @@ class Nexvio_Admin {
 		self::close();
 	}
 
-	/** sanitize_text_field() for strings only, so numbers and booleans from JSON keep their type. */
-	public static function clean_scalar( $value ) {
-		return is_string( $value ) ? sanitize_textarea_field( $value ) : $value;
-	}
-
 	public static function save_filters() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'Not allowed.', 'nexvio' ) );
 		}
 		check_admin_referer( 'nexvio_save_filters' );
-		$raw  = isset( $_POST['nexvio_filters_json'] ) && is_string( $_POST['nexvio_filters_json'] ) ? sanitize_textarea_field( wp_unslash( $_POST['nexvio_filters_json'] ) ) : '[]';
-		$list = json_decode( $raw, true );
-		$list = is_array( $list ) ? map_deep( $list, array( __CLASS__, 'clean_scalar' ) ) : array();
-		update_option( Nexvio_Filter_Config::OPTION, Nexvio_Filter_Config::sanitize( $list ) );
+		$raw  = isset( $_POST['nexvio_filters_json'] ) ? sanitize_textarea_field( wp_unslash( $_POST['nexvio_filters_json'] ) ) : '[]';
+		$list = json_decode( $raw, true ); // Decoded from an already sanitized string; every field is sanitized again in Nexvio_Filter_Config::sanitize().
+		update_option( Nexvio_Filter_Config::OPTION, Nexvio_Filter_Config::sanitize( is_array( $list ) ? $list : array() ) );
 		$style = isset( $_POST['nexvio_filter_style'] ) && is_array( $_POST['nexvio_filter_style'] ) ? map_deep( wp_unslash( $_POST['nexvio_filter_style'] ), 'sanitize_text_field' ) : array();
 		update_option( Nexvio_Filter_Config::STYLE_OPTION, Nexvio_Filter_Config::sanitize_style( $style ) );
 		wp_safe_redirect( admin_url( 'admin.php?page=' . self::FILTERS . '&updated=1' ) );
@@ -741,6 +763,17 @@ class Nexvio_Admin {
 		self::close();
 	}
 
+	/** Custom fonts for the preview (the site's own fonts only exist on the front end). */
+	private static function preview_fonts() {
+		$out = '';
+		foreach ( Nexvio_Side_Cart::font_vars() as $decl ) {
+			if ( false === strpos( $decl, 'var(' ) ) {
+				$out .= ';' . $decl;
+			}
+		}
+		return $out;
+	}
+
 	/** Static copy of the side cart, styled by the same CSS as the shop. */
 	private static function cart_preview( $style, $main ) {
 		$img = function ( $c1, $c2 ) {
@@ -750,7 +783,7 @@ class Nexvio_Admin {
 			return Nexvio_Cart_Settings::text( $key );
 		};
 		?>
-		<div class="nexvio-sc nexvio-sc--<?php echo esc_attr( $style ); ?> nexvio-sc--preview" id="nexvio-preview-cart" style="--wsc-mc:<?php echo esc_attr( $main ); ?>;--wsc-mc-text:<?php echo esc_attr( Nexvio_Cart_Settings::contrast( $main ) ); ?>">
+		<div class="nexvio-sc nexvio-sc--<?php echo esc_attr( $style ); ?> nexvio-sc--preview" id="nexvio-preview-cart" style="--wsc-mc:<?php echo esc_attr( $main ); ?>;--wsc-mc-text:<?php echo esc_attr( Nexvio_Cart_Settings::contrast( $main ) ); ?><?php echo esc_attr( self::preview_fonts() ); ?>">
 			<div class="nexvio-sc__panel">
 				<div class="nexvio-sc__inner">
 					<header class="nexvio-sc__head">
@@ -767,7 +800,7 @@ class Nexvio_Admin {
 									<span class="nexvio-sc__thumb"><img src="<?php echo esc_attr( $img( $it[6], $it[7] ) ); ?>" alt=""></span>
 									<div class="nexvio-sc__info">
 										<div class="nexvio-sc__top"><span class="nexvio-sc__name"><?php echo esc_html( $it[0] ); ?></span><span class="nexvio-sc__line"><?php echo esc_html( $it[4] ); ?></span></div>
-										<div class="nexvio-sc__meta"><span class="nexvio-sc__var"><?php echo esc_html( $it[1] ); ?></span><span class="nexvio-sc__unit"><?php echo $it[2] ? '<del>' . esc_html( $it[2] ) . '</del> ' : ''; ?><?php echo esc_html( $it[3] ); ?></span></div>
+										<div class="nexvio-sc__meta"><span class="nexvio-sc__var"><?php echo esc_html( $it[1] ); ?></span><span class="nexvio-sc__unit"><?php echo $it[2] ? '<del>' . esc_html( $it[2] ) . '</del> <ins class="nexvio-sc__sale">' . esc_html( $it[3] ) . '</ins>' : esc_html( $it[3] ); ?></span></div>
 										<div class="nexvio-sc__bottom">
 											<span class="nexvio-sc__qty"><button type="button" tabindex="-1">−</button><input type="number" value="<?php echo (int) $it[5]; ?>" tabindex="-1" readonly aria-hidden="true"><button type="button" tabindex="-1">+</button></span>
 											<span class="nexvio-sc__remove"><?php echo wp_kses( Nexvio_Side_Cart::icon( 'trash' ), Nexvio_Plugin::allowed_html() ); ?><span><?php echo esc_html( Nexvio_Texts::get( 'remove' ) ); ?></span></span>
@@ -785,13 +818,13 @@ class Nexvio_Admin {
 						</dl>
 						<div class="nexvio-sc__actions">
 							<span class="nexvio-sc__btn nexvio-sc__btn--primary"><span data-preview="checkout_label"><?php echo esc_html( $t( 'checkout_label' ) ); ?></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-							<span class="nexvio-sc__link" data-preview="view_label" data-preview-show="view_cart"><?php echo esc_html( $t( 'view_label' ) ); ?></span>
+							<span class="nexvio-sc__btn nexvio-sc__btn--ghost" data-preview-show="shop_more"><span data-preview="shop_label"><?php echo esc_html( $t( 'shop_label' ) ); ?></span></span>
 						</div>
 					</footer>
 				</div>
 			</div>
-			<span class="nexvio-fc nexvio-fc--<?php echo esc_attr( $style ); ?> nexvio-fc--preview" id="nexvio-preview-fc" style="--wsc-mc:<?php echo esc_attr( $main ); ?>;--wsc-mc-text:<?php echo esc_attr( Nexvio_Cart_Settings::contrast( $main ) ); ?>" aria-hidden="true">
-				<span class="nexvio-fc__ring"></span><span class="nexvio-fc__icon"><?php echo wp_kses( Nexvio_Side_Cart::icon( 'bag' ), Nexvio_Plugin::allowed_html() ); ?></span><span class="nexvio-fc__count">3</span>
+			<span class="nexvio-fc nexvio-fc--<?php echo esc_attr( $style ); ?> nexvio-fc--preview<?php echo Nexvio_Cart_Settings::on( 'fl_pulse' ) ? ' nexvio-fc--pulse' : ''; ?>" id="nexvio-preview-fc" style="--wsc-mc:<?php echo esc_attr( $main ); ?>;--wsc-mc-text:<?php echo esc_attr( Nexvio_Cart_Settings::contrast( $main ) ); ?>" aria-hidden="true">
+				<span class="nexvio-fc__ring"></span><span class="nexvio-fc__icon"><?php echo wp_kses( Nexvio_Side_Cart::floating_icon(), Nexvio_Plugin::allowed_html() ); ?></span><span class="nexvio-fc__count">3</span>
 			</span>
 		</div>
 		<?php
@@ -802,8 +835,8 @@ class Nexvio_Admin {
 		$extra = isset( $f[3] ) ? $f[3] : array();
 		$id    = str_replace( '_', '-', $prefix ) . '-' . $key;
 		$name  = $prefix . '[' . $key . ']';
-		echo '<div class="nexvio-row"><div class="nexvio-row__label">';
-		echo 'toggle' === $type || 'checks' === $type || 'pages' === $type ? '<strong>' . esc_html( $label ) . '</strong>' : '<label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label>';
+		echo '<div class="nexvio-row' . ( in_array( $type, array( 'icons', 'media' ), true ) ? ' nexvio-row--stack' : '' ) . '"' . ( ! empty( $extra['show_if'] ) ? ' data-show-if="' . esc_attr( $extra['show_if'] ) . '"' : '' ) . '><div class="nexvio-row__label">';
+		echo 'toggle' === $type || 'checks' === $type || 'pages' === $type || 'icons' === $type ? '<strong>' . esc_html( $label ) . '</strong>' : '<label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label>';
 		if ( ! empty( $extra['help'] ) ) {
 			echo '<p>' . esc_html( $extra['help'] ) . '</p>';
 		}
@@ -838,6 +871,40 @@ class Nexvio_Admin {
 				break;
 			case 'number':
 				echo '<span class="nexvio-input-unit"><input type="number" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" min="' . esc_attr( isset( $extra['min'] ) ? $extra['min'] : 0 ) . '" max="' . esc_attr( isset( $extra['max'] ) ? $extra['max'] : 9999 ) . '"><span>' . esc_html( isset( $extra['unit'] ) ? $extra['unit'] : '' ) . '</span></span>';
+				break;
+			case 'icons':
+				echo '<div class="nexvio-iconpick-grid" role="radiogroup" aria-label="' . esc_attr( $label ) . '">';
+				foreach ( $extra['options'] as $k => $l ) {
+					$custom = (string) Nexvio_Cart_Settings::get( 'fl_icon_url' );
+					if ( 'custom' === $k ) {
+						$glyph = $custom ? '<img src="' . esc_url( $custom ) . '" alt="">' : '<span class="dashicons dashicons-plus-alt2" aria-hidden="true"></span>';
+					} else {
+						$glyph = Nexvio_Side_Cart::icon( $k );
+					}
+					echo wp_kses( '<label class="nexvio-iconpick"><input type="radio" name="' . esc_attr( $name ) . '" value="' . esc_attr( $k ) . '"' . checked( $value, $k, false ) . '><span class="nexvio-iconpick__card"><span class="nexvio-iconpick__svg">' . $glyph . '</span><span class="nexvio-iconpick__name">' . esc_html( $l ) . '</span></span></label>', Nexvio_Plugin::allowed_html() );
+				}
+				echo '</div>';
+				break;
+			case 'media':
+				echo '<div class="nexvio-media" data-nexvio-media>';
+				echo '<div class="nexvio-media__card">';
+				echo '<span class="nexvio-media__thumb">' . ( $value ? '<img src="' . esc_url( $value ) . '" alt="">' : '<span class="dashicons dashicons-format-image" aria-hidden="true"></span>' ) . '</span>';
+				echo '<div class="nexvio-media__body">';
+				echo '<div class="nexvio-media__actions">';
+				echo '<button type="button" class="nexvio-btn nexvio-btn--sm" data-nexvio-media-pick data-label-select="' . esc_attr__( 'Select icon', 'nexvio' ) . '" data-label-change="' . esc_attr__( 'Change icon', 'nexvio' ) . '" data-title="' . esc_attr__( 'Select your icon', 'nexvio' ) . '" data-button="' . esc_attr__( 'Use this icon', 'nexvio' ) . '"><span class="dashicons dashicons-admin-media" aria-hidden="true"></span><span data-nexvio-media-label>' . esc_html( $value ? __( 'Change icon', 'nexvio' ) : __( 'Select icon', 'nexvio' ) ) . '</span></button>';
+				echo '<button type="button" class="nexvio-media__remove" data-nexvio-media-clear' . ( $value ? '' : ' hidden' ) . '>' . esc_html__( 'Remove', 'nexvio' ) . '</button>';
+				echo '</div>';
+				echo '<p class="nexvio-media__hint">' . esc_html__( 'Opens your Media Library. The icon shows in the live preview straight away.', 'nexvio' ) . '</p>';
+				echo '</div></div>';
+				echo '<details class="nexvio-media__url"' . ( $value ? ' open' : '' ) . '><summary>' . esc_html__( 'Or paste an image address', 'nexvio' ) . '</summary>';
+				echo '<input type="url" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_url( $value ) . '" placeholder="https://" data-nexvio-media-url></details>';
+				echo '</div>';
+				break;
+			case 'font':
+				echo '<input type="text" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" placeholder="Playfair Display" data-nexvio-font="' . esc_attr( $key ) . '">';
+				break;
+			case 'url':
+				echo '<input type="url" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_url( $value ) . '" placeholder="https://" class="regular-text">';
 				break;
 			case 'page':
 				$dd = wp_dropdown_pages( array(
@@ -898,12 +965,12 @@ class Nexvio_Admin {
 				<ol>
 					<li><strong>Requirements:</strong> WordPress 5.8+, PHP 7.4+, WooCommerce and Elementor (the free version is enough; Elementor Pro is needed only for Theme Builder templates).</li>
 					<li><strong>Choose your widgets</strong> in <a href="' . esc_url( $w ) . '">Widgets</a>. Disabled widgets are removed from the Elementor panel.</li>
-					<li><strong>Set the wishlist page</strong> in <a href="' . esc_url( admin_url( 'admin.php?page=' . self::WISHLIST ) ) . '">Wishlist</a> (click "Create the page"), then edit it with Elementor and add <em>Wishlist Grid</em>.</li>
+					<li><strong>Set the wishlist page</strong> in <a href="' . esc_url( admin_url( 'admin.php?page=' . self::WISHLIST ) ) . '">Wishlist</a> (click "Create the page"), then edit it with Elementor and add <em>Wishlist Card</em> (or <em>Wishlist Card Layouts</em>).</li>
 					<li><strong>Build your templates:</strong>
 						<ul>
 							<li>Header: <em>Header Search</em> + <em>Wishlist Icon</em></li>
-							<li>Products archive (shop and categories): <em>Product Filter</em> in a sidebar + <em>Product Grid</em> with source "Current query"</li>
-							<li>Single product: <em>Add to Cart</em> + <em>Related Products</em></li>
+							<li>Products archive (shop and categories): <em>Product Filter</em> in a sidebar + <em>Products Archive</em> (or <em>Products Archive Layouts</em>)</li>
+							<li>Single product: <em>Add to Cart</em> + <em>Related Products</em> (or <em>Related Products Layouts</em>)</li>
 							<li>Home page: <em>Product Slider</em></li>
 						</ul>
 					</li>
@@ -916,24 +983,42 @@ class Nexvio_Admin {
 					<li><strong>Badges:</strong> language (product attribute), category, new, sale (percentage), pre-order (tag <code>precommande</code> or backorder).</li>
 					<li><strong>Background by category:</strong> give each category its own colours.</li>
 				</ul>
-				<p><strong>Design Layout</strong> (Content tab, first section): pick one of 12 card designs from preview images: Classic Vault, Minimal Light, Image Overlay, Horizontal, Glass, Neon Outline, Elevated Shop, Compact Tiles, Editorial, Price Tag, Spotlight and Boutique. The same picker is in Products Grid, Products Archive, Related Products and Wishlist Grid. The colours, image shape and effects of the chosen design are in <em>Style &gt; Layout design</em>; only the controls that apply to that design are shown. You can also choose an icon or text add-to-cart button and show star ratings.</p>
+				<p><strong>Design Layout</strong> (Content tab, first section): pick one of 12 card designs from preview images: Classic Vault, Minimal Light, Image Overlay, Horizontal, Glass, Neon Outline, Elevated Shop, Compact Tiles, Editorial, Price Tag, Spotlight and Boutique. The same picker is in Products Card Layouts, Products Archive Layouts, Related Products Layouts and Wishlist Card Layouts. The colours, image shape and effects of the chosen design are in <em>Style &gt; Layout design</em>; only the controls that apply to that design are shown. You can also choose an icon or text add-to-cart button and show star ratings.</p>
 				<p><strong>Motion</strong> (Slider section): <em>Slide</em> works with arrows, swipe and optional autoplay. <em>Continuous infinite scroll</em> moves the products at a steady speed in an endless loop with no visible restart; set the speed per device, the direction and pause on hover. Arrows and drag / swipe still work in this mode.</p>
 				<p><strong>Tips:</strong> the Horizontal design looks best with 2 or 3 visible cards, Compact Tiles with 5 or 6. Glass is made for colourful or image backgrounds.</p>' ),
-			'grid' => array( 'dashicons-grid-view', 'Products Archive', '
-				<p>The product grid for the shop page and the category / tag / attribute archives, with pagination, result count and sorting.</p>
+			'products-card' => array( 'dashicons-index-card', 'Products Card', '
+				<p>A grid of <strong>simple product cards</strong>: the image on top, then the title, description, price and a full-width button. It uses the same product query, columns and pagination as Products Card Layouts, with one plain design and a short Style tab.</p>
+				<ul>
+					<li><strong>Style &gt; Layout design</strong>: card background, border (top, right, bottom, left), text area padding and box shadow.</li>
+					<li><strong>Content &gt; Hover gallery image</strong>: show another picture from the product gallery when the pointer is over the card, with animation effect, duration and easing.</li>
+					<li><strong>Style &gt; Image</strong>: Default, Cover or Contain fit, the image controls (alignment, width, height, opacity, filters, border, radius, shadow) and the image area (shape, space, radius, background).</li>
+					<li><strong>Style &gt; Card Content</strong>: title, description, price and the other product info, each with colour, typography and spacing (top and bottom).</li>
+					<li><strong>Style &gt; Button</strong> (when the button is on): font, normal and gradient background, text colour, icon colour, padding, spacing and border radius (top, right, bottom, left).</li>
+					<li><strong>Style &gt; Badges</strong>: text font, padding, margin and radius for the Category, New, Sale, Pre-order and Language badges. <strong>Pagination</strong> and the <strong>No products message</strong> work as in Products Card Layouts.</li>
+				</ul>' ),
+			'products-grid' => array( 'dashicons-screenoptions', 'Products Card Layouts', '
+				<p><strong>Products Card Layouts</strong> (the Products Grid widget) is a grid of <strong>chosen</strong> products on any page, with 12 selectable card designs: latest, featured, on sale, best sellers, categories, tags or product IDs.</p>
+				<ul>
+					<li>Its own <strong>Design Layout</strong>, columns, gaps and pagination, independent from the Products Archive widgets.</li>
+					<li>Each Products Card Layouts widget uses its own page number in the URL, so several grids on one page paginate separately.</li>
+					<li>"Products per page" is in the Products (query) section.</li>
+				</ul>' ),
+			'products-archive' => array( 'dashicons-grid-view', 'Products Archive', '
+				<p>The <strong>shop and product archive</strong> widget with the Products Card design: image on top, then title, description, price and button. Put it in your shop / category template.</p>
+				<ul>
+					<li>It always shows the products of the page being viewed (shop, category, tag, attribute, search) and follows the archive pagination. It is not a fixed grid. In the editor you see recent products as a preview.</li>
+					<li>It updates with the Product Filter, the Filter Popup and other filter plugins that reload the product list; the cards keep their layout after each update.</li>
+					<li><strong>Result count and sorting</strong> and <strong>Run WooCommerce loop hooks</strong> (keep on for filter plugins) are in the Content tab. Products per page: <a href="' . esc_url( $s ) . '">Settings</a> &gt; Shop.</li>
+					<li>The Content and Style tabs are the same as Products Card: layout design, image, card content, button, badges, pagination and gallery hover.</li>
+				</ul>' ),
+			'grid' => array( 'dashicons-grid-view', 'Products Archive Layouts', '
+				<p><strong>Products Archive Layouts</strong> is the product grid with 12 selectable card designs for the shop page and the category / tag / attribute archives, with pagination, result count and sorting.</p>
 				<ul>
 					<li>Use the source <strong>Current query</strong> in your archive template: the grid shows the products of the page being viewed and works with the Product Filter.</li>
 					<li>Products per page: <a href="' . esc_url( $s ) . '">Settings</a> &gt; Shop.</li>
 					<li><strong>Design Layout</strong> (Content tab): the same 12 designs as the Product Slider, with their own settings in <em>Style &gt; Layout design</em>.</li>
 					<li><strong>View Mode</strong> (Content tab): <em>Grid View</em> (cards in rows and columns, columns per device in <em>Grid layout</em>) or <em>List View</em> (image and details side by side). List view has its own settings: image width and shape, price and button in a right column or below, vertical and text alignment, short description, stacking on mobile, and its own spacing, colours and typography in <em>Style &gt; List view</em>.</li>
 					<li>Turn on <em>Let shoppers switch Grid / List</em> to show two buttons above the products; the choice can be remembered and stays when the filter reloads the products.</li>
-				</ul>' ),
-			'products-grid' => array( 'dashicons-screenoptions', 'Products Grid', '
-				<p>A separate widget for a grid of <strong>chosen</strong> products on any page: latest, featured, on sale, best sellers, categories, tags or product IDs.</p>
-				<ul>
-					<li>Its own <strong>Design Layout</strong>, columns, gaps and pagination, independent from the Products Archive.</li>
-					<li>Each Products Grid uses its own page number in the URL, so several grids on one page paginate separately.</li>
-					<li>"Products per page" is in the Products (query) section.</li>
 				</ul>' ),
 			'filter' => array( 'dashicons-filter', 'Product Filter', '
 				<p>An AJAX filter: only the product area reloads, the URL updates (shareable, back button works).</p>
@@ -957,8 +1042,15 @@ class Nexvio_Admin {
 				</ul>' ),
 			'search' => array( 'dashicons-search', 'Header Search', '
 				<p>A search icon for the header. A click opens a search bar (dropdown or full-width). The search filters the shop by product title, and on a category page it searches inside that category. When the page has a Product Filter, results update without reloading. Press <kbd>Esc</kbd> to close.</p>' ),
-			'related' => array( 'dashicons-randomize', 'Related Products', '
-				<p>On the product page, shows other products of the <strong>same category</strong>, most popular first (or best rated, random, newest).</p>
+			'related-products' => array( 'dashicons-randomize', 'Related Products', '
+				<p>Related products for the <strong>single product page</strong>, with the Products Card design. It uses the same query as Related Products Layouts: other products of the same category, most popular first (or best rated, random, newest).</p>
+				<ul>
+					<li>Category used: most specific, primary (Yoast / Rank Math), top-level or all. <em>Fill from the parent category</em> completes a short list.</li>
+					<li>Show as a slider or a grid; slider and header options are the same as in the Product Slider.</li>
+					<li>The Style tab is the Products Card one (layout design, image, card content, button, badges) plus the header and slider arrows. Gallery hover is in the Content tab.</li>
+				</ul>' ),
+			'related' => array( 'dashicons-randomize', 'Related Products Layouts', '
+				<p><strong>Related Products Layouts</strong> has 12 selectable card designs. On the product page, it shows other products of the <strong>same category</strong>, most popular first (or best rated, random, newest).</p>
 				<ul>
 					<li>Category used: most specific (default), primary (Yoast / Rank Math), top-level or all.</li>
 					<li>"Fill from the parent category" completes the list when the category has few products.</li>
@@ -972,6 +1064,7 @@ class Nexvio_Admin {
 					<li><strong>Settings:</strong> <em>Nexvio &gt; Add to Cart</em>. Choose Light or Dark, pick one main colour (or a ready-made one) and check the live preview. Texts are automatic in your site\'s language; type your own only to replace them.</li>
 					<li><strong>Adding products:</strong> product cards, the Add to Cart widget and product pages (simple and variable products, with their options) add without reloading and open the panel. Double clicks are ignored while a product is being added.</li>
 					<li><strong>In the panel:</strong> change quantities, remove products, apply or remove a coupon, then <em>Proceed to Checkout</em> or <em>View Cart</em>. An empty cart shows a <em>Continue Shopping</em> button that goes to your shop page.</li>
+					<li><strong>Cart Panel</strong> widget: the whole cart shown on a page (for clients who want a cart page instead of, or as well as, the popup), with full control over what is shown and how it looks.</li>
 					<li><strong>Header Cart</strong> widget: icon with a live counter for the header. <strong>Floating Cart</strong> widget: a button fixed in a bottom corner. Both open the same panel. You can also show a floating cart on every page from the settings, without a widget.</li>
 					<li>With the side cart turned off, WooCommerce adds to cart exactly as before, and the Header Cart links to the cart page.</li>
 				</ul>' ),
@@ -980,17 +1073,36 @@ class Nexvio_Admin {
 				<ul>
 					<li><strong>Customers</strong> (logged in): the list is saved in their account, on every device.</li>
 					<li><strong>Visitors:</strong> the list is saved in their browser and added to their account when they log in. You can require an account in Settings.</li>
-					<li><strong>Wishlist Icon</strong> shows a live counter; <strong>Wishlist Grid</strong> shows the saved products and removes a card when its heart is clicked.</li>
+					<li><strong>Wishlist Icon</strong> shows a live counter; <strong>Wishlist Card</strong> and <strong>Wishlist Card Layouts</strong> show the saved products and remove a card when its heart is clicked.</li>
 					<li>Exclude the wishlist page from page caching: every visitor has a different list.</li>
 				</ul>' ),
+			'wishlist-card' => array( 'dashicons-star-filled', 'Wishlist Card', '
+				<p>The <strong>My favorites</strong> page widget with the Products Card design. It shows the products the visitor saved in the built-in wishlist, newest first.</p>
+				<ul>
+					<li>Clicking a heart removes the card right away (can be turned off). An empty wishlist shows your message and an optional button to the shop.</li>
+					<li>Options: title and product count, maximum products, hide sold-out products, grid columns and gaps. In the editor a preview product is shown.</li>
+					<li>The Style tab is the Products Card one, plus the title and the empty wishlist. Gallery hover is in the Content tab.</li>
+				</ul>' ),
+			'wishlist-layouts' => array( 'dashicons-star-filled', 'Wishlist Card Layouts', '
+				<p>The same wishlist page widget (saved products, live removal, empty message) with the 12 selectable card designs of the Product Slider. Pick the design in <em>Content &gt; Design Layout</em>; its colours are in <em>Style &gt; Layout design</em>.</p>' ),
+			'gallery-hover' => array( 'dashicons-format-gallery', 'Hover gallery image', '
+				<p>Products Card, Products Archive, Related Products, Wishlist Card and the three Layouts widgets (Products Archive Layouts, Related Products Layouts, Wishlist Card Layouts) can show another picture of the product when the pointer is over the card. Each widget has its own settings in <em>Content &gt; Hover gallery image</em>.</p>
+				<ul>
+					<li><strong>Enable Gallery Image on Hover:</strong> off by default. When on, the first image of the WooCommerce product gallery replaces the main image while hovering and the main image returns when the pointer leaves. Products without a gallery image keep their main image. Desktop (mouse) only.</li>
+					<li><strong>Enable Hover Animation:</strong> turn off to swap the images instantly.</li>
+					<li><strong>Animation Effect:</strong> Fade, Zoom In, Zoom Out, Slide (the new image slides in from the right) or None.</li>
+					<li><strong>Animation Duration:</strong> from 100 to 2000 ms.</li>
+					<li><strong>Animation Easing:</strong> Ease, Ease In, Ease Out or Ease In Out.</li>
+					<li>The three Layouts widgets also have <em>Go through the gallery images while hovering</em> (number of images and time per image).</li>
+				</ul>' ),
 			'desc-rating' => array( 'dashicons-star-half', 'Short description & rating', '
-				<p>In every product widget (Slider, Products Grid, Products Archive, Related Products, Wishlist Grid): <em>Content &gt; Description &amp; rating</em>. Each widget has its own settings.</p>
+				<p>In every product widget (Slider, Products Card Layouts, Products Archive Layouts, Related Products Layouts, Wishlist Card Layouts): <em>Content &gt; Description &amp; rating</em>. Each widget has its own settings.</p>
 				<ul>
 					<li><strong>Show short description:</strong> the product\'s WooCommerce short description, cut to a number of words (0 = all). Products without one show nothing; optionally use the long description instead. <em>Style &gt; Short description</em>: colour, typography, line height, alignment, spacing, maximum lines, and "Same height on every card" to keep prices and buttons lined up.</li>
 					<li><strong>Show rating:</strong> the WooCommerce star rating with the review count (87) or (87 reviews), and optionally the average (4.5). Products without reviews show nothing, or the text "No reviews yet" if you choose; they never get stars. <em>Style &gt; Rating</em>: star colour and size, alignment, spacing, count colour and typography.</li>
 				</ul>' ),
 			'swatches' => array( 'dashicons-art', 'Colour swatches', '
-				<p>Every product widget (Slider, Grid, Archive, Related Products, Wishlist Grid) can show a dot per colour under the image: <em>Content &gt; Colour swatches &gt; Show colour swatches</em>.</p>
+				<p>Every product widget (Slider and the Layouts widgets) can show a dot per colour under the image: <em>Content &gt; Colour swatches &gt; Show colour swatches</em>.</p>
 				<ul>
 					<li>The colour attribute is found automatically (named Color, Colour, Couleur…), or enter its slug, e.g. <code>pa_color</code>.</li>
 					<li>On <strong>variable products</strong>, choosing a colour shows that variation\'s image on the card (on click, or on hover). The card then links to the product with that colour already selected.</li>
@@ -1009,7 +1121,7 @@ class Nexvio_Admin {
 				<p><strong>JavaScript events</strong> (jQuery, on body): <code>nexvio_wishlist_changed</code>, <code>nexvio_filter_updated</code>.</p>' ),
 			'faq' => array( 'dashicons-editor-help', 'FAQ', '
 				<p><strong>The widgets are not in Elementor.</strong> Check that they are enabled in Widgets and that Elementor and WooCommerce are active, then reload the editor.</p>
-				<p><strong>The filter reloads the whole page.</strong> The products container was not found: use the Product Grid widget with "Current query", or set your grid\'s selector in the filter settings.</p>
+				<p><strong>The filter reloads the whole page.</strong> The products container was not found: use the Products Archive widget, or set your grid\'s selector in the filter settings.</p>
 				<p><strong>The wishlist counter shows an old number.</strong> A page cache served an old page. The counter refreshes itself after load; also exclude the wishlist page from the cache.</p>' ),
 		);
 	}
@@ -1075,27 +1187,24 @@ class Nexvio_Admin {
 			wp_die( esc_html__( 'Not allowed.', 'nexvio' ) );
 		}
 		check_admin_referer( 'nexvio_save_settings' );
-		$section = isset( $_POST['nexvio_section'] ) && 'wishlist' === sanitize_key( wp_unslash( $_POST['nexvio_section'] ) ) ? 'wishlist' : 'general';
+		$p       = wp_unslash( $_POST );
+		$section = isset( $p['nexvio_section'] ) && 'wishlist' === $p['nexvio_section'] ? 'wishlist' : 'general';
 
 		if ( 'wishlist' === $section ) {
-			$days = isset( $_POST['nexvio_wishlist_days'] ) ? absint( wp_unslash( $_POST['nexvio_wishlist_days'] ) ) : 60;
-			update_option( 'nexvio_wishlist_page', isset( $_POST['nexvio_wishlist_page'] ) ? absint( wp_unslash( $_POST['nexvio_wishlist_page'] ) ) : 0 );
-			update_option( 'nexvio_wishlist_guests', ! empty( $_POST['nexvio_wishlist_guests'] ) ? 'yes' : 'no' );
-			update_option( 'nexvio_wishlist_days', max( 1, min( 730, $days ) ) );
+			update_option( 'nexvio_wishlist_page', isset( $p['nexvio_wishlist_page'] ) ? absint( $p['nexvio_wishlist_page'] ) : 0 );
+			update_option( 'nexvio_wishlist_guests', ! empty( $p['nexvio_wishlist_guests'] ) ? 'yes' : 'no' );
+			update_option( 'nexvio_wishlist_days', max( 1, min( 730, isset( $p['nexvio_wishlist_days'] ) ? absint( $p['nexvio_wishlist_days'] ) : 60 ) ) );
 			wp_safe_redirect( admin_url( 'admin.php?page=' . self::WISHLIST . '&updated=1' ) );
 			exit;
 		}
 
-		$per_page = isset( $_POST['nexvio_per_page'] ) ? absint( wp_unslash( $_POST['nexvio_per_page'] ) ) : 0;
-		$limit    = isset( $_POST['nexvio_related_limit'] ) ? absint( wp_unslash( $_POST['nexvio_related_limit'] ) ) : 8;
-		$orderby  = isset( $_POST['nexvio_related_orderby'] ) ? sanitize_key( wp_unslash( $_POST['nexvio_related_orderby'] ) ) : 'popularity';
-		$layout   = isset( $_POST['nexvio_related_layout'] ) ? sanitize_key( wp_unslash( $_POST['nexvio_related_layout'] ) ) : 'slider';
-		update_option( 'nexvio_per_page', min( 200, $per_page ) );
-		update_option( 'nexvio_auto_related', ! empty( $_POST['nexvio_auto_related'] ) ? 'yes' : 'no' );
-		update_option( 'nexvio_related_title', isset( $_POST['nexvio_related_title'] ) ? sanitize_text_field( wp_unslash( $_POST['nexvio_related_title'] ) ) : '' );
-		update_option( 'nexvio_related_limit', max( 1, min( 40, $limit ) ) );
+		update_option( 'nexvio_per_page', min( 200, isset( $p['nexvio_per_page'] ) ? absint( $p['nexvio_per_page'] ) : 0 ) );
+		update_option( 'nexvio_auto_related', ! empty( $p['nexvio_auto_related'] ) ? 'yes' : 'no' );
+		update_option( 'nexvio_related_title', isset( $p['nexvio_related_title'] ) ? sanitize_text_field( $p['nexvio_related_title'] ) : '' );
+		update_option( 'nexvio_related_limit', max( 1, min( 40, isset( $p['nexvio_related_limit'] ) ? absint( $p['nexvio_related_limit'] ) : 8 ) ) );
+		$orderby = isset( $p['nexvio_related_orderby'] ) ? sanitize_key( $p['nexvio_related_orderby'] ) : 'popularity';
 		update_option( 'nexvio_related_orderby', in_array( $orderby, array( 'popularity', 'rating', 'rand', 'date' ), true ) ? $orderby : 'popularity' );
-		update_option( 'nexvio_related_layout', 'grid' === $layout ? 'grid' : 'slider' );
+		update_option( 'nexvio_related_layout', isset( $p['nexvio_related_layout'] ) && 'grid' === $p['nexvio_related_layout'] ? 'grid' : 'slider' );
 
 		wp_safe_redirect( admin_url( 'admin.php?page=' . self::SETTINGS . '&updated=1' ) );
 		exit;

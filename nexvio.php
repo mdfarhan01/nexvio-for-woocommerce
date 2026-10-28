@@ -47,4 +47,5 @@ register_activation_hook( __FILE__, function () {
 	add_option( 'nexvio_wishlist_guests', 'yes' );
 	add_option( 'nexvio_wishlist_days', 60 );
 	add_option( 'nexvio_auto_related', 'no' );
+	update_option( 'nexvio_do_activation_redirect', 1, false ); /* open the dashboard once */
 } );

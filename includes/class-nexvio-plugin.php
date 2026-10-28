@@ -23,6 +23,124 @@ final class Nexvio_Plugin {
 	}
 
 	/* ------------------------------------------------------------------
+	 * Output escaping
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Allowed HTML for the markup the widgets build: post content tags plus
+	 * inline SVG icons and the form controls of the filter, cart and search.
+	 *
+	 * Attribute names are lower case because wp_kses() compares them lower case
+	 * (browsers restore the camel case of SVG attributes such as viewBox).
+	 *
+	 * @return array
+	 */
+	public static function allowed_html() {
+		static $allowed = null;
+		if ( null !== $allowed ) {
+			return $allowed;
+		}
+
+		$allowed = wp_kses_allowed_html( 'post' );
+
+		$global = array(
+			'class'    => true,
+			'id'       => true,
+			'style'    => true,
+			'title'    => true,
+			'role'     => true,
+			'hidden'   => true,
+			'tabindex' => true,
+			'lang'     => true,
+			'dir'      => true,
+			'data-*'   => true,
+		);
+
+		// wp_kses() has a wildcard for data-* only, so the ARIA attributes are listed.
+		foreach ( array( 'controls', 'current', 'describedby', 'disabled', 'expanded', 'haspopup', 'hidden', 'label', 'labelledby', 'live', 'modal', 'pressed', 'selected', 'checked', 'atomic', 'busy' ) as $aria ) {
+			$global[ 'aria-' . $aria ] = true;
+		}
+
+		$paint = array(
+			'fill'            => true,
+			'fill-rule'       => true,
+			'clip-rule'       => true,
+			'stroke'          => true,
+			'stroke-width'    => true,
+			'stroke-linecap'  => true,
+			'stroke-linejoin' => true,
+			'opacity'         => true,
+			'transform'       => true,
+		);
+
+		$extra = array(
+			'svg'            => array_merge( $paint, array( 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'focusable' => true, 'preserveaspectratio' => true ) ),
+			'g'              => $paint,
+			'path'           => array_merge( $paint, array( 'd' => true ) ),
+			'circle'         => array_merge( $paint, array( 'cx' => true, 'cy' => true, 'r' => true ) ),
+			'ellipse'        => array_merge( $paint, array( 'cx' => true, 'cy' => true, 'rx' => true, 'ry' => true ) ),
+			'rect'           => array_merge( $paint, array( 'x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true, 'ry' => true ) ),
+			'line'           => array_merge( $paint, array( 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true ) ),
+			'polyline'       => array_merge( $paint, array( 'points' => true ) ),
+			'polygon'        => array_merge( $paint, array( 'points' => true ) ),
+			'defs'           => array(),
+			'lineargradient' => array( 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'gradientunits' => true, 'gradienttransform' => true ),
+			'stop'           => array( 'offset' => true, 'stop-color' => true, 'stop-opacity' => true ),
+			'form'           => array( 'action' => true, 'method' => true, 'novalidate' => true, 'autocomplete' => true, 'enctype' => true, 'role' => true ),
+			'input'          => array( 'type' => true, 'name' => true, 'value' => true, 'checked' => true, 'disabled' => true, 'readonly' => true, 'required' => true, 'placeholder' => true, 'min' => true, 'max' => true, 'step' => true, 'maxlength' => true, 'pattern' => true, 'size' => true, 'inputmode' => true, 'autocomplete' => true, 'form' => true ),
+			'select'         => array( 'name' => true, 'multiple' => true, 'disabled' => true, 'required' => true, 'autocomplete' => true ),
+			'option'         => array( 'value' => true, 'selected' => true, 'disabled' => true ),
+			'optgroup'       => array( 'label' => true, 'disabled' => true ),
+			'textarea'       => array( 'name' => true, 'rows' => true, 'cols' => true, 'placeholder' => true, 'disabled' => true, 'readonly' => true, 'required' => true ),
+			'button'         => array( 'type' => true, 'name' => true, 'value' => true, 'disabled' => true, 'form' => true ),
+			'label'          => array( 'for' => true ),
+			'a'              => array( 'href' => true, 'target' => true, 'rel' => true, 'download' => true ),
+			'img'            => array( 'src' => true, 'srcset' => true, 'sizes' => true, 'alt' => true, 'width' => true, 'height' => true, 'loading' => true, 'decoding' => true ),
+			'details'        => array( 'open' => true ),
+			'summary'        => array(),
+			'nav'            => array(),
+			'section'        => array(),
+			'header'         => array(),
+			'footer'         => array(),
+			'aside'          => array(),
+			'article'        => array(),
+			'main'           => array(),
+			'ul'             => array(),
+			'ol'             => array(),
+			'li'             => array(),
+			'dl'             => array(),
+			'dt'             => array(),
+			'dd'             => array(),
+			'div'            => array(),
+			'span'           => array(),
+			'p'              => array(),
+			'i'              => array(),
+			'del'            => array(),
+			'ins'            => array(),
+			'h2'             => array(),
+			'h3'             => array(),
+			'h4'             => array(),
+		);
+
+		foreach ( $extra as $tag => $attrs ) {
+			$allowed[ $tag ] = array_merge( isset( $allowed[ $tag ] ) && is_array( $allowed[ $tag ] ) ? $allowed[ $tag ] : array(), $global, $attrs );
+		}
+
+		return $allowed;
+	}
+
+	/**
+	 * CSS custom properties the card, swatch, rating and filter markup use
+	 * inline. WordPress 6.x allows "--*" itself; this keeps older versions working.
+	 *
+	 * @param string[] $props Allowed CSS properties.
+	 * @return string[]
+	 */
+	public static function safe_style_css( $props ) {
+		return array_merge( (array) $props, array( '--sw', '--sw-img', '--r', '--lo', '--hi', '--nexvio-rating', 'display', 'justify-content', 'object-fit', 'gap', 'align-items' ) );
+	}
+
+	/* ------------------------------------------------------------------
 	 * Widgets registry
 	 * ------------------------------------------------------------------ */
 
@@ -40,26 +158,58 @@ final class Nexvio_Plugin {
 				'icon'  => 'dashicons-images-alt2',
 				'group' => __( 'Products', 'nexvio' ),
 			),
+			'products_card' => array(
+				'class' => 'Nexvio_Products_Card_Widget',
+				'file'  => 'class-nexvio-products-card-widget.php',
+				'title' => __( 'Products Card', 'nexvio' ),
+				'desc'  => __( 'A grid of simple product cards (image, title, description, price, button) with a short Style tab: box, image, card content, button and badges.', 'nexvio' ),
+				'icon'  => 'dashicons-index-card',
+				'group' => __( 'Products', 'nexvio' ),
+			),
 			'products_grid' => array(
 				'class' => 'Nexvio_Products_Grid_Widget',
 				'file'  => 'class-nexvio-products-grid-widget.php',
-				'title' => __( 'Products Grid', 'nexvio' ),
+				'title' => __( 'Products Card Layouts', 'nexvio' ),
 				'desc'  => __( 'A grid of chosen products for any page (featured, on sale, categories…), with pagination and 11 designs.', 'nexvio' ),
 				'icon'  => 'dashicons-screenoptions',
 				'group' => __( 'Products', 'nexvio' ),
 			),
+			'product_showcase' => array(
+				'class' => 'Nexvio_Product_Showcase_Widget',
+				'file'  => 'class-nexvio-product-showcase-widget.php',
+				'title' => __( 'Product Showcase (Tabs)', 'nexvio' ),
+				'desc'  => __( 'Big product view (image, title, price, stock countdown, payment options, Add to cart) with a product list that switches it like tabs. Fully responsive.', 'nexvio' ),
+				'icon'  => 'dashicons-columns',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'products_archive' => array(
+				'class' => 'Nexvio_Products_Archive_Widget',
+				'file'  => 'class-nexvio-products-archive-widget.php',
+				'title' => __( 'Products Archive', 'nexvio' ),
+				'desc'  => __( 'Shop / category page products with the Products Card design. Follows the filter and the archive pagination.', 'nexvio' ),
+				'icon'  => 'dashicons-grid-view',
+				'group' => __( 'Shop', 'nexvio' ),
+			),
 			'product_grid' => array(
 				'class' => 'Nexvio_Product_Grid_Widget',
 				'file'  => 'class-nexvio-product-grid-widget.php',
-				'title' => __( 'Products Archive', 'nexvio' ),
+				'title' => __( 'Products Archive Layouts', 'nexvio' ),
 				'desc'  => __( 'Shop / category page grid with pagination, result count and sorting. Works with the filter. 11 designs.', 'nexvio' ),
 				'icon'  => 'dashicons-grid-view',
 				'group' => __( 'Shop', 'nexvio' ),
 			),
+			'related_products' => array(
+				'class' => 'Nexvio_Related_Products_Widget',
+				'file'  => 'class-nexvio-related-products-widget.php',
+				'title' => __( 'Related Products', 'nexvio' ),
+				'desc'  => __( 'On the product page: related products with the Products Card design.', 'nexvio' ),
+				'icon'  => 'dashicons-randomize',
+				'group' => __( 'Single product', 'nexvio' ),
+			),
 			'product_related' => array(
 				'class' => 'Nexvio_Product_Related_Widget',
 				'file'  => 'class-nexvio-product-related-widget.php',
-				'title' => __( 'Related Products', 'nexvio' ),
+				'title' => __( 'Related Products Layouts', 'nexvio' ),
 				'desc'  => __( 'On the product page: other products of the same category, most popular first.', 'nexvio' ),
 				'icon'  => 'dashicons-randomize',
 				'group' => __( 'Single product', 'nexvio' ),
@@ -104,6 +254,14 @@ final class Nexvio_Plugin {
 				'icon'  => 'dashicons-cart',
 				'group' => __( 'Cart', 'nexvio' ),
 			),
+			'cart_panel' => array(
+				'class' => 'Nexvio_Cart_Panel_Widget',
+				'file'  => 'class-nexvio-cart-panel-widget.php',
+				'title' => __( 'Cart Panel', 'nexvio' ),
+				'desc'  => __( 'The full cart shown on a page: products, quantities, coupon and checkout. Fully styleable.', 'nexvio' ),
+				'icon'  => 'dashicons-products',
+				'group' => __( 'Cart', 'nexvio' ),
+			),
 			'floating_cart' => array(
 				'class' => 'Nexvio_Floating_Cart_Widget',
 				'file'  => 'class-nexvio-floating-cart-widget.php',
@@ -120,10 +278,18 @@ final class Nexvio_Plugin {
 				'icon'  => 'dashicons-heart',
 				'group' => __( 'Header', 'nexvio' ),
 			),
+			'wishlist_card' => array(
+				'class' => 'Nexvio_Wishlist_Card_Widget',
+				'file'  => 'class-nexvio-wishlist-card-widget.php',
+				'title' => __( 'Wishlist Card', 'nexvio' ),
+				'desc'  => __( 'The visitor\'s wishlist products with the Products Card design. Hearts remove cards live.', 'nexvio' ),
+				'icon'  => 'dashicons-star-filled',
+				'group' => __( 'Wishlist', 'nexvio' ),
+			),
 			'wishlist_grid' => array(
 				'class' => 'Nexvio_Wishlist_Grid_Widget',
 				'file'  => 'class-nexvio-wishlist-grid-widget.php',
-				'title' => __( 'Wishlist Grid (My favorites)', 'nexvio' ),
+				'title' => __( 'Wishlist Card Layouts', 'nexvio' ),
 				'desc'  => __( 'The visitor\'s wishlist products, with the same card design. Hearts remove cards live.', 'nexvio' ),
 				'icon'  => 'dashicons-star-filled',
 				'group' => __( 'Wishlist', 'nexvio' ),
@@ -150,164 +316,10 @@ final class Nexvio_Plugin {
 	}
 
 	/* ------------------------------------------------------------------
-	 * Output escaping
-	 * ------------------------------------------------------------------ */
-
-	/**
-	 * HTML the plugin is allowed to print: the post-content set plus the inline SVG
-	 * icons, form controls and data-* / aria-* attributes its own markup uses.
-	 * Use it as the second argument of wp_kses() when printing built markup.
-	 *
-	 * @return array
-	 */
-	public static function allowed_html() {
-		static $allowed = null;
-		if ( null !== $allowed ) {
-			return $allowed;
-		}
-		$global = array(
-			'id'       => true,
-			'class'    => true,
-			'style'    => true,
-			'title'    => true,
-			'role'     => true,
-			'hidden'   => true,
-			'inert'    => true,
-			'tabindex' => true,
-			'lang'     => true,
-			'dir'      => true,
-			'data-*'   => true,
-		);
-		/* kses has no aria-* wildcard (only data-*), so each attribute the markup uses is listed. */
-		foreach ( array( 'hidden', 'label', 'labelledby', 'describedby', 'controls', 'expanded', 'pressed', 'selected', 'checked', 'current', 'haspopup', 'modal', 'live', 'atomic', 'busy', 'disabled', 'invalid', 'required', 'owns', 'orientation', 'roledescription', 'valuenow', 'valuemin', 'valuemax', 'valuetext', 'multiline', 'readonly', 'sort', 'level', 'posinset', 'setsize', 'relevant', 'activedescendant', 'autocomplete' ) as $aria ) {
-			$global[ 'aria-' . $aria ] = true;
-		}
-		$svg    = array_merge( $global, array(
-			'xmlns'             => true,
-			'viewbox'           => true,
-			'width'             => true,
-			'height'            => true,
-			'fill'              => true,
-			'stroke'            => true,
-			'stroke-width'      => true,
-			'stroke-linecap'    => true,
-			'stroke-linejoin'   => true,
-			'stroke-opacity'    => true,
-			'fill-opacity'      => true,
-			'fill-rule'         => true,
-			'clip-rule'         => true,
-			'focusable'         => true,
-			'd'                 => true,
-			'cx'                => true,
-			'cy'                => true,
-			'r'                 => true,
-			'rx'                => true,
-			'ry'                => true,
-			'x'                 => true,
-			'y'                 => true,
-			'x1'                => true,
-			'y1'                => true,
-			'x2'                => true,
-			'y2'                => true,
-			'points'            => true,
-			'transform'         => true,
-			'offset'            => true,
-			'stop-color'        => true,
-			'stop-opacity'      => true,
-			'opacity'           => true,
-		) );
-		$tags   = wp_kses_allowed_html( 'post' );
-		foreach ( $tags as $tag => $attrs ) {
-			$tags[ $tag ] = array_merge( is_array( $attrs ) ? $attrs : array(), $global );
-		}
-		$extra = array(
-			'svg'            => $svg,
-			'g'              => $svg,
-			'path'           => $svg,
-			'circle'         => $svg,
-			'ellipse'        => $svg,
-			'rect'           => $svg,
-			'line'           => $svg,
-			'polyline'       => $svg,
-			'polygon'        => $svg,
-			'defs'           => $svg,
-			'lineargradient' => array_merge( $svg, array( 'gradientunits' => true, 'gradienttransform' => true ) ),
-			'stop'           => $svg,
-			'details'        => array_merge( $global, array( 'open' => true ) ),
-			'summary'        => $global,
-			'button'         => array_merge( $global, array( 'type' => true, 'name' => true, 'value' => true, 'disabled' => true ) ),
-			'input'          => array_merge( $global, array(
-				'type'        => true,
-				'name'        => true,
-				'value'       => true,
-				'checked'     => true,
-				'disabled'    => true,
-				'readonly'    => true,
-				'placeholder' => true,
-				'min'         => true,
-				'max'         => true,
-				'step'        => true,
-				'size'        => true,
-				'maxlength'   => true,
-				'inputmode'   => true,
-				'pattern'     => true,
-				'autocomplete' => true,
-				'required'    => true,
-			) ),
-			'select'         => array_merge( $global, array( 'name' => true, 'disabled' => true, 'multiple' => true ) ),
-			'option'         => array_merge( $global, array( 'value' => true, 'selected' => true, 'disabled' => true ) ),
-			'label'          => array_merge( $global, array( 'for' => true ) ),
-			'form'           => array_merge( $global, array( 'action' => true, 'method' => true, 'enctype' => true, 'novalidate' => true ) ),
-			'a'              => array_merge( $global, array( 'href' => true, 'target' => true, 'rel' => true, 'download' => true ) ),
-			'img'            => array_merge( $global, array(
-				'src'      => true,
-				'srcset'   => true,
-				'sizes'    => true,
-				'alt'      => true,
-				'width'    => true,
-				'height'   => true,
-				'loading'  => true,
-				'decoding' => true,
-			) ),
-			'del'            => $global,
-			'ins'            => $global,
-			'bdi'            => $global,
-			'nav'            => $global,
-			'aside'          => $global,
-			'section'        => $global,
-		);
-		$allowed = array_merge( $tags, $extra );
-		return $allowed;
-	}
-
-	/** Extra inline-CSS properties the plugin markup relies on (kses would drop them). */
-	public static function safe_style_css( $props ) {
-		return array_merge( (array) $props, array( 'justify-content', 'display', 'align-items', 'gap', 'flex-direction' ) );
-	}
-
-	/** Lets kses keep the plugin's own CSS custom properties (--sw, --nexvio-rating ...). */
-	public static function allow_css_var( $allow, $css ) {
-		if ( $allow ) {
-			return $allow;
-		}
-		$css = trim( (string) $css );
-		if ( preg_match( '/^--(?:nexvio-[a-z0-9-]+|sw|r|lo|hi|c)\s*:\s*(?!.*url)[#a-z0-9.,%()\s-]+$/i', $css ) ) {
-			return true;
-		}
-		/* swatch picture: an http(s) image address only */
-		if ( preg_match( '#^--sw-img\s*:\s*url\(\s*https?://[^\s\'"()<>\\\\]+\s*\)$#i', $css ) ) {
-			return true;
-		}
-		return $allow;
-	}
-
-	/* ------------------------------------------------------------------
 	 * Boot
 	 * ------------------------------------------------------------------ */
 
 	public function boot() {
-		add_filter( 'safe_style_css', array( __CLASS__, 'safe_style_css' ) );
-		add_filter( 'safecss_filter_attr_allow_css', array( __CLASS__, 'allow_css_var' ), 10, 2 );
 		require_once NEXVIO_PATH . 'includes/class-nexvio-wishlist.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-filter-query.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-layouts.php';
@@ -316,6 +328,7 @@ final class Nexvio_Plugin {
 		require_once NEXVIO_PATH . 'includes/class-nexvio-filter-config.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-cart-settings.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-side-cart.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-showcase-ajax.php';
 		require_once NEXVIO_PATH . 'admin/class-nexvio-admin.php';
 
 		Nexvio_Admin::init();
@@ -338,8 +351,10 @@ final class Nexvio_Plugin {
 
 		Nexvio_Wishlist::init();
 		Nexvio_Filter_Query::init();
+		add_filter( 'safe_style_css', array( __CLASS__, 'safe_style_css' ) );
 		add_action( 'admin_init', array( 'Nexvio_Swatches', 'init_admin' ) );
 		add_action( 'woocommerce_init', array( 'Nexvio_Side_Cart', 'init' ) );
+		add_action( 'woocommerce_init', array( 'Nexvio_Showcase_Ajax', 'init' ) );
 
 		/* Elementor */
 		add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
@@ -464,6 +479,7 @@ final class Nexvio_Plugin {
 			'nexvio-product-filter'   => array( 'product-filter.css', array() ),
 			'nexvio-filter-drawer'    => array( 'filter-drawer.css', array( 'nexvio-product-filter' ) ),
 			'nexvio-header-search'    => array( 'header-search.css', array() ),
+			'nexvio-product-showcase' => array( 'product-showcase.css', array( 'nexvio-add-to-cart' ) ),
 		);
 		foreach ( $styles as $handle => $st ) {
 			wp_register_style( $handle, NEXVIO_URL . 'assets/css/' . $st[0], $st[1], self::ver( 'assets/css/' . $st[0] ) );
@@ -480,6 +496,7 @@ final class Nexvio_Plugin {
 			'nexvio-header-search'    => array( 'header-search.js', array() ),
 			'nexvio-view-switch'      => array( 'view-switch.js', array() ),
 			'nexvio-filter-drawer'    => array( 'filter-drawer.js', array() ),
+			'nexvio-product-showcase' => array( 'product-showcase.js', array() ),
 		);
 		foreach ( $scripts as $handle => $sc ) {
 			wp_register_script( $handle, NEXVIO_URL . 'assets/js/' . $sc[0], $sc[1], self::ver( 'assets/js/' . $sc[0] ), true );

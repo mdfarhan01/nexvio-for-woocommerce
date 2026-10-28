@@ -1,7 +1,8 @@
 /* Nexvio: Filter Popup (side panel) */
 .nexvio-fd-wrap {
-	display: flex;
+	display: flex
 }
+
 .nexvio-fd__open {
 	--fd-bg: #111827;
 	--fd-color: #ffffff;
@@ -27,40 +28,40 @@
 	font-size: 14px;
 	font-weight: 600;
 	line-height: 1;
-	letter-spacing: 0.02em;
+	letter-spacing: .02em;
 	cursor: pointer;
-	box-shadow: 0 10px 24px -14px rgba(0, 0, 0, 0.5);
-	transition:
-		background 0.2s,
-		color 0.2s,
-		border-color 0.2s,
-		transform 0.2s,
-		box-shadow 0.2s;
+	box-shadow: 0 10px 24px -14px rgba(0, 0, 0, .5);
+	transition: background .2s, color .2s, border-color .2s, transform .2s, box-shadow .2s
 }
+
 .nexvio-fd-wrap .nexvio-fd__open:hover,
 .nexvio-fd-wrap .nexvio-fd__open:focus {
 	background: var(--fd-bg-h);
 	color: var(--fd-color-h);
 	border-color: var(--fd-border-h);
 	transform: translateY(-1px);
-	box-shadow: 0 14px 28px -14px rgba(0, 0, 0, 0.55);
+	box-shadow: 0 14px 28px -14px rgba(0, 0, 0, .55)
 }
+
 .nexvio-fd-wrap .nexvio-fd__open:focus-visible {
 	outline: 2px solid var(--fd-badge-bg);
-	outline-offset: 3px;
+	outline-offset: 3px
 }
+
 .nexvio-fd__icon {
 	display: grid;
 	place-items: center;
 	width: var(--fd-icon);
 	height: var(--fd-icon);
-	font-size: var(--fd-icon);
+	font-size: var(--fd-icon)
 }
+
 .nexvio-fd__icon svg {
 	width: 100%;
 	height: 100%;
-	display: block;
+	display: block
 }
+
 .nexvio-fd__badge {
 	min-width: 20px;
 	height: 20px;
@@ -72,29 +73,32 @@
 	font-weight: 700;
 	line-height: 20px;
 	text-align: center;
-	font-variant-numeric: tabular-nums;
+	font-variant-numeric: tabular-nums
 }
+
 .nexvio-fd__badge[hidden] {
-	display: none;
+	display: none
 }
 
 /* panel */
 .nexvio-fd {
 	--fd-w: 380px;
 	--fd-dur: 420ms;
-	--fd-overlay: rgba(8, 10, 16, 0.55);
+	--fd-overlay: rgba(8, 10, 16, .55);
 	position: fixed;
 	inset: 0;
 	z-index: 999970;
 	visibility: hidden;
 	pointer-events: none;
-	transition: visibility 0s linear var(--fd-dur);
+	transition: visibility 0s linear var(--fd-dur)
 }
+
 .nexvio-fd.is-open {
 	visibility: visible;
 	pointer-events: auto;
-	transition: visibility 0s;
+	transition: visibility 0s
 }
+
 .nexvio-fd__overlay {
 	position: absolute;
 	inset: 0;
@@ -102,11 +106,13 @@
 	opacity: 0;
 	transition: opacity var(--fd-dur) ease;
 	-webkit-backdrop-filter: blur(2px);
-	backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px)
 }
+
 .nexvio-fd.is-open .nexvio-fd__overlay {
-	opacity: 1;
+	opacity: 1
 }
+
 .nexvio-fd__panel {
 	position: absolute;
 	top: 0;
@@ -117,24 +123,28 @@
 	flex-direction: column;
 	outline: none;
 	transform: translateX(-104%);
-	transition: transform var(--fd-dur) cubic-bezier(0.22, 0.8, 0.24, 1);
-	box-shadow: 24px 0 60px -10px rgba(0, 0, 0, 0.35);
-	will-change: transform;
+	transition: transform var(--fd-dur) cubic-bezier(.22, .8, .24, 1);
+	box-shadow: 24px 0 60px -10px rgba(0, 0, 0, .35);
+	will-change: transform
 }
+
 .nexvio-fd--right .nexvio-fd__panel {
 	left: auto;
 	right: 0;
 	transform: translateX(104%);
-	box-shadow: -24px 0 60px -10px rgba(0, 0, 0, 0.35);
+	box-shadow: -24px 0 60px -10px rgba(0, 0, 0, .35)
 }
+
 .nexvio-fd.is-open .nexvio-fd__panel {
-	transform: none;
+	transform: none
 }
+
 html.nexvio-fd-lock {
-	overflow: hidden;
+	overflow: hidden
 }
+
 html.nexvio-fd-lock body {
-	padding-right: var(--nexvio-fd-sb, 0);
+	padding-right: var(--nexvio-fd-sb, 0)
 }
 
 /* the filter fills the panel: header on top, fields scroll, Apply stays at the bottom */
@@ -145,8 +155,9 @@ html.nexvio-fd-lock body {
 	flex-direction: column;
 	border: 0;
 	border-radius: 0;
-	padding: 0;
+	padding: 0
 }
+
 .nexvio-fd__head {
 	display: flex;
 	align-items: center;
@@ -154,18 +165,16 @@ html.nexvio-fd-lock body {
 	gap: 12px;
 	padding: 20px 22px 16px;
 	border-bottom: 1px solid var(--nexvio-pf-divider);
-	flex-shrink: 0;
+	flex-shrink: 0
 }
+
 .nexvio-fd__title {
 	margin: 0;
 	color: var(--nexvio-pf-title);
-	font:
-		700 20px/1.2 'Chakra Petch',
-		'Segoe UI',
-		system-ui,
-		sans-serif;
-	letter-spacing: 0.01em;
+	font: 700 20px/1.2 "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+	letter-spacing: .01em
 }
+
 .nexvio-fd .nexvio-fd__close {
 	flex-shrink: 0;
 	display: grid;
@@ -180,32 +189,35 @@ html.nexvio-fd-lock body {
 	color: var(--nexvio-pf-otext-a);
 	cursor: pointer;
 	box-shadow: none;
-	transition:
-		transform 0.25s,
-		border-color 0.2s;
+	transition: transform .25s, border-color .2s
 }
+
 .nexvio-fd .nexvio-fd__close:hover,
 .nexvio-fd .nexvio-fd__close:focus {
 	transform: rotate(90deg);
 	border-color: var(--nexvio-pf-check);
 	background: transparent;
-	color: var(--nexvio-pf-otext-a);
+	color: var(--nexvio-pf-otext-a)
 }
+
 .nexvio-fd .nexvio-fd__close svg {
 	width: 18px;
-	height: 18px;
+	height: 18px
 }
+
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__form {
 	flex: 1;
 	min-height: 0;
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 6px 22px 0;
-	scrollbar-width: thin;
+	scrollbar-width: thin
 }
+
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__group:first-child {
-	padding-top: 16px;
+	padding-top: 16px
 }
+
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__actions {
 	position: sticky;
 	bottom: 0;
@@ -214,69 +226,82 @@ html.nexvio-fd-lock body {
 	padding: 14px 22px calc(16px + env(safe-area-inset-bottom, 0px));
 	background: var(--nexvio-pf-bg);
 	border-top: 1px solid var(--nexvio-pf-divider);
-	box-shadow: 0 -12px 24px -18px rgba(0, 0, 0, 0.35);
+	box-shadow: 0 -12px 24px -18px rgba(0, 0, 0, .35)
 }
+
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__apply {
-	height: 48px;
+	height: 48px
 }
+
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__reset {
-	height: 48px;
+	height: 48px
 }
 
 /* smooth entrance: the groups slide in one after the other */
 .nexvio-fd .nexvio-pf--drawer .nexvio-pf__group {
 	opacity: 0;
 	transform: translateX(-12px);
-	transition:
-		opacity 0.35s ease,
-		transform 0.35s ease;
-}
-.nexvio-fd--right .nexvio-pf--drawer .nexvio-pf__group {
-	transform: translateX(12px);
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group {
-	opacity: 1;
-	transform: none;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(1) {
-	transition-delay: 0.08s;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(2) {
-	transition-delay: 0.13s;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(3) {
-	transition-delay: 0.18s;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(4) {
-	transition-delay: 0.23s;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(5) {
-	transition-delay: 0.28s;
-}
-.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(n + 6) {
-	transition-delay: 0.32s;
+	transition: opacity .35s ease, transform .35s ease
 }
 
-@media (max-width: 767px) {
+.nexvio-fd--right .nexvio-pf--drawer .nexvio-pf__group {
+	transform: translateX(12px)
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group {
+	opacity: 1;
+	transform: none
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(1) {
+	transition-delay: .08s
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(2) {
+	transition-delay: .13s
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(3) {
+	transition-delay: .18s
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(4) {
+	transition-delay: .23s
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(5) {
+	transition-delay: .28s
+}
+
+.nexvio-fd.is-open .nexvio-pf--drawer .nexvio-pf__group:nth-child(n+6) {
+	transition-delay: .32s
+}
+
+@media (max-width:767px) {
 	.nexvio-fd__panel {
-		width: min(var(--fd-w), 88vw);
+		width: min(var(--fd-w), 88vw)
 	}
+
 	.nexvio-fd__head {
-		padding: 16px 18px 12px;
+		padding: 16px 18px 12px
 	}
+
 	.nexvio-fd .nexvio-pf--drawer .nexvio-pf__form {
-		padding: 4px 18px 0;
+		padding: 4px 18px 0
 	}
+
 	.nexvio-fd .nexvio-pf--drawer .nexvio-pf__actions {
 		margin: auto -18px 0;
-		padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px));
+		padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px))
 	}
 }
-@media (prefers-reduced-motion: reduce) {
+
+@media (prefers-reduced-motion:reduce) {
+
 	.nexvio-fd,
 	.nexvio-fd__panel,
 	.nexvio-fd__overlay,
 	.nexvio-fd .nexvio-pf--drawer .nexvio-pf__group {
-		transition: none !important;
+		transition: none !important
 	}
 }

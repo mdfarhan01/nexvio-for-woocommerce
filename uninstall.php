@@ -12,7 +12,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 foreach ( array(
 	'nexvio_disabled_widgets', 'nexvio_wishlist_page', 'nexvio_wishlist_guests', 'nexvio_wishlist_days',
-	'nexvio_per_page', 'nexvio_auto_related', 'nexvio_related_title', 'nexvio_related_limit',
+	'nexvio_per_page', 'nexvio_do_activation_redirect', 'nexvio_auto_related', 'nexvio_related_title', 'nexvio_related_limit',
 	'nexvio_related_orderby', 'nexvio_related_layout', 'nexvio_cart', 'nexvio_filters', 'nexvio_filter_style',
 ) as $nexvio_option ) {
 	delete_option( $nexvio_option );

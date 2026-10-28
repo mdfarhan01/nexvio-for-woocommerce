@@ -7,12 +7,17 @@
  * same design layouts as the Product Slider. Separate from the Products
  * Archive widget, which shows the products of the shop / category page.
  *
+ * Style tab (7 sections): Layout design, Image, Card Content, Button,
+ * Badges, Pagination, No products message.
+ *
  * @package Nexvio_For_WooCommerce
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use Elementor\Controls_Manager;
 
 require_once __DIR__ . '/class-nexvio-product-grid-widget.php';
 
@@ -23,7 +28,12 @@ class Nexvio_Products_Grid_Widget extends Nexvio_Product_Grid_Widget {
 	}
 
 	public function get_title() {
-		return esc_html__( 'Products Grid', 'nexvio' );
+		return esc_html__( 'Products Card Layouts', 'nexvio' );
+	}
+
+	/** Keeps the original gallery hover controls. */
+	protected function gallery_ui() {
+		return '';
 	}
 
 	public function get_icon() {
@@ -35,13 +45,15 @@ class Nexvio_Products_Grid_Widget extends Nexvio_Product_Grid_Widget {
 	}
 
 	protected function register_controls() {
+		/* Content tab */
 		$this->register_design_section();
 		$this->register_query_section();
 		$this->register_card_sections();
 		$this->register_grid_layout_section();
 		$this->register_pagination_section();
-		$this->register_layout_style_section();
-		$this->register_card_style_sections();
+
+		/* Style tab: Layout design, Image, Card Content, Button, Badges, Pagination, No products message */
+		$this->register_gs_card_styles();
 		$this->register_pagination_style_section();
 		$this->register_empty_style_section();
 		$this->limit_classic_controls();

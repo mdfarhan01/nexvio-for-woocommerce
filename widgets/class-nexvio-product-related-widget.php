@@ -22,8 +22,14 @@ class Nexvio_Product_Related_Widget extends Nexvio_Product_Slider_Widget {
 	}
 
 	public function get_title() {
-		return esc_html__( 'Related Products', 'nexvio' );
+		return esc_html__( 'Related Products Layouts', 'nexvio' );
 	}
+
+	/** Gallery hover controls (see the card trait). */
+	protected function gallery_ui() {
+		return 'full';
+	}
+
 
 	public function get_icon() {
 		return 'eicon-product-related';
@@ -44,9 +50,8 @@ class Nexvio_Product_Related_Widget extends Nexvio_Product_Slider_Widget {
 		$this->register_card_sections();
 		$this->register_layout_section();
 		$this->register_slider_section( array( 'condition' => array( 'layout' => 'slider' ) ) );
-		$this->register_layout_style_section();
+		$this->register_gs_card_styles();
 		$this->register_header_style_section();
-		$this->register_card_style_sections();
 		$this->register_nav_style_section( array( 'condition' => array( 'layout' => 'slider' ) ) );
 		$this->limit_classic_controls();
 
@@ -60,7 +65,7 @@ class Nexvio_Product_Related_Widget extends Nexvio_Product_Slider_Widget {
 		) );
 	}
 
-	private function register_related_section() {
+	protected function register_related_section() {
 		$this->start_controls_section( 'section_related', array( 'label' => esc_html__( 'Related products', 'nexvio' ) ) );
 
 		$this->add_control( 'related_note', array(
@@ -147,7 +152,7 @@ class Nexvio_Product_Related_Widget extends Nexvio_Product_Slider_Widget {
 		$this->end_controls_section();
 	}
 
-	private function register_layout_section() {
+	protected function register_layout_section() {
 		$this->start_controls_section( 'section_layout', array( 'label' => esc_html__( 'Layout', 'nexvio' ) ) );
 		$this->add_control( 'layout', array(
 			'label'   => esc_html__( 'Layout', 'nexvio' ),

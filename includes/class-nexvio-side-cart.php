@@ -20,12 +20,13 @@ class Nexvio_Side_Cart {
 		/* read-only count: also used by the Header Cart when the side cart is off */
 		add_action( 'wc_ajax_nexvio_cart_get', array( __CLASS__, 'ajax_get' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'register_assets' ), 6 );
+		/* also used by the Cart Panel widget, which works with the side cart switched off */
+		foreach ( array( 'qty', 'remove', 'coupon', 'coupon_remove', 'add' ) as $action ) {
+			add_action( 'wc_ajax_nexvio_cart_' . $action, array( __CLASS__, 'ajax_' . $action ) );
+		}
 
 		if ( ! Nexvio_Cart_Settings::on( 'enabled' ) ) {
 			return;
-		}
-		foreach ( array( 'qty', 'remove', 'coupon', 'coupon_remove', 'add' ) as $action ) {
-			add_action( 'wc_ajax_nexvio_cart_' . $action, array( __CLASS__, 'ajax_' . $action ) );
 		}
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
 		add_action( 'wp_footer', array( __CLASS__, 'footer' ), 20 );
@@ -100,13 +101,72 @@ class Nexvio_Side_Cart {
 	private static function css_vars() {
 		$main = sanitize_hex_color( (string) Nexvio_Cart_Settings::get( 'main_color' ) );
 		$main = $main ? $main : '#b08d57';
+		$sizes = Nexvio_Cart_Settings::fl_sizes();
+		$size  = isset( $sizes[ Nexvio_Cart_Settings::get( 'fl_size' ) ] ) ? $sizes[ Nexvio_Cart_Settings::get( 'fl_size' ) ] : $sizes['medium'];
+		$imgs  = array( 'small' => array( 76, 72 ), 'medium' => array( 96, 84 ), 'large' => array( 116, 100 ) );
+		$img   = isset( $imgs[ Nexvio_Cart_Settings::get( 'img_size' ) ] ) ? $imgs[ Nexvio_Cart_Settings::get( 'img_size' ) ] : $imgs['medium'];
+		$lines = max( 1, min( 3, (int) Nexvio_Cart_Settings::get( 'title_lines' ) ) );
 		$vars = array(
+			'--wsc-img:' . (int) $img[0] . 'px',
+			'--wsc-lines:' . (int) $lines,
+			'--wfc-x:' . (int) Nexvio_Cart_Settings::get( 'fl_x' ) . 'px',
+			'--wfc-y:' . (int) Nexvio_Cart_Settings::get( 'fl_y' ) . 'px',
+			'--wfc-y-m:' . (int) Nexvio_Cart_Settings::get( 'fl_y_m' ) . 'px',
+			'--fc-size:' . (int) $size[0] . 'px',
+			'--fc-icon:' . (int) round( $size[0] * 0.38 ) . 'px',
 			'--wsc-mc:' . $main,
 			'--wsc-mc-text:' . Nexvio_Cart_Settings::contrast( $main ),
 			'--wsc-w:' . (int) Nexvio_Cart_Settings::get( 'width' ) . 'px',
 			'--wsc-wm:' . (int) Nexvio_Cart_Settings::get( 'width_m' ) . '%',
 		);
-		return '#nexvio-side-cart,.nexvio-fc,.nexvio-hc{' . implode( ';', $vars ) . '}';
+		$css = '#nexvio-side-cart,.nexvio-icart,.nexvio-fc,.nexvio-hc{' . implode( ';', $vars ) . '}';
+		$css .= '@media (max-width:767px){#nexvio-side-cart,.nexvio-icart{--wsc-img:' . (int) $img[1] . 'px}}';
+		$fonts = self::font_vars();
+		if ( $fonts ) {
+			$css .= '#nexvio-side-cart,.nexvio-icart{' . implode( ';', $fonts ) . '}';
+		}
+		/* phones: a slightly smaller button */
+		$css .= '@media (max-width:767px){.nexvio-fc{--fc-size:' . (int) $size[1] . 'px;--fc-icon:' . (int) round( $size[1] * 0.38 ) . 'px}}';
+		return $css;
+	}
+
+	/** A font list typed in the dashboard -> a safe CSS font-family value ('' when empty). */
+	private static function font_stack( $raw ) {
+		$generic = array( 'serif', 'sans-serif', 'monospace', 'cursive', 'system-ui' );
+		$names   = array();
+		foreach ( explode( ',', (string) $raw ) as $name ) {
+			$name = trim( $name );
+			if ( '' === $name ) {
+				continue;
+			}
+			$names[] = in_array( strtolower( $name ), $generic, true ) ? strtolower( $name ) : '"' . $name . '"';
+		}
+		return implode( ',', $names );
+	}
+
+	/** Font settings -> CSS variables (empty when both fonts are "Default"). */
+	public static function font_vars() {
+		$out    = array();
+		$global = array( 'primary', 'secondary', 'text', 'accent' );
+		$rows   = array(
+			'heading' => array( '--wsc-hf', '"Cormorant Garamond"', ',Georgia,serif' ),
+			'body'    => array( '--wsc-bf', 'inherit', ',sans-serif' ),
+		);
+		foreach ( $rows as $which => $cfg ) {
+			$choice = (string) Nexvio_Cart_Settings::get( 'font_' . $which );
+			if ( in_array( $choice, $global, true ) ) {
+				/* the Elementor global font; if the site has none, the default font is used */
+				$out[] = $cfg[0] . ':var(--e-global-typography-' . $choice . '-font-family,' . $cfg[1] . ')' . ( 'heading' === $which ? $cfg[2] : '' );
+			} elseif ( 'custom' === $choice ) {
+				$stack = self::font_stack( Nexvio_Cart_Settings::get( 'font_' . $which . '_custom' ) );
+				if ( '' !== $stack ) {
+					/* already ends with serif / sans-serif…: no extra fallback needed */
+					$tail  = preg_match( '/(?:^|,)(?:serif|sans-serif|monospace|cursive|system-ui)$/', $stack ) ? '' : $cfg[2];
+					$out[] = $cfg[0] . ':' . $stack . $tail;
+				}
+			}
+		}
+		return $out;
 	}
 
 	public static function preset() {
@@ -137,6 +197,25 @@ class Nexvio_Side_Cart {
 		}
 	}
 
+	/** The cart on a page (Cart Panel widget): the same content as the side cart, always visible. */
+	public static function inline_html( $preset = '', $classes = '' ) {
+		if ( ! function_exists( 'WC' ) ) {
+			return '';
+		}
+		if ( ! WC()->cart && function_exists( 'wc_load_cart' ) ) {
+			wc_load_cart();
+		}
+		if ( ! WC()->cart ) {
+			return '';
+		}
+		$preset = in_array( $preset, array( 'light', 'dark' ), true ) ? $preset : self::preset();
+		$cls    = 'nexvio-sc nexvio-sc--' . $preset . ' nexvio-icart' . ( $classes ? ' ' . $classes : '' );
+		if ( in_array( Nexvio_Texts::lang(), array( 'bn', 'ar', 'hi', 'ja', 'zh', 'ko', 'th', 'fa', 'he', 'ur', 'ta', 'te', 'mr', 'gu', 'pa', 'ne', 'si' ), true ) ) {
+			$cls .= ' nexvio-sc--script';
+		}
+		return '<div class="' . esc_attr( $cls ) . '" data-nexvio-inline><div class="nexvio-sc__inner">' . self::render_inner() . '</div><div class="nexvio-sc__loading" aria-hidden="true"><span></span></div></div>';
+	}
+
 	/* ------------------------------------------------------------------
 	 * Buttons used by the widgets
 	 * ------------------------------------------------------------------ */
@@ -148,9 +227,26 @@ class Nexvio_Side_Cart {
 			'heart' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-9-9a4.8 4.8 0 0 1 9-3 4.8 4.8 0 0 1 9 3c-2 4.6-9 9-9 9z"/></svg>',
 			'close' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
 			'trash' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
+			'basket' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10h18l-1.8 9H4.8L3 10z"/><path d="M8 10l3-6M16 10l-3-6"/></svg>',
+			'tote'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 8V7a4 4 0 0 1 8 0v1"/></svg>',
+			'handbag' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="3"/><path d="M8 8V6.5A2.5 2.5 0 0 1 10.5 4h3A2.5 2.5 0 0 1 16 6.5V8"/><path d="M3 13h18"/></svg>',
+			'trolley' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h3l2.2 11h11l2-8H6"/><path d="M9 10h9"/><circle cx="9" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>',
+			'package' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4v10l-8 4-8-4V7l8-4z"/><path d="M4 7l8 4 8-4M12 11v10"/></svg>',
+			'gift'  => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="18" height="4" rx="1"/><path d="M5 13v7h14v-7M12 9v11"/><path d="M12 9S9 8.5 8.2 6.8A2 2 0 0 1 12 6v3zM12 9s3-.5 3.8-2.2A2 2 0 0 0 12 6v3z"/></svg>',
+			'store' => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10l1.5-5.5h15L21 10"/><path d="M3 10a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.5V20h14v-7.5"/></svg>',
 			'tag'   => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg>',
 		);
 		return isset( $icons[ $name ] ) ? $icons[ $name ] : $icons['bag'];
+	}
+
+	/** The icon chosen in Nexvio > Add to Cart (a built-in one or a custom image). */
+	public static function floating_icon() {
+		$choice = (string) Nexvio_Cart_Settings::get( 'fl_icon' );
+		$url    = (string) Nexvio_Cart_Settings::get( 'fl_icon_url' );
+		if ( 'custom' === $choice && '' !== $url ) {
+			return '<img src="' . esc_url( $url ) . '" alt="" loading="lazy" decoding="async">';
+		}
+		return self::icon( 'custom' === $choice ? 'bag' : $choice );
 	}
 
 	/**
@@ -160,7 +256,7 @@ class Nexvio_Side_Cart {
 	public static function floating_html( $a = array() ) {
 		$a = array_merge( array(
 			'global'     => false,
-			'icon_html'  => self::icon( 'bag' ),
+			'icon_html'  => self::floating_icon(),
 			'label'      => Nexvio_Texts::get( 'open_cart' ),
 			'show_count' => true,
 			'hide_zero'  => true,
@@ -177,7 +273,7 @@ class Nexvio_Side_Cart {
 			return '';
 		}
 		$count = self::count();
-		$cls   = 'nexvio-fc nexvio-fc--' . self::preset() . ' nexvio-fc--' . ( 'left' === $a['side'] ? 'left' : 'right' ) . ( $a['global'] ? ' nexvio-fc--global' : '' ) . ( $a['classes'] ? ' ' . $a['classes'] : '' ) . ( $count < 1 ? ' is-empty' : '' );
+		$cls   = 'nexvio-fc nexvio-fc--' . self::preset() . ' nexvio-fc--' . ( 'left' === $a['side'] ? 'left' : 'right' ) . ( $a['global'] ? ' nexvio-fc--global' : '' ) . ( Nexvio_Cart_Settings::on( 'fl_pulse' ) ? ' nexvio-fc--pulse' : '' ) . ( $a['classes'] ? ' ' . $a['classes'] : '' ) . ( $count < 1 ? ' is-empty' : '' );
 		foreach ( $a['devices'] as $device => $show ) {
 			if ( ! $show ) {
 				$cls .= ' nexvio-hide-' . $device;
@@ -263,6 +359,7 @@ class Nexvio_Side_Cart {
 		if ( $product->is_on_sale() && '' !== (string) $product->get_regular_price() ) {
 			$regular = wc_price( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ) );
 		}
+		$full_name = wp_strip_all_tags( $name );
 		$remove_label = Nexvio_Texts::get( 'remove' ) . ': ' . wp_strip_all_tags( $name );
 		$meta = 'yes' === self::opt( 'show_variation' ) ? trim( wp_strip_all_tags( str_replace( array( '</dd>', '</dt>' ), array( ' · ', ' ' ), wc_get_formatted_cart_item_data( $item ) ) ) ) : '';
 		$meta = trim( preg_replace( '/\s+/', ' ', $meta ), " ·\t\n" );
@@ -276,15 +373,15 @@ class Nexvio_Side_Cart {
 			<div class="nexvio-sc__info">
 				<div class="nexvio-sc__top">
 					<?php if ( $link ) : ?>
-						<a class="nexvio-sc__name" href="<?php echo esc_url( $link ); ?>"><?php echo wp_kses_post( $name ); ?></a>
+						<a class="nexvio-sc__name" href="<?php echo esc_url( $link ); ?>" title="<?php echo esc_attr( $full_name ); ?>"><?php echo wp_kses_post( $name ); ?></a>
 					<?php else : ?>
-						<span class="nexvio-sc__name"><?php echo wp_kses_post( $name ); ?></span>
+						<span class="nexvio-sc__name" title="<?php echo esc_attr( $full_name ); ?>"><?php echo wp_kses_post( $name ); ?></span>
 					<?php endif; ?>
 					<span class="nexvio-sc__line"><?php echo wp_kses_post( $line ); ?></span>
 				</div>
 				<div class="nexvio-sc__meta">
 					<?php if ( '' !== $meta ) : ?><span class="nexvio-sc__var"><?php echo esc_html( $meta ); ?></span><?php endif; ?>
-					<span class="nexvio-sc__unit"><?php echo $regular ? '<del>' . wp_kses_post( $regular ) . '</del> ' : ''; ?><?php echo wp_kses_post( $unit ); ?></span>
+					<span class="nexvio-sc__unit"><?php echo $regular ? '<del>' . wp_kses_post( $regular ) . '</del> <ins class="nexvio-sc__sale">' . wp_kses_post( $unit ) . '</ins>' : wp_kses_post( $unit ); ?></span>
 				</div>
 				<div class="nexvio-sc__bottom">
 					<?php if ( 1 !== $max ) : ?>
@@ -306,15 +403,19 @@ class Nexvio_Side_Cart {
 	private static function render_footer() {
 		$cart     = WC()->cart;
 		$coupons  = $cart->get_coupons();
-		$shipping = $cart->needs_shipping();
+		$shipping  = $cart->needs_shipping();
+		/* side cart shows product prices only: fees (e.g. Delivery fee) are added at checkout */
+		$fee_sum   = (float) $cart->get_fee_total() + (float) $cart->get_fee_tax();
+		$total_now = max( 0, (float) $cart->get_total( 'edit' ) - $fee_sum );
+		$coupon_id = wp_unique_id( 'nexvio-sc-coupon-' );
 		?>
 		<footer class="nexvio-sc__foot">
 			<?php if ( 'yes' === self::opt( 'coupon' ) && function_exists( 'wc_coupons_enabled' ) && wc_coupons_enabled() ) : ?>
 				<details class="nexvio-sc__coupon">
 					<summary><?php echo wp_kses( self::icon( 'tag' ), Nexvio_Plugin::allowed_html() ); ?><span><?php echo esc_html( Nexvio_Texts::get( 'coupon_link' ) ); ?></span></summary>
 					<form class="nexvio-sc__coupon-form" data-nexvio-coupon>
-						<label class="screen-reader-text" for="nexvio-sc-coupon"><?php echo esc_html( Nexvio_Texts::get( 'coupon_placeholder' ) ); ?></label>
-						<input type="text" id="nexvio-sc-coupon" name="coupon_code" autocomplete="off" placeholder="<?php echo esc_attr( Nexvio_Texts::get( 'coupon_placeholder' ) ); ?>">
+						<label class="screen-reader-text" for="<?php echo esc_attr( $coupon_id ); ?>"><?php echo esc_html( Nexvio_Texts::get( 'coupon_placeholder' ) ); ?></label>
+						<input type="text" id="<?php echo esc_attr( $coupon_id ); ?>" name="coupon_code" autocomplete="off" placeholder="<?php echo esc_attr( Nexvio_Texts::get( 'coupon_placeholder' ) ); ?>">
 						<button type="submit"><?php echo esc_html( Nexvio_Texts::get( 'apply' ) ); ?></button>
 					</form>
 				</details>
@@ -333,13 +434,13 @@ class Nexvio_Side_Cart {
 				<?php if ( $shipping ) : ?>
 					<div class="nexvio-sc__row"><dt><?php echo esc_html( Nexvio_Texts::get( 'shipping' ) ); ?></dt><dd><?php echo $cart->show_shipping() && $cart->get_customer()->has_calculated_shipping() ? wp_kses_post( $cart->get_cart_shipping_total() ) : esc_html( Nexvio_Texts::get( 'calc' ) ); ?></dd></div>
 				<?php endif; ?>
-				<div class="nexvio-sc__row nexvio-sc__row--total"><dt><?php echo esc_html( Nexvio_Texts::get( 'total' ) ); ?></dt><dd><?php echo wp_kses_post( $cart->get_total() ); ?></dd></div>
+				<div class="nexvio-sc__row nexvio-sc__row--total"><dt><?php echo esc_html( Nexvio_Texts::get( 'total' ) ); ?></dt><dd><?php echo wp_kses_post( wc_price( $total_now ) ); ?></dd></div>
 			</dl>
 
 			<div class="nexvio-sc__actions">
 				<a class="nexvio-sc__btn nexvio-sc__btn--primary" href="<?php echo esc_url( Nexvio_Cart_Settings::checkout_url() ); ?>"><span><?php echo esc_html( Nexvio_Cart_Settings::text( 'checkout_label' ) ); ?></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-				<?php if ( 'yes' === self::opt( 'view_cart' ) ) : ?>
-					<a class="nexvio-sc__link" href="<?php echo esc_url( Nexvio_Cart_Settings::cart_url() ); ?>"><?php echo esc_html( Nexvio_Cart_Settings::text( 'view_label' ) ); ?></a>
+				<?php if ( 'yes' === self::opt( 'shop_more' ) ) : ?>
+					<a class="nexvio-sc__btn nexvio-sc__btn--ghost" href="<?php echo esc_url( Nexvio_Cart_Settings::shop_url() ); ?>" data-nexvio-shop-more><span><?php echo esc_html( Nexvio_Cart_Settings::text( 'shop_label' ) ); ?></span></a>
 				<?php endif; ?>
 			</div>
 		</footer>
@@ -489,8 +590,7 @@ class Nexvio_Side_Cart {
 		if ( ! $product || ! in_array( $product->get_type(), array( 'simple', 'variable' ), true ) ) {
 			wp_send_json_error( array( 'fallback' => true ), 400 );
 		}
-		$raw_qty      = isset( $_POST['quantity'] ) && is_scalar( $_POST['quantity'] ) ? sanitize_text_field( wp_unslash( $_POST['quantity'] ) ) : '1';
-		$qty          = is_numeric( $raw_qty ) ? wc_stock_amount( $raw_qty ) : 1;
+		$qty          = isset( $_POST['quantity'] ) ? wc_stock_amount( absint( wp_unslash( $_POST['quantity'] ) ) ) : 1;
 		$qty          = $qty > 0 ? $qty : 1;
 		$variation_id = isset( $_POST['variation_id'] ) ? absint( wp_unslash( $_POST['variation_id'] ) ) : 0;
 		$variations   = array();
@@ -498,16 +598,10 @@ class Nexvio_Side_Cart {
 			if ( ! $variation_id ) {
 				wp_send_json_error( self::state( array( array( 'type' => 'error', 'text' => Nexvio_Texts::get( 'options' ) ) ) ), 400 );
 			}
-			/* Only the attribute_* fields are read; the nonce was checked at the top of this handler. */
-			$posted = array_filter(
-				wc_clean( wp_unslash( $_POST ) ), // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
-				static function ( $v, $k ) {
-					return is_string( $k ) && 0 === strpos( $k, 'attribute_' ) && is_scalar( $v );
-				},
-				ARRAY_FILTER_USE_BOTH
-			);
-			foreach ( $posted as $k => $v ) {
-				$variations[ sanitize_title( $k ) ] = $v;
+			foreach ( $_POST as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- nonce checked above.
+				if ( is_string( $k ) && 0 === strpos( $k, 'attribute_' ) && is_scalar( $v ) ) {
+					$variations[ sanitize_title( wp_unslash( $k ) ) ] = wc_clean( wp_unslash( $v ) );
+				}
 			}
 		}
 		$passed = apply_filters( 'woocommerce_add_to_cart_validation', true, $product_id, $qty, $variation_id, $variations ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- WooCommerce core hook.

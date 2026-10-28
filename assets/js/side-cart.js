@@ -1,53 +1,32 @@
 /* Nexvio: side cart, header / floating cart counters, AJAX add to cart on product pages. */
-/* Source: https://github.com/mdfarhan01/nexvio-for-woocommerce (this file is not minified; edit it directly). */
 (function () {
 	'use strict';
 
 	var C = window.NEXVIO_CART || {};
-	var root = null,
-		panel = null,
-		inner = null,
-		opener = null;
+	var root = null, panel = null, opener = null, usingKeys = false;
 	var nonce = C.nonce || '';
 	var skipNextAdded = false;
 	var timers = {};
 
-	function $q() {
-		return window.jQuery || null;
-	}
+	function $q() { return window.jQuery || null; }
 
 	/* The panel opens only because of something the visitor did on this page (clicking a cart icon,
 	 * adding a product). Never on its own, and never inside the Elementor editor / preview, where
 	 * saving or re-rendering widgets must not pop it open. */
 	var lastGesture = 0;
 	['click', 'pointerdown', 'keydown', 'touchstart', 'submit'].forEach(function (name) {
-		document.addEventListener(
-			name,
-			function (e) {
-				if (e.isTrusted) {
-					lastGesture = Date.now();
-				}
-			},
-			true
-		);
+		document.addEventListener(name, function (e) { if (e.isTrusted) { lastGesture = Date.now(); } }, true);
 	});
-	function userActed() {
-		return Date.now() - lastGesture < 15000;
-	}
+	/* was the last thing the visitor used the keyboard? (decides whether focus goes back to the cart icon) */
+	document.addEventListener('keydown', function (e) { if (e.key === 'Tab' || e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { usingKeys = true; } }, true);
+	document.addEventListener('pointerdown', function () { usingKeys = false; }, true);
+	function userActed() { return Date.now() - lastGesture < 15000; }
 	function inEditor() {
-		return (
-			!!(document.body && document.body.classList.contains('elementor-editor-active')) ||
-			/[?&]elementor-preview=/.test(window.location.search) ||
-			!!(
-				window.elementorFrontend &&
-				window.elementorFrontend.isEditMode &&
-				window.elementorFrontend.isEditMode()
-			)
-		);
+		return !!(document.body && document.body.classList.contains('elementor-editor-active'))
+			|| /[?&]elementor-preview=/.test(window.location.search)
+			|| !!(window.elementorFrontend && window.elementorFrontend.isEditMode && window.elementorFrontend.isEditMode());
 	}
-	function url(endpoint) {
-		return (C.ajax || '').replace('%%endpoint%%', endpoint);
-	}
+	function url(endpoint) { return (C.ajax || '').replace('%%endpoint%%', endpoint); }
 
 	/* ------------------------------------------------------------------
 	 * Requests (retry once with a fresh nonce)
@@ -55,25 +34,15 @@
 	function post(endpoint, data, retried) {
 		var body = data instanceof FormData ? data : new FormData();
 		if (!(data instanceof FormData)) {
-			Object.keys(data || {}).forEach(function (k) {
-				body.append(k, data[k]);
-			});
+			Object.keys(data || {}).forEach(function (k) { body.append(k, data[k]); });
 		}
 		body.set('nonce', nonce);
 		return fetch(url(endpoint), { method: 'POST', credentials: 'same-origin', body: body })
-			.then(function (r) {
-				return r.json().catch(function () {
-					return { success: false, data: {} };
-				});
-			})
+			.then(function (r) { return r.json().catch(function () { return { success: false, data: {} }; }); })
 			.then(function (res) {
 				var d = (res && res.data) || {};
-				if (d.nonce) {
-					nonce = d.nonce;
-				}
-				if (!res.success && d.retry && !retried) {
-					return post(endpoint, body, true);
-				}
+				if (d.nonce) { nonce = d.nonce; }
+				if (!res.success && d.retry && !retried) { return post(endpoint, body, true); }
 				return res;
 			});
 	}
@@ -84,39 +53,25 @@
 	function setCounts(state) {
 		document.querySelectorAll('.nexvio-cart-count').forEach(function (el) {
 			var mode = el.getAttribute('data-count-mode');
-			var n = mode === 'lines' ? state.lines : mode === 'quantity' ? state.qty : state.count;
+			var n = mode === 'lines' ? state.lines : (mode === 'quantity' ? state.qty : state.count);
 			n = parseInt(n, 10) || 0;
 			if (String(el.textContent) !== String(n)) {
 				el.textContent = n;
-				el.classList.remove('is-bump');
-				void el.offsetWidth;
-				el.classList.add('is-bump');
+				el.classList.remove('is-bump'); void el.offsetWidth; el.classList.add('is-bump');
 				var fc = el.closest('.nexvio-fc');
-				if (fc && n > 0) {
-					fc.classList.remove('is-pulse');
-					void fc.offsetWidth;
-					fc.classList.add('is-pulse');
-				}
+				if (fc && n > 0) { fc.classList.remove('is-pulse'); void fc.offsetWidth; fc.classList.add('is-pulse'); }
 			}
 			el.classList.toggle('is-zero-hidden', el.getAttribute('data-hide-zero') === '1' && n < 1);
-			var f = el.closest('.nexvio-fc');
-			if (f) {
-				f.classList.toggle('is-empty', n < 1);
-			}
+			var f = el.closest('.nexvio-fc'); if (f) { f.classList.toggle('is-empty', n < 1); }
 		});
 	}
 
 	function applyFragments(fr) {
-		if (!fr) {
-			return;
-		}
+		if (!fr) { return; }
 		Object.keys(fr).forEach(function (sel) {
 			document.querySelectorAll(sel).forEach(function (el) {
-				var t = document.createElement('div');
-				t.innerHTML = fr[sel];
-				if (t.firstElementChild) {
-					el.replaceWith(t.firstElementChild);
-				}
+				var t = document.createElement('div'); t.innerHTML = fr[sel];
+				if (t.firstElementChild) { el.replaceWith(t.firstElementChild); }
 			});
 		});
 	}
@@ -126,94 +81,62 @@
 	 * ------------------------------------------------------------------ */
 	function bind() {
 		root = document.getElementById('nexvio-side-cart');
-		if (!root) {
-			return;
-		}
+		if (!root) { return; }
 		panel = root.querySelector('.nexvio-sc__panel');
-		inner = root.querySelector('.nexvio-sc__inner');
 	}
 
+	/* every cart on the page: the side cart panel and any Cart Panel widget */
+	function inners() { return document.querySelectorAll('.nexvio-sc__inner'); }
+
 	function render(state, messages) {
-		if (!state) {
-			return;
-		}
+		if (!state) { return; }
 		setCounts(state);
-		if (!inner || typeof state.html !== 'string') {
-			return;
-		}
-		var couponOpen = !!inner.querySelector('.nexvio-sc__coupon[open]');
-		var scroll = inner.querySelector('.nexvio-sc__body');
-		var top = scroll ? scroll.scrollTop : 0;
-		inner.innerHTML = state.html;
-		var body = inner.querySelector('.nexvio-sc__body');
-		if (body) {
-			body.scrollTop = top;
-		}
+		if (typeof state.html !== 'string') { return; }
 		var list = messages || state.messages || [];
-		if (couponOpen || (list.length && state.couponError)) {
-			var d = inner.querySelector('.nexvio-sc__coupon');
-			if (d) {
-				d.open = true;
+		inners().forEach(function (inner) {
+			var couponOpen = !!inner.querySelector('.nexvio-sc__coupon[open]');
+			var scroll = inner.querySelector('.nexvio-sc__body');
+			var top = scroll ? scroll.scrollTop : 0;
+			inner.innerHTML = state.html;
+			var body = inner.querySelector('.nexvio-sc__body');
+			if (body) { body.scrollTop = top; }
+			if (couponOpen || (list.length && state.couponError)) {
+				var d = inner.querySelector('.nexvio-sc__coupon'); if (d) { d.open = true; }
 			}
-		}
+		});
 		showMessages(list);
 	}
 
 	function showMessages(list) {
-		var box = inner ? inner.querySelector('.nexvio-sc__msgs') : null;
-		if (!box) {
-			return;
-		}
-		box.innerHTML = '';
-		(list || []).forEach(function (m) {
-			if (!m || !m.text) {
-				return;
-			}
-			var p = document.createElement('p');
-			p.className = 'nexvio-sc__msg nexvio-sc__msg--' + (m.type || 'notice');
-			p.textContent = m.text;
-			box.appendChild(p);
+		inners().forEach(function (inner) {
+			var box = inner.querySelector('.nexvio-sc__msgs');
+			if (!box) { return; }
+			box.innerHTML = '';
+			(list || []).forEach(function (m) {
+				if (!m || !m.text) { return; }
+				var p = document.createElement('p');
+				p.className = 'nexvio-sc__msg nexvio-sc__msg--' + (m.type || 'notice');
+				p.textContent = m.text;
+				box.appendChild(p);
+			});
 		});
 	}
 
-	function loading(on) {
-		if (root) {
-			root.classList.toggle('is-loading', !!on);
-		}
-	}
+	function loading(on) { document.querySelectorAll('.nexvio-sc').forEach(function (el) { el.classList.toggle('is-loading', !!on); }); }
 
 	function refresh(silent) {
-		if (!silent) {
-			loading(true);
-		}
+		if (!silent) { loading(true); }
 		return fetch(url('nexvio_cart_get'), { method: 'POST', credentials: 'same-origin' })
-			.then(function (r) {
-				return r.json();
-			})
-			.then(function (res) {
-				if (res && res.success) {
-					if (res.data.nonce) {
-						nonce = res.data.nonce;
-					}
-					render(res.data);
-				}
-				return res;
-			})
+			.then(function (r) { return r.json(); })
+			.then(function (res) { if (res && res.success) { if (res.data.nonce) { nonce = res.data.nonce; } render(res.data); } return res; })
 			.catch(function () {})
-			.then(function (res) {
-				loading(false);
-				return res;
-			});
+			.then(function (res) { loading(false); return res; });
 	}
 
-	function isOpen() {
-		return root && root.classList.contains('is-open');
-	}
+	function isOpen() { return root && root.classList.contains('is-open'); }
 
 	function open(from) {
-		if (!root) {
-			return;
-		}
+		if (!root) { return; }
 		opener = from || document.activeElement;
 		root.removeAttribute('inert');
 		root.setAttribute('aria-hidden', 'false');
@@ -221,24 +144,20 @@
 		document.documentElement.style.setProperty('--nexvio-sb', sb + 'px');
 		document.documentElement.classList.add('nexvio-sc-lock');
 		root.classList.add('is-open');
-		window.setTimeout(function () {
-			if (panel) {
-				panel.focus({ preventScroll: true });
-			}
-		}, 30);
+		window.setTimeout(function () { if (panel) { panel.focus({ preventScroll: true }); } }, 30);
 		refresh(false);
 	}
 
 	function close() {
-		if (!isOpen()) {
-			return;
-		}
+		if (!isOpen()) { return; }
 		root.classList.remove('is-open');
 		root.setAttribute('aria-hidden', 'true');
 		root.setAttribute('inert', '');
 		document.documentElement.classList.remove('nexvio-sc-lock');
+		/* back to the cart icon only for keyboard users; after a click the icon must not look "selected" */
 		if (opener && opener.focus) {
-			opener.focus({ preventScroll: true });
+			if (usingKeys) { opener.focus({ preventScroll: true }); }
+			else if (document.activeElement === opener && opener.blur) { opener.blur(); }
 		}
 	}
 
@@ -247,52 +166,35 @@
 	 * ------------------------------------------------------------------ */
 	function act(endpoint, data, li) {
 		loading(true);
-		if (li) {
-			li.classList.add('is-busy');
-		}
-		return post(endpoint, data)
-			.then(function (res) {
-				var d = (res && res.data) || {};
-				if (d.html !== undefined) {
-					d.couponError = !res.success && endpoint === 'nexvio_cart_coupon';
-					render(d, d.messages);
-				} else if (!res.success) {
-					showMessages([{ type: 'error', text: C.i18n.error }]);
-				}
-				var $ = $q();
-				if ($ && res.success) {
-					if (d.fragments) {
-						applyFragments(d.fragments);
-					}
-					$(document.body).trigger('nexvio_cart_updated', [d]);
-				}
-				return res;
-			})
-			.catch(function () {
+		if (li) { li.classList.add('is-busy'); }
+		return post(endpoint, data).then(function (res) {
+			var d = (res && res.data) || {};
+			if (d.html !== undefined) {
+				d.couponError = !res.success && endpoint === 'nexvio_cart_coupon';
+				render(d, d.messages);
+			} else if (!res.success) {
 				showMessages([{ type: 'error', text: C.i18n.error }]);
-			})
-			.then(function (r) {
-				loading(false);
-				if (li) {
-					li.classList.remove('is-busy');
-				}
-				return r;
-			});
+			}
+			var $ = $q();
+			if ($ && res.success) {
+				if (d.fragments) { applyFragments(d.fragments); }
+				$(document.body).trigger('nexvio_cart_updated', [d]);
+			}
+			return res;
+		}).catch(function () {
+			showMessages([{ type: 'error', text: C.i18n.error }]);
+		}).then(function (r) { loading(false); if (li) { li.classList.remove('is-busy'); } return r; });
 	}
 
 	function setQty(li, qty) {
 		var key = li.getAttribute('data-key');
 		clearTimeout(timers[key]);
-		timers[key] = setTimeout(function () {
-			act('nexvio_cart_qty', { key: key, qty: qty }, li);
-		}, 380);
+		timers[key] = setTimeout(function () { act('nexvio_cart_qty', { key: key, qty: qty }, li); }, 380);
 	}
 
 	document.addEventListener('click', function (e) {
 		var t = e.target;
-		if (!t.closest) {
-			return;
-		}
+		if (!t.closest) { return; }
 
 		var trigger = t.closest('[data-nexvio-cart-open]');
 		if (trigger && C.enabled && root && !inEditor()) {
@@ -300,34 +202,27 @@
 			open(trigger);
 			return;
 		}
-		if (!root || !root.contains(t)) {
-			return;
-		}
+		var host = t.closest('.nexvio-sc');
+		if (!host) { return; }
 
-		if (t.closest('[data-nexvio-cart-close]')) {
-			e.preventDefault();
-			close();
+		if (t.closest('[data-nexvio-cart-close]')) { e.preventDefault(); close(); return; }
+		var more = t.closest('[data-nexvio-shop-more]');
+		if (more && host === root) {
+			/* already on the shop page: just close the panel instead of reloading it */
+			try {
+				var to = new URL(more.href, location.href);
+				if (to.origin === location.origin && to.pathname.replace(/\/+$/, '') === location.pathname.replace(/\/+$/, '') && !to.search) { e.preventDefault(); close(); return; }
+			} catch (err) { /* normal link */ }
 			return;
 		}
-		if (t.closest('[data-nexvio-cart-overlay]')) {
-			if (C.closeOverlay) {
-				close();
-			}
-			return;
-		}
+		if (t.closest('[data-nexvio-cart-overlay]')) { if (C.closeOverlay) { close(); } return; }
 
 		var q = t.closest('[data-nexvio-qty]');
 		if (q) {
 			var li = q.closest('.nexvio-sc__item');
 			var input = li.querySelector('.nexvio-sc__qty input');
 			var max = parseInt(input.getAttribute('max'), 10) || Infinity;
-			var v = Math.min(
-				max,
-				Math.max(
-					1,
-					(parseInt(input.value, 10) || 1) + parseInt(q.getAttribute('data-nexvio-qty'), 10)
-				)
-			);
+			var v = Math.min(max, Math.max(1, (parseInt(input.value, 10) || 1) + parseInt(q.getAttribute('data-nexvio-qty'), 10)));
 			input.value = v;
 			li.querySelector('[data-nexvio-qty="-1"]').disabled = v <= 1;
 			li.querySelector('[data-nexvio-qty="1"]').disabled = v >= max;
@@ -342,16 +237,12 @@
 			return;
 		}
 		var cr = t.closest('[data-nexvio-coupon-remove]');
-		if (cr) {
-			act('nexvio_cart_coupon_remove', { code: cr.getAttribute('data-nexvio-coupon-remove') });
-		}
+		if (cr) { act('nexvio_cart_coupon_remove', { code: cr.getAttribute('data-nexvio-coupon-remove') }); }
 	});
 
 	document.addEventListener('change', function (e) {
 		var input = e.target;
-		if (!root || !root.contains(input) || !input.closest('.nexvio-sc__qty')) {
-			return;
-		}
+		if (!input.closest || !input.closest('.nexvio-sc .nexvio-sc__qty')) { return; }
 		var li = input.closest('.nexvio-sc__item');
 		var max = parseInt(input.getAttribute('max'), 10) || Infinity;
 		var v = Math.min(max, Math.max(1, parseInt(input.value, 10) || 1));
@@ -360,42 +251,24 @@
 	});
 
 	document.addEventListener('keydown', function (e) {
-		if (!isOpen()) {
-			return;
-		}
-		if (e.key === 'Escape' && C.closeEsc) {
-			close();
-			return;
-		}
+		if (!isOpen()) { return; }
+		if (e.key === 'Escape' && C.closeEsc) { close(); return; }
 		if (e.key === 'Tab' && panel) {
 			/* keep keyboard focus inside the open panel */
-			var f = panel.querySelectorAll(
-				'a[href],button:not([disabled]),input,summary,[tabindex]:not([tabindex="-1"])'
-			);
-			if (!f.length) {
-				return;
-			}
-			var first = f[0],
-				last = f[f.length - 1];
-			if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
-				e.preventDefault();
-				last.focus();
-			} else if (!e.shiftKey && document.activeElement === last) {
-				e.preventDefault();
-				first.focus();
-			}
+			var f = panel.querySelectorAll('a[href],button:not([disabled]),input,summary,[tabindex]:not([tabindex="-1"])');
+			if (!f.length) { return; }
+			var first = f[0], last = f[f.length - 1];
+			if (e.shiftKey && (document.activeElement === first || document.activeElement === panel)) { e.preventDefault(); last.focus(); }
+			else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 		}
 	});
 
 	document.addEventListener('submit', function (e) {
 		var f = e.target;
-		if (root && f.matches && f.matches('[data-nexvio-coupon]')) {
+		if (f.matches && f.matches('[data-nexvio-coupon]')) {
 			e.preventDefault();
 			var code = (f.querySelector('input[name="coupon_code"]') || {}).value || '';
-			if (!code.trim()) {
-				showMessages([{ type: 'error', text: C.i18n.coupon }]);
-				return;
-			}
+			if (!code.trim()) { showMessages([{ type: 'error', text: C.i18n.coupon }]); return; }
 			act('nexvio_cart_coupon', { code: code.trim() });
 			return;
 		}
@@ -406,29 +279,19 @@
 	 * Open after adding
 	 * ------------------------------------------------------------------ */
 	function wantsOpen(type, el) {
-		if (!C.enabled || !root || inEditor() || !userActed()) {
-			return false;
-		}
+		if (!C.enabled || !root || inEditor() || !userActed()) { return false; }
 		var pref = el && el.closest ? el.closest('[data-nexvio-side]') : null;
 		var p = pref ? pref.getAttribute('data-nexvio-side') : 'global';
-		if (p === 'open') {
-			return true;
-		}
-		if (p === 'no') {
-			return false;
-		}
+		if (p === 'open') { return true; }
+		if (p === 'no') { return false; }
 		return !!C.autoOpen && (!type || (C.openTypes || []).indexOf(type) > -1);
 	}
 
 	function typeFromButton($btn) {
 		var el = $btn && $btn[0] ? $btn[0] : null;
-		if (!el) {
-			return '';
-		}
+		if (!el) { return ''; }
 		var m = (el.className || '').match(/product_type_([a-z_-]+)/);
-		if (m) {
-			return m[1];
-		}
+		if (m) { return m[1]; }
 		return el.closest && el.closest('.nexvio-atc') ? 'simple' : '';
 	}
 
@@ -449,103 +312,58 @@
 
 	function singleProductSubmit(e) {
 		var form = e.target;
-		if (e.defaultPrevented || !C.enabled || !C.ajaxSingle || !root) {
-			return;
-		}
-		if (
-			!form.matches ||
-			!form.matches('form.cart') ||
-			form.classList.contains('grouped_form') ||
-			form.classList.contains('nexvio-atc__form')
-		) {
-			return;
-		}
-		if (form.getAttribute('data-nexvio-native') === '1') {
-			return;
-		}
+		if (e.defaultPrevented || !C.enabled || !C.ajaxSingle || !root) { return; }
+		if (!form.matches || !form.matches('form.cart') || form.classList.contains('grouped_form') || form.classList.contains('nexvio-atc__form')) { return; }
+		if (form.getAttribute('data-nexvio-native') === '1') { return; }
 		var submitter = e.submitter || form.querySelector('[type="submit"]');
-		var id =
-			(form.querySelector('input[name="add-to-cart"]') || {}).value ||
-			(submitter && submitter.name === 'add-to-cart' ? submitter.value : '') ||
-			form.getAttribute('data-product_id') ||
-			'';
-		if (!id) {
-			return;
-		}
+		var id = (form.querySelector('input[name="add-to-cart"]') || {}).value
+			|| (submitter && submitter.name === 'add-to-cart' ? submitter.value : '')
+			|| form.getAttribute('data-product_id') || '';
+		if (!id) { return; }
 		e.preventDefault();
-		if (form.getAttribute('data-nexvio-busy') === '1') {
-			return;
-		} /* no double submit */
+		if (form.getAttribute('data-nexvio-busy') === '1') { return; } /* no double submit */
 
 		var isVariable = form.classList.contains('variations_form');
 		var vid = form.querySelector('input[name="variation_id"]');
-		if (isVariable && (!vid || !parseInt(vid.value, 10))) {
-			inlineMessage(form, C.i18n.options);
-			return;
-		}
+		if (isVariable && (!vid || !parseInt(vid.value, 10))) { inlineMessage(form, C.i18n.options); return; }
 
 		var data = new FormData(form);
 		data.delete('add-to-cart'); /* never let WooCommerce's own handler add it a second time */
 		data.set('nexvio_product_id', id);
 		var btn = submitter || form.querySelector('.single_add_to_cart_button');
 		form.setAttribute('data-nexvio-busy', '1');
-		if (btn) {
-			btn.classList.add('loading');
-			btn.setAttribute('aria-busy', 'true');
-			btn.disabled = true;
-		}
+		if (btn) { btn.classList.add('loading'); btn.setAttribute('aria-busy', 'true'); btn.disabled = true; }
 		inlineMessage(form, '');
 
-		post('nexvio_cart_add', data)
-			.then(function (res) {
-				var d = (res && res.data) || {};
-				if (res.success) {
-					render(d);
-					var $ = $q();
-					if ($) {
-						skipNextAdded = true;
-						$(document.body).trigger('added_to_cart', [d.fragments, d.cart_hash, $(btn)]);
-					} else {
-						applyFragments(d.fragments);
-					}
-					if (btn) {
-						btn.classList.add('added');
-					}
-					if (wantsOpen(d.type || (isVariable ? 'variable' : 'simple'), form)) {
-						open(btn);
-					}
-					return;
+		post('nexvio_cart_add', data).then(function (res) {
+			var d = (res && res.data) || {};
+			if (res.success) {
+				render(d);
+				var $ = $q();
+				if ($) {
+					skipNextAdded = true;
+					$(document.body).trigger('added_to_cart', [d.fragments, d.cart_hash, $(btn)]);
+				} else {
+					applyFragments(d.fragments);
 				}
-				if (d.fallback) {
-					/* not supported here: let WooCommerce handle it normally */
-					var h = document.createElement('input');
-					h.type = 'hidden';
-					h.name = 'add-to-cart';
-					h.value = id;
-					form.appendChild(h);
-					form.setAttribute('data-nexvio-native', '1');
-					HTMLFormElement.prototype.submit.call(form);
-					return;
-				}
-				var msg =
-					(d.messages || [])
-						.map(function (m) {
-							return m.text;
-						})
-						.join(' ') || C.i18n.error;
-				inlineMessage(form, msg);
-			})
-			.catch(function () {
-				inlineMessage(form, C.i18n.error);
-			})
-			.then(function () {
-				form.removeAttribute('data-nexvio-busy');
-				if (btn) {
-					btn.classList.remove('loading');
-					btn.removeAttribute('aria-busy');
-					btn.disabled = false;
-				}
-			});
+				if (btn) { btn.classList.add('added'); }
+				if (wantsOpen(d.type || (isVariable ? 'variable' : 'simple'), form)) { open(btn); }
+				return;
+			}
+			if (d.fallback) { /* not supported here: let WooCommerce handle it normally */
+				var h = document.createElement('input'); h.type = 'hidden'; h.name = 'add-to-cart'; h.value = id; form.appendChild(h);
+				form.setAttribute('data-nexvio-native', '1');
+				HTMLFormElement.prototype.submit.call(form);
+				return;
+			}
+			var msg = (d.messages || []).map(function (m) { return m.text; }).join(' ') || C.i18n.error;
+			inlineMessage(form, msg);
+		}).catch(function () {
+			inlineMessage(form, C.i18n.error);
+		}).then(function () {
+			form.removeAttribute('data-nexvio-busy');
+			if (btn) { btn.classList.remove('loading'); btn.removeAttribute('aria-busy'); btn.disabled = false; }
+		});
 	}
 
 	/* ------------------------------------------------------------------
@@ -553,24 +371,13 @@
 	 * ------------------------------------------------------------------ */
 	function hookJquery() {
 		var $ = $q();
-		if (!$) {
-			return;
-		}
+		if (!$) { return; }
 		$(document.body).on('added_to_cart', function (ev, fragments, hash, $btn) {
-			if (skipNextAdded) {
-				skipNextAdded = false;
-				return;
-			}
+			if (skipNextAdded) { skipNextAdded = false; return; }
 			var type = typeFromButton($btn);
-			if (wantsOpen(type, $btn && $btn[0])) {
-				open($btn && $btn[0]);
-			} else {
-				refresh(true);
-			}
+			if (wantsOpen(type, $btn && $btn[0])) { open($btn && $btn[0]); } else { refresh(true); }
 		});
-		$(document.body).on('removed_from_cart updated_cart_totals wc_fragments_refreshed', function () {
-			refresh(true);
-		});
+		$(document.body).on('removed_from_cart updated_cart_totals wc_fragments_refreshed', function () { refresh(true); });
 	}
 
 	/* ------------------------------------------------------------------
@@ -580,9 +387,7 @@
 		bind();
 		hookJquery();
 		var counters = document.querySelectorAll('.nexvio-cart-count');
-		if (!counters.length && !root) {
-			return;
-		}
+		if (!counters.length && !root && !document.querySelector('.nexvio-icart')) { return; }
 		var hasCart = /(?:^|;\s*)woocommerce_items_in_cart=1/.test(document.cookie);
 		if (hasCart) {
 			refresh(true);
@@ -591,16 +396,8 @@
 		}
 	}
 
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', start);
-	} else {
-		start();
-	}
-	window.addEventListener('pageshow', function (e) {
-		if (e.persisted) {
-			refresh(true);
-		}
-	});
+	if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', start); } else { start(); }
+	window.addEventListener('pageshow', function (e) { if (e.persisted) { refresh(true); } });
 
 	/* public */
 	window.NEXVIOCart = { open: open, close: close, refresh: refresh };

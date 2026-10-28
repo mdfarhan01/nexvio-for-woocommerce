@@ -27,8 +27,14 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 	}
 
 	public function get_title() {
-		return esc_html__( 'Products Archive', 'nexvio' );
+		return esc_html__( 'Products Archive Layouts', 'nexvio' );
 	}
+
+	/** Gallery hover controls (see the card trait). */
+	protected function gallery_ui() {
+		return 'full';
+	}
+
 
 	public function get_icon() {
 		return 'eicon-gallery-grid';
@@ -64,9 +70,8 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 		$this->register_grid_layout_section( array( 'conditions' => self::view_conditions( 'grid' ) ) );
 		$this->register_list_section();
 		$this->register_pagination_section();
-		$this->register_layout_style_section();
+		$this->register_gs_card_styles();
 		$this->register_list_style_section();
-		$this->register_card_style_sections();
 		$this->register_toolbar_style_section();
 		$this->register_pagination_style_section();
 		$this->register_empty_style_section();
@@ -93,7 +98,7 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 		) );
 		$this->add_control( 'custom_note', array(
 			'type'            => Controls_Manager::RAW_HTML,
-			'raw'             => esc_html__( 'Custom query: set the products in the "Products (query)" section. "Number of products" becomes products per page. Filter plugins only work with "Current query". Tip: for a grid of chosen products on a normal page, use the separate "Products Grid" widget.', 'nexvio' ),
+			'raw'             => esc_html__( 'Custom query: set the products in the "Products (query)" section. "Number of products" becomes products per page. The Nexvio Product Filter also works with a custom query. Other filter plugins only work with "Current query". Tip: for a grid of chosen products on a normal page, use the separate "Products Grid" widget.', 'nexvio' ),
 			'content_classes' => 'elementor-descriptor',
 			'condition'       => array( 'source_mode' => 'custom' ),
 		) );
@@ -557,7 +562,15 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 	protected function render() {
 		$s       = $this->grid_settings( $this->get_settings_for_display() );
 		$is_main = 'current' === $s['source_mode'] && $this->is_product_archive();
-		$preview = 'current' === $s['source_mode'] && ! $is_main;
+		/* a filter is on but the page's own query did not take it (a normal page, another plugin changed the query): run it here */
+		if ( $is_main && $this->follows_filter() ) {
+			global $wp_query;
+			if ( ! $wp_query->get( 'nexvio_applied' ) ) {
+				$is_main = false;
+			}
+		}
+		$filtering = $this->follows_filter();
+		$preview   = 'current' === $s['source_mode'] && ! $is_main;
 
 		if ( $is_main ) {
 			global $wp_query;
@@ -571,13 +584,13 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 			$current = isset( $_GET[ $param ] ) ? max( 1, absint( wp_unslash( $_GET[ $param ] ) ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification
 			if ( $preview ) {
 				$preview_s = array_merge( $s, array( 'source' => 'recent', 'categories' => array(), 'tags' => array(), 'orderby' => 'date', 'order' => 'DESC', 'hide_out' => '', 'exclude_ids' => '' ) );
-				$result    = $this->get_products_paged( $preview_s, max( 1, (int) $s['preview_limit'] ), 1 );
+				$result    = $this->get_products_paged( $preview_s, max( 1, (int) $s['preview_limit'] ), $filtering ? $current : 1 );
 			} else {
 				$result = $this->get_products_paged( $s, max( 1, (int) $s['limit'] ), $current );
 			}
 			$products = (array) $result->products;
 			$total    = (int) $result->total;
-			$pages    = $preview ? 1 : (int) $result->max_num_pages;
+			$pages    = ( $preview && ! $filtering ) ? 1 : (int) $result->max_num_pages;
 			$per_page = $preview ? (int) $s['preview_limit'] : (int) $s['limit'];
 		}
 

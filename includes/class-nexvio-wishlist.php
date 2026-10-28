@@ -21,6 +21,10 @@ class Nexvio_Wishlist {
 	public static function init() {
 		add_action( 'wp_ajax_nexvio_wishlist_toggle', array( __CLASS__, 'ajax_toggle' ) );
 		add_action( 'wp_ajax_nopriv_nexvio_wishlist_toggle', array( __CLASS__, 'ajax_toggle' ) );
+		add_action( 'wp_ajax_nexvio_wishlist_ids', array( __CLASS__, 'ajax_ids' ) );
+		add_action( 'wp_ajax_nopriv_nexvio_wishlist_ids', array( __CLASS__, 'ajax_ids' ) );
+		add_action( 'wp_ajax_nexvio_wishlist_grid', array( __CLASS__, 'ajax_grid' ) );
+		add_action( 'wp_ajax_nopriv_nexvio_wishlist_grid', array( __CLASS__, 'ajax_grid' ) );
 		add_action( 'wp_ajax_nexvio_wishlist_count', array( __CLASS__, 'ajax_count' ) );
 		add_action( 'wp_ajax_nopriv_nexvio_wishlist_count', array( __CLASS__, 'ajax_count' ) );
 		add_action( 'wp_login', array( __CLASS__, 'merge_on_login' ), 10, 2 );
@@ -90,7 +94,39 @@ class Nexvio_Wishlist {
 				'samesite' => 'Lax',
 			) );
 		}
+		self::expire_duplicate_cookies();
 		$_COOKIE[ self::COOKIE ] = $value;
+	}
+
+	/**
+	 * Browsers keep one cookie per name + domain + path. If the same cookie was ever stored with another
+	 * path or domain, PHP reads the first one it is sent and every change seems to be ignored (the list
+	 * stays as it was). Remove those other copies so only the one written above is left.
+	 */
+	private static function expire_duplicate_cookies() {
+		if ( headers_sent() ) {
+			return;
+		}
+		$host    = (string) wp_parse_url( home_url(), PHP_URL_HOST );
+		$used_p  = COOKIEPATH ? COOKIEPATH : '/';
+		$used_d  = is_string( COOKIE_DOMAIN ) ? COOKIE_DOMAIN : '';
+		$paths   = array_unique( array_filter( array( '/', COOKIEPATH, SITECOOKIEPATH ), 'strlen' ) );
+		$domains = array_unique( array( '', $used_d, $host, '' !== $host ? '.' . $host : '' ) );
+		foreach ( $paths as $path ) {
+			foreach ( $domains as $domain ) {
+				if ( $path === $used_p && $domain === $used_d ) {
+					continue;
+				}
+				setcookie( self::COOKIE, '', array(
+					'expires'  => time() - DAY_IN_SECONDS,
+					'path'     => $path,
+					'domain'   => $domain,
+					'secure'   => is_ssl(),
+					'httponly' => true,
+					'samesite' => 'Lax',
+				) );
+			}
+		}
 	}
 
 	public static function get_list() {
@@ -123,13 +159,24 @@ class Nexvio_Wishlist {
 		return array_map( 'intval', array_keys( $list ) );
 	}
 
+	/** Product IDs that still exist and are published (deleted or hidden products are left out). */
+	public static function valid_ids() {
+		$ids = array();
+		foreach ( self::ids() as $id ) {
+			if ( 'publish' === get_post_status( $id ) ) {
+				$ids[] = $id;
+			}
+		}
+		return $ids;
+	}
+
 	public static function has( $product_id ) {
 		$list = self::get_list();
 		return isset( $list[ (int) $product_id ] );
 	}
 
 	public static function count() {
-		return count( self::get_list() );
+		return count( self::valid_ids() );
 	}
 
 	public static function add( $product_id ) {
@@ -216,12 +263,22 @@ class Nexvio_Wishlist {
 			wp_send_json_error( array( 'login' => $login ), 401 );
 		}
 
-		if ( self::has( $product_id ) ) {
-			self::remove( $product_id );
+		/* The page may come from a page cache, so the heart the visitor clicked can be out of date.
+		   The browser therefore says what it wants ("1" add, "0" remove) and the result is the same however
+		   often the request is repeated. Without it the state is simply flipped. */
+		$want = isset( $_POST['want'] ) ? sanitize_key( wp_unslash( $_POST['want'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- logged-in: nonce checked above; guest: cross-site requests refused above.
+		if ( '1' === $want ) {
+			$in = true;
+		} elseif ( '0' === $want ) {
 			$in = false;
 		} else {
+			$in = ! self::has( $product_id );
+		}
+
+		if ( $in && ! self::has( $product_id ) ) {
 			self::add( $product_id );
-			$in = true;
+		} elseif ( ! $in && self::has( $product_id ) ) {
+			self::remove( $product_id );
 		}
 
 		if ( $in ) {
@@ -233,14 +290,86 @@ class Nexvio_Wishlist {
 		wp_send_json_success( array(
 			'product_id' => $product_id,
 			'in'         => $in,
-			'count'      => self::count(),
+			'count'      => count( self::valid_ids() ),
+			'ids'        => self::valid_ids(),
 			'url'        => self::url(),
 		) );
 	}
 
 	public static function ajax_count() {
 		nocache_headers();
-		wp_send_json_success( array( 'count' => self::count() ) );
+		wp_send_json_success( array( 'count' => count( self::valid_ids() ) ) );
+	}
+
+	/** Current wishlist of this visitor. Pages may be cached, so the browser asks for it after loading. */
+	public static function ajax_ids() {
+		nocache_headers();
+		$ids = self::valid_ids();
+		wp_send_json_success( array(
+			'ids'   => $ids,
+			'count' => count( $ids ),
+		) );
+	}
+
+	/**
+	 * Fresh HTML of a Wishlist Grid widget. A page cache (plugin, host or CDN) can hand out an old copy of
+	 * the favorites page, so the browser asks for the grid itself, which is never cached.
+	 */
+	public static function ajax_grid() {
+		nocache_headers();
+		$post_id = isset( $_POST['post'] ) ? absint( wp_unslash( $_POST['post'] ) ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- read-only: renders the visitor's own wishlist.
+		$el_id   = isset( $_POST['el'] ) ? sanitize_key( wp_unslash( $_POST['el'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- read-only: renders the visitor's own wishlist.
+
+		if ( ! $post_id || '' === $el_id || ! class_exists( '\\Elementor\\Plugin' ) || 'publish' !== get_post_status( $post_id ) || post_password_required( $post_id ) ) {
+			wp_send_json_error( array( 'message' => 'invalid' ), 400 );
+		}
+
+		$document = \Elementor\Plugin::$instance->documents->get( $post_id );
+		$data     = $document ? self::find_element( (array) $document->get_elements_data(), $el_id ) : null;
+		if ( ! $data || empty( $data['widgetType'] ) || ! in_array( $data['widgetType'], array( 'nexvio_wishlist_grid', 'nexvio_wishlist_card' ), true ) ) {
+			wp_send_json_error( array( 'message' => 'not_found' ), 404 );
+		}
+
+		$widget = \Elementor\Plugin::$instance->elements_manager->create_element_instance( $data );
+		if ( ! $widget ) {
+			wp_send_json_error( array( 'message' => 'not_found' ), 404 );
+		}
+
+		ob_start();
+		$widget->render_content();
+		$html = ob_get_clean();
+
+		$ids = self::valid_ids();
+		wp_send_json_success( array(
+			'html'  => $html,
+			'ids'   => $ids,
+			'count' => count( $ids ),
+		) );
+	}
+
+	/** Find one element by its Elementor id in a document's element tree. */
+	private static function find_element( $elements, $id ) {
+		foreach ( $elements as $element ) {
+			if ( isset( $element['id'] ) && (string) $element['id'] === (string) $id ) {
+				return $element;
+			}
+			if ( ! empty( $element['elements'] ) ) {
+				$found = self::find_element( $element['elements'], $id );
+				if ( $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Tell page caches not to store a page whose content depends on the wishlist. */
+	public static function no_cache_page() {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound -- standard constant that page cache plugins read.
+		}
+		nocache_headers();
+		do_action( 'litespeed_control_set_nocache', 'nexvio wishlist' ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- LiteSpeed Cache hook.
 	}
 
 	public static function shortcode_count() {

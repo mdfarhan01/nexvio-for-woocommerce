@@ -69,6 +69,9 @@ class Nexvio_Texts {
 			'view_cart' => array(
 				'fr' => 'Voir le panier', 'de' => 'Warenkorb anzeigen', 'es' => 'Ver carrito', 'it' => 'Visualizza carrello', 'pt' => 'Ver carrinho', 'nl' => 'Bekijk winkelmand', 'bn' => 'ব্যাগ দেখুন', 'ar' => 'عرض السلة', 'hi' => 'बैग देखें', 'tr' => 'Sepeti görüntüle', 'pl' => 'Zobacz koszyk', 'sv' => 'Visa varukorg', 'ru' => 'Перейти в корзину', 'ja' => 'カートを見る', 'zh' => '查看购物车',
 			),
+			'shop_more' => array(
+				'fr' => 'Continuer vos achats', 'de' => 'Weiter stöbern', 'es' => 'Seguir comprando', 'it' => 'Continua a scoprire', 'pt' => 'Ver mais produtos', 'nl' => 'Verder winkelen', 'bn' => 'আরও কেনাকাটা করুন', 'ar' => 'تسوق المزيد', 'hi' => 'और खरीदारी करें', 'tr' => 'Alışverişe devam et', 'pl' => 'Zobacz więcej', 'sv' => 'Handla mer', 'ru' => 'Смотреть ещё', 'ja' => 'もっと見る', 'zh' => '继续逛逛',
+			),
 			'continue' => array(
 				'fr' => 'Continuer mes achats', 'de' => 'Weiter einkaufen', 'es' => 'Seguir comprando', 'it' => 'Continua lo shopping', 'pt' => 'Continuar comprando', 'nl' => 'Verder winkelen', 'bn' => 'কেনাকাটা চালিয়ে যান', 'ar' => 'متابعة التسوق', 'hi' => 'खरीदारी जारी रखें', 'tr' => 'Alışverişe devam et', 'pl' => 'Kontynuuj zakupy', 'sv' => 'Fortsätt handla', 'ru' => 'Продолжить покупки', 'ja' => '買い物を続ける', 'zh' => '继续购物',
 			),
@@ -128,6 +131,8 @@ class Nexvio_Texts {
 				return array( __( 'Proceed to Checkout', 'nexvio' ), __( 'Proceed to checkout', 'woocommerce' ), 'Proceed to checkout' );
 			case 'view_cart':
 				return array( __( 'View Cart', 'nexvio' ), __( 'View cart', 'woocommerce' ), 'View cart' );
+			case 'shop_more':
+				return array( __( 'Shop More', 'nexvio' ), '', '' );
 			case 'coupon_link':
 				return array( __( 'Have a coupon code?', 'nexvio' ), __( 'Have a coupon?', 'woocommerce' ), 'Have a coupon?' );
 			case 'coupon_placeholder':
@@ -166,7 +171,7 @@ class Nexvio_Texts {
 	private static $source = array(
 		'title' => 'Your Shopping Bag', 'subtitle' => 'Review your selected items', 'empty_title' => 'Your shopping bag is empty',
 		'empty_text' => 'Discover our latest pieces and find something you love.', 'continue' => 'Continue Shopping', 'checkout' => 'Proceed to Checkout',
-		'view_cart' => 'View Cart', 'coupon_link' => 'Have a coupon code?', 'coupon_placeholder' => 'Coupon code', 'apply' => 'Apply', 'subtotal' => 'Subtotal',
+		'view_cart' => 'View Cart', 'shop_more' => 'Shop More', 'coupon_link' => 'Have a coupon code?', 'coupon_placeholder' => 'Coupon code', 'apply' => 'Apply', 'subtotal' => 'Subtotal',
 		'shipping' => 'Shipping', 'total' => 'Total', 'remove' => 'Remove', 'remove_coupon' => 'Remove', 'qty' => 'Quantity',
 		'options' => 'Please choose the product options first.', 'coupon_empty' => 'Please enter a coupon code.', 'calc' => 'Calculated at checkout',
 		'close' => 'Close the cart', 'error' => 'Something went wrong. Please try again.', 'open_cart' => 'Open cart',
