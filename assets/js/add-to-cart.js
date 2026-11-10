@@ -87,6 +87,8 @@
 						if (!g.getAttribute('data-value')) { g.classList.add('is-missing'); }
 					});
 				}
+				/* Product Variations widget: highlight what is missing */
+				document.dispatchEvent(new CustomEvent('nexvio:variation:missing', { detail: { product: form.getAttribute('data-product_id') } }));
 				return;
 			}
 		}
@@ -165,16 +167,102 @@
 			.then(function () { btn.classList.remove('is-loading'); });
 	});
 
+	/* ---------------------------------------------------------------
+	   Variable product with the Product Variations widget:
+	   that widget sends "nexvio:variation" (chosen variation + attributes);
+	   the hidden fields, the button and the quantity limits follow it.
+	   --------------------------------------------------------------- */
+	function varTexts(form) {
+		var t = {};
+		try { t = JSON.parse(form.getAttribute('data-texts') || '{}'); } catch (e) { t = {}; }
+		return t;
+	}
+
+	function applyVariation(form, d) {
+		var vEl = form.elements['variation_id'];
+		if (!vEl) { return; }
+		vEl.value = d && d.variation ? d.variation : 0;
+
+		/* the chosen attribute values travel with the form (also "any" attributes) */
+		Array.prototype.slice.call(form.querySelectorAll('input[data-nx-attr]')).forEach(function (n) { n.remove(); });
+		var sel = d && d.selection ? d.selection : {};
+		Object.keys(sel).forEach(function (k) {
+			if (sel[k] === '') { return; }
+			var h = document.createElement('input');
+			h.type = 'hidden';
+			h.name = k;
+			h.value = sel[k];
+			h.setAttribute('data-nx-attr', '1');
+			form.appendChild(h);
+		});
+
+		var root = form.closest('.nexvio-atc');
+		if (root && vEl.value > 0) { message(root, ''); }
+
+		if (form.getAttribute('data-avail') === '0') { return; }
+		var btn = form.querySelector('.nexvio-atc__btn');
+		var label = btn ? btn.querySelector('.nexvio-atc__label') : null;
+		var texts = varTexts(form);
+		if (btn && !btn.classList.contains('is-loading') && !btn.classList.contains('is-added')) {
+			var bad = false, txt = texts.label || '';
+			if (d && d.complete) {
+				if (!d.data) { bad = true; txt = texts.unavail || texts.out || txt; }
+				else if (!d.data.stock) { bad = true; txt = texts.out || txt; }
+			}
+			btn.disabled = bad;
+			btn.classList.toggle('is-disabled', bad);
+			if (bad) { btn.setAttribute('aria-disabled', 'true'); } else { btn.removeAttribute('aria-disabled'); }
+			if (label && txt) { label.textContent = txt; }
+		}
+
+		var q = form.querySelector('input.nexvio-atc__input');
+		if (q && d && d.data) {
+			q.setAttribute('min', d.data.min > 0 ? d.data.min : 1);
+			if (d.data.max > 0) { q.setAttribute('max', d.data.max); } else { q.removeAttribute('max'); }
+			clamp(q);
+		}
+	}
+
+	function syncVariations(scope) {
+		Array.prototype.slice.call((scope || document).querySelectorAll('.nexvio-atc__form[data-variable="1"]')).forEach(function (form) {
+			var st = window.nexvioVarState ? window.nexvioVarState[form.getAttribute('data-product_id')] : null;
+			if (st) { applyVariation(form, st); }
+		});
+	}
+
+	document.addEventListener('nexvio:variation', function (e) {
+		var d = e.detail || {};
+		Array.prototype.slice.call(document.querySelectorAll('.nexvio-atc__form[data-variable="1"]')).forEach(function (form) {
+			if (String(form.getAttribute('data-product_id')) === String(d.product)) { applyVariation(form, d); }
+		});
+	});
+
+	/* variable / grouped / external products with the WooCommerce form: the heart sits in the row of the button */
+	function placeHeart(scope) {
+		Array.prototype.slice.call((scope || document).querySelectorAll('.nexvio-atc--native')).forEach(function (root) {
+			var heart = root.querySelector(':scope > .nexvio-atc__wish');
+			if (!heart) { return; }
+			var row = root.querySelector('.woocommerce-variation-add-to-cart') || root.querySelector('form.cart');
+			if (row) { row.appendChild(heart); }
+		});
+	}
+
+	function initWidget(scope) {
+		initAll(scope);
+		placeHeart(scope);
+		syncVariations(scope);
+	}
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', function () { initAll(); });
+		document.addEventListener('DOMContentLoaded', function () { initWidget(); });
 	} else {
-		initAll();
+		initWidget();
 	}
 
 	window.addEventListener('elementor/frontend/init', function () {
 		if (!window.elementorFrontend || !window.elementorFrontend.hooks) { return; }
 		window.elementorFrontend.hooks.addAction('frontend/element_ready/nexvio_add_to_cart.default', function ($scope) {
-			if ($scope && $scope[0]) { initAll($scope[0]); }
+			if ($scope && $scope[0]) { initWidget($scope[0]); }
 		});
 	});
 })();

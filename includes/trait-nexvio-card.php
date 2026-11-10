@@ -92,13 +92,19 @@ trait Nexvio_Card_Trait {
 	 * Design layout (shared by Product Slider, Products Grid and Products Archive)
 	 * ------------------------------------------------------------------ */
 
+	/** Which set of designs the picker offers: '' (shared designs) or 'slider' (Products Slider Layouts). */
+	protected function design_layout_group() {
+		return '';
+	}
+
 	protected function register_design_section() {
 		$this->start_controls_section( 'section_design', array( 'label' => esc_html__( 'Design Layout', 'nexvio' ) ) );
+		$group = $this->design_layout_group();
 		$this->add_control( 'design_layout', array(
 			'label'       => esc_html__( 'Design Layout', 'nexvio' ),
 			'type'        => class_exists( 'Nexvio_Layout_Control' ) ? Nexvio_Layout_Control::TYPE : Controls_Manager::SELECT,
-			'default'     => 'classic',
-			'options'     => class_exists( 'Nexvio_Layout_Control' ) ? Nexvio_Layouts::options_for_control() : Nexvio_Layouts::titles(),
+			'default'     => 'slider' === $group ? 'sl-showcase' : 'classic',
+			'options'     => class_exists( 'Nexvio_Layout_Control' ) ? Nexvio_Layouts::options_for_control( $group ) : Nexvio_Layouts::titles( $group ),
 			'description' => esc_html__( 'Choose how each product card looks. Colours and shapes for the chosen design are in Style > Layout design.', 'nexvio' ),
 		) );
 		$this->add_control( 'btn_style', array(
@@ -1345,6 +1351,9 @@ trait Nexvio_Card_Trait {
 
 	/** 'none' or 'wishlist'. Old values (yith, local, custom) count as 'wishlist'. */
 	protected function wish_mode( $s ) {
+		if ( ! Nexvio_Plugin::feature_enabled( 'wishlist' ) ) {
+			return 'none';
+		}
 		$mode = isset( $s['wish_mode'] ) ? $s['wish_mode'] : 'wishlist';
 		return 'none' === $mode ? 'none' : 'wishlist';
 	}

@@ -42,7 +42,7 @@ class Nexvio_Product_Filter_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio-product-filter' );
+		return array( 'nexvio-layout', 'nexvio-product-filter' );
 	}
 
 	public function get_script_depends() {
@@ -1159,8 +1159,12 @@ class Nexvio_Product_Filter_Widget extends Widget_Base {
 		) );
 		if ( 'auto' === $display ) {
 			/* pictures on the values -> image circles; colour attribute -> colour circles; size -> buttons */
-			$display = '';
-			if ( class_exists( 'Nexvio_Swatches' ) && ! is_wp_error( $terms ) ) {
+			$display  = '';
+			$set_type = class_exists( 'Nexvio_Attribute_Types' ) ? Nexvio_Attribute_Types::type_of( $taxonomy ) : '';
+			if ( in_array( $set_type, array( 'color', 'image' ), true ) ) {
+				$display = $set_type; /* the type chosen in Products > Attributes */
+			}
+			if ( ! $display && class_exists( 'Nexvio_Swatches' ) && ! is_wp_error( $terms ) ) {
 				foreach ( (array) $terms as $t ) {
 					if ( Nexvio_Swatches::image_for( (int) $t->term_id ) ) {
 						$display = 'image';

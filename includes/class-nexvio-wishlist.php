@@ -161,8 +161,18 @@ class Nexvio_Wishlist {
 
 	/** Product IDs that still exist and are published (deleted or hidden products are left out). */
 	public static function valid_ids() {
+		$all = self::ids();
+		if ( empty( $all ) ) {
+			return array();
+		}
+
+		/* one query for every saved product instead of one get_post_status() lookup per product */
+		if ( function_exists( '_prime_post_caches' ) ) {
+			_prime_post_caches( $all, false, false );
+		}
+
 		$ids = array();
-		foreach ( self::ids() as $id ) {
+		foreach ( $all as $id ) {
 			if ( 'publish' === get_post_status( $id ) ) {
 				$ids[] = $id;
 			}
@@ -287,11 +297,12 @@ class Nexvio_Wishlist {
 			do_action( 'nexvio_wishlist_removed', $product_id );
 		}
 
+		$valid = self::valid_ids();
 		wp_send_json_success( array(
 			'product_id' => $product_id,
 			'in'         => $in,
-			'count'      => count( self::valid_ids() ),
-			'ids'        => self::valid_ids(),
+			'count'      => count( $valid ),
+			'ids'        => $valid,
 			'url'        => self::url(),
 		) );
 	}

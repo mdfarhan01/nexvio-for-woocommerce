@@ -1,0 +1,450 @@
+/* Nexvio Product Variations.
+   Defaults live in CSS variables on .nexvio-var; the Elementor controls set the same variables and win. */
+.nexvio-var {
+	--nv-gap: 14px;
+	--nv-optgap: 8px;
+	--nv-labelgap: 8px;
+	--nv-labelw: 0px;
+	--nv-label-c: inherit;
+	--nv-ddbg: #ffffff;
+	--nv-ddc: #111111;
+	--nv-ddbc: #8f9aab;
+	--nv-ddw: 100%;
+	--nv-ddh: 44px;
+	--nv-ddr: 4px;
+	--nv-bh: 44px;
+	--nv-pad: 6px 16px;
+	--nv-bw: 2px;
+	--nv-br: 6px;
+	--nv-bg: transparent;
+	--nv-c: currentColor;
+	--nv-bc: #8f9aab;
+	--nv-bg-h: rgba(128, 128, 128, .1);
+	--nv-c-h: currentColor;
+	--nv-bc-h: #3d8bff;
+	--nv-bg-a: rgba(61, 139, 255, .14);
+	--nv-c-a: #1d6fe8;
+	--nv-bc-a: #3d8bff;
+	--nv-swsize: 36px;
+	--nv-swr: 999px;
+	--nv-swbc: #8f9aab;
+	--nv-swring: #3d8bff;
+	--nv-cbs: 18px;
+	--nv-cbr: 4px;
+	--nv-cbc: #8f9aab;
+	--nv-cba: #3d8bff;
+	--nv-cbt: #ffffff;
+	--nv-unav: .45;
+	--nv-missing: #ff6371;
+	--nv-clear: #6b7686;
+	--nv-clear-h: #3d8bff;
+	--nv-avail-l: inherit;
+	--nv-avail-in: #2fae78;
+	--nv-avail-out: #ff6371;
+	--nv-avail-gap: 14px;
+	--nv-line: rgba(128, 128, 128, .35);
+	--nv-price: inherit;
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+	width: 100%;
+	min-width: 0;
+	max-width: 100%
+}
+
+.nexvio-var *,
+.nexvio-var *::before,
+.nexvio-var *::after {
+	box-sizing: border-box
+}
+
+.nexvio-var--note p {
+	margin: 0;
+	padding: 12px 14px;
+	border: 1px dashed rgba(128, 128, 128, .5);
+	border-radius: 6px;
+	font-size: 14px;
+	opacity: .8
+}
+
+.nexvio-var__attrs {
+	display: flex;
+	flex-direction: column;
+	gap: var(--nv-gap);
+	min-width: 0
+}
+
+.nexvio-var__group {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--nv-labelgap);
+	min-width: 0
+}
+
+.nexvio-var--label-inline .nexvio-var__group {
+	flex-direction: row;
+	align-items: center
+}
+
+.nexvio-var .nexvio-var__label {
+	flex: 0 0 auto;
+	min-width: var(--nv-labelw);
+	margin: 0;
+	padding: 0;
+	color: var(--nv-label-c);
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 14px;
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none
+}
+
+.nexvio-var__opts {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--nv-optgap)
+}
+
+.nexvio-var__group--checkbox .nexvio-var__opts {
+	gap: 8px 20px
+}
+
+.nexvio-var__group.is-missing .nexvio-var__label {
+	color: var(--nv-missing)
+}
+
+.nexvio-var__group.is-missing .nexvio-var__opts {
+	animation: nexvio-var-shake .35s ease
+}
+
+@keyframes nexvio-var-shake {
+
+	0%,
+	100% {
+		transform: translateX(0)
+	}
+
+	25% {
+		transform: translateX(-5px)
+	}
+
+	75% {
+		transform: translateX(5px)
+	}
+}
+
+/* dropdown */
+.nexvio-var .nexvio-var__select {
+	display: block;
+	width: var(--nv-ddw);
+	max-width: 100%;
+	height: var(--nv-ddh);
+	min-height: 0;
+	margin: 0;
+	padding: 0 38px 0 14px;
+	border: 1px solid var(--nv-ddbc);
+	border-radius: var(--nv-ddr);
+	background-color: var(--nv-ddbg);
+	color: var(--nv-ddc);
+	box-shadow: none;
+	font-family: inherit;
+	font-size: 15px;
+	font-weight: 500;
+	line-height: 1.2;
+	cursor: pointer;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat
+}
+
+.nexvio-var .nexvio-var__select:focus-visible {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+.nexvio-var .nexvio-var__select option {
+	background: var(--nv-ddbg);
+	color: var(--nv-ddc)
+}
+
+.nexvio-var .nexvio-var__select option.is-unavailable {
+	color: #9aa3b2
+}
+
+/* buttons */
+.nexvio-var .nexvio-var__opt--btn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: var(--nv-bh);
+	margin: 0;
+	padding: var(--nv-pad);
+	border: var(--nv-bw) solid var(--nv-bc);
+	border-radius: var(--nv-br);
+	background: var(--nv-bg);
+	color: var(--nv-c);
+	box-shadow: none;
+	font-family: inherit;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0;
+	text-transform: none;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color .18s, border-color .18s, color .18s, box-shadow .18s;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-var .nexvio-var__opt--btn:hover:not(.is-selected) {
+	background: var(--nv-bg-h);
+	color: var(--nv-c-h);
+	border-color: var(--nv-bc-h)
+}
+
+.nexvio-var .nexvio-var__opt--btn.is-selected {
+	background: var(--nv-bg-a);
+	color: var(--nv-c-a);
+	border-color: var(--nv-bc-a)
+}
+
+.nexvio-var .nexvio-var__opt--btn:focus-visible,
+.nexvio-var .nexvio-var__opt--sw:focus-visible {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+/* swatches */
+.nexvio-var .nexvio-var__opt--sw {
+	position: relative;
+	display: inline-block;
+	flex: 0 0 auto;
+	width: var(--nv-swsize);
+	height: var(--nv-swsize);
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--nv-swbc);
+	border-radius: var(--nv-swr);
+	background: var(--sw, #999);
+	box-shadow: none;
+	cursor: pointer;
+	transition: outline-color .15s, transform .15s;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-var .nexvio-var__opt--sw.is-image {
+	background: var(--sw-img) center/cover no-repeat, var(--sw, #999)
+}
+
+.nexvio-var .nexvio-var__opt--sw:hover:not(.is-selected) {
+	transform: scale(1.08)
+}
+
+.nexvio-var .nexvio-var__opt--sw.is-selected {
+	outline: 2px solid var(--nv-swring);
+	outline-offset: 3px
+}
+
+/* checkbox style */
+.nexvio-var .nexvio-var__opt--check {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 2px 0;
+	color: inherit;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.3;
+	cursor: pointer
+}
+
+.nexvio-var .nexvio-var__opt--check input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none
+}
+
+.nexvio-var__box {
+	flex: 0 0 auto;
+	display: inline-grid;
+	place-items: center;
+	width: var(--nv-cbs);
+	height: var(--nv-cbs);
+	border: 2px solid var(--nv-cbc);
+	border-radius: var(--nv-cbr);
+	background: transparent;
+	transition: background-color .15s, border-color .15s
+}
+
+.nexvio-var__box::after {
+	content: "";
+	display: block;
+	width: 32%;
+	height: 58%;
+	margin-top: -12%;
+	border: solid var(--nv-cbt);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+	opacity: 0;
+	transition: opacity .12s
+}
+
+.nexvio-var__opt--check input:checked+.nexvio-var__box {
+	background: var(--nv-cba);
+	border-color: var(--nv-cba)
+}
+
+.nexvio-var__opt--check input:checked+.nexvio-var__box::after {
+	opacity: 1
+}
+
+.nexvio-var__opt--check input:focus-visible+.nexvio-var__box {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+/* options that are not available with the current choice */
+.nexvio-var__opt.is-unavailable {
+	opacity: var(--nv-unav)
+}
+
+.nexvio-var__opt--btn.is-unavailable::after,
+.nexvio-var__opt--sw.is-unavailable::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	background: linear-gradient(to top right, transparent calc(50% - 1px), currentColor, transparent calc(50% + 1px))
+}
+
+.nexvio-var[data-unav="hide"] .is-unavailable {
+	display: none !important
+}
+
+/* clear link */
+.nexvio-var__tools {
+	display: flex;
+	justify-content: flex-start;
+	margin-top: 8px
+}
+
+.nexvio-var__tools:has(.nexvio-var__clear[hidden]) {
+	margin-top: 0
+}
+
+.nexvio-var .nexvio-var__clear {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	box-shadow: none;
+	color: var(--nv-clear);
+	font-family: inherit;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: .04em;
+	line-height: 1.4;
+	text-transform: uppercase;
+	text-decoration: none;
+	cursor: pointer;
+	transition: color .15s
+}
+
+.nexvio-var .nexvio-var__clear:hover,
+.nexvio-var .nexvio-var__clear:focus-visible {
+	background: none;
+	color: var(--nv-clear-h);
+	text-decoration: underline
+}
+
+.nexvio-var .nexvio-var__clear[hidden] {
+	display: none
+}
+
+/* price */
+.nexvio-var .nexvio-var__price {
+	margin-top: 12px;
+	color: var(--nv-price);
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.3
+}
+
+.nexvio-var .nexvio-var__price[hidden] {
+	display: none
+}
+
+.nexvio-var .nexvio-var__price del {
+	opacity: .55;
+	font-weight: 500;
+	margin-right: 6px
+}
+
+.nexvio-var .nexvio-var__price ins {
+	background: none;
+	text-decoration: none
+}
+
+/* stock line */
+.nexvio-var .nexvio-var__avail {
+	margin-top: var(--nv-avail-gap);
+	font-size: 15px;
+	line-height: 1.4
+}
+
+.nexvio-var .nexvio-var__avail[hidden] {
+	display: none
+}
+
+.nexvio-var--line .nexvio-var__avail {
+	padding-top: var(--nv-avail-gap);
+	border-top: 1px solid var(--nv-line)
+}
+
+.nexvio-var .nexvio-var__avail-label {
+	color: var(--nv-avail-l);
+	font-weight: 700
+}
+
+.nexvio-var .nexvio-var__avail-val.is-in {
+	color: var(--nv-avail-in)
+}
+
+.nexvio-var .nexvio-var__avail-val.is-out {
+	color: var(--nv-avail-out)
+}
+
+@media (max-width:767px) {
+	.nexvio-var {
+		--nv-ddw: 100%
+	}
+
+	.nexvio-var--label-inline .nexvio-var__group {
+		flex-direction: column;
+		align-items: stretch
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.nexvio-var__group.is-missing .nexvio-var__opts {
+		animation: none
+	}
+}

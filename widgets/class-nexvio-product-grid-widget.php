@@ -49,7 +49,7 @@ class Nexvio_Product_Grid_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio' );
+		return array( 'nexvio-layout', 'nexvio' );
 	}
 
 	public function get_script_depends() {

@@ -41,7 +41,7 @@ class Nexvio_Cart_Panel_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio-side-cart' );
+		return array( 'nexvio-layout', 'nexvio-side-cart' );
 	}
 
 	public function get_script_depends() {

@@ -38,7 +38,7 @@ class Nexvio_Filter_Drawer_Widget extends Nexvio_Product_Filter_Widget {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio-product-filter', 'nexvio-filter-drawer' );
+		return array( 'nexvio-layout', 'nexvio-product-filter', 'nexvio-filter-drawer' );
 	}
 
 	public function get_script_depends() {

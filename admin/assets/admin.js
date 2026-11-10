@@ -177,6 +177,45 @@
 		});
 	})();
 
+	/* Dashboard: Filters / Add to Cart / Wishlist on-off */
+	(function () {
+		var box = document.getElementById('nexvio-features');
+		if (!box) { return; }
+		var t = document.querySelector('.nexvio-toast');
+		function say(msg, bad) {
+			if (!t) { return; }
+			t.textContent = msg;
+			t.classList.toggle('is-error', !!bad);
+			t.classList.add('is-on');
+		}
+		box.addEventListener('change', function (e) {
+			var input = e.target;
+			if (!input.matches || !input.matches('input[data-feature]')) { return; }
+			var card = input.closest('.nexvio-card');
+			var on = input.checked;
+			var body = new FormData();
+			body.append('action', 'nexvio_toggle_feature');
+			body.append('nonce', D.nonce);
+			body.append('feature', input.getAttribute('data-feature'));
+			body.append('enabled', on ? '1' : '0');
+			if (card) { card.classList.add('is-saving'); }
+			fetch(D.ajax, { method: 'POST', credentials: 'same-origin', body: body })
+				.then(function (r) { return r.json(); })
+				.then(function (res) {
+					if (!res || !res.success) { throw new Error('fail'); }
+					if (card) { card.classList.toggle('is-off', !on); }
+					say(D.i18n.saved);
+					/* reload so the menu and the counters follow the change */
+					setTimeout(function () { window.location.reload(); }, 350);
+				})
+				.catch(function () {
+					input.checked = !on;
+					if (card) { card.classList.remove('is-saving'); }
+					say(D.i18n.error, true);
+				});
+		});
+	})();
+
 	var grid = document.getElementById('nexvio-grid');
 	if (!grid) { return; }
 

@@ -1,0 +1,956 @@
+/* Nexvio Smart Purchase */
+.nexvio-sp,
+.nexvio-sp__modal {
+	--nexvio-sp-dur: 320ms;
+	--nexvio-sp-ease: cubic-bezier(.2, .8, .2, 1);
+}
+
+.nexvio-sp *,
+.nexvio-sp *::before,
+.nexvio-sp *::after,
+.nexvio-sp__modal *,
+.nexvio-sp__modal *::before,
+.nexvio-sp__modal *::after {
+	box-sizing: border-box
+}
+
+.nexvio-sp__modal[hidden],
+.nexvio-sp [hidden],
+.nexvio-sp__modal [hidden] {
+	display: none !important
+}
+
+/* ---------- card purchase buttons (inside the Products Card) ---------- */
+.nexvio-sp--item {
+	display: block
+}
+
+.nexvio-sp__cbtns {
+	margin-top: 10px
+}
+
+.nexvio-sp__cbtns .nexvio-sp__btn {
+	min-height: 42px;
+	padding: 8px 14px;
+	font-size: 14px
+}
+
+/* ---------- trigger ---------- */
+a.nexvio-sp__trigger {
+	text-decoration: none
+}
+
+.nexvio-sp__trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	gap: 10px;
+	padding: 13px 26px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background: #111827;
+	color: #fff;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color .2s, color .2s, border-color .2s, transform .2s
+}
+
+.nexvio-sp__trigger:hover {
+	background: #1f2937;
+	color: #fff
+}
+
+.nexvio-sp__trigger--after {
+	flex-direction: row-reverse
+}
+
+.nexvio-sp__trigger:focus-visible,
+.nexvio-sp__btn:focus-visible,
+.nexvio-sp__opt:focus-visible,
+.nexvio-sp__thumb:focus-visible,
+.nexvio-sp__nav:focus-visible,
+.nexvio-sp__close:focus-visible,
+.nexvio-sp__step:focus-visible,
+.nexvio-sp__qty-input:focus-visible,
+.nexvio-sp__clear:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 2px
+}
+
+.nexvio-sp__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 20px;
+	line-height: 1;
+	flex: 0 0 auto
+}
+
+.nexvio-sp__icon svg {
+	width: 1em;
+	height: 1em;
+	display: block
+}
+
+/* ---------- page scroll lock ---------- */
+html.nexvio-sp-lock {
+	overflow: hidden;
+	padding-right: var(--nexvio-sp-sw, 0)
+}
+
+/* ---------- modal ---------- */
+.nexvio-sp__modal--popup {
+	position: fixed;
+	inset: 0;
+	z-index: 99999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 20px
+}
+
+.nexvio-sp__modal--pos-top.nexvio-sp__modal--popup {
+	align-items: flex-start
+}
+
+.nexvio-sp__modal--pos-bottom.nexvio-sp__modal--popup {
+	align-items: flex-end
+}
+
+.nexvio-sp__overlay {
+	position: absolute;
+	inset: 0;
+	background: rgba(10, 14, 20, .6)
+}
+
+.nexvio-sp__overlay--none {
+	background: transparent !important
+}
+
+.nexvio-sp__dialog {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 1000px;
+	max-width: 100%;
+	max-height: 90vh;
+	background: #fff;
+	color: #111827;
+	border-radius: 16px;
+	overflow: hidden;
+	box-shadow: 0 30px 80px rgba(0, 0, 0, .35)
+}
+
+.nexvio-sp__dialog:focus {
+	outline: none
+}
+
+.nexvio-sp__close {
+	position: absolute;
+	top: 12px;
+	right: 12px;
+	z-index: 6;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .92);
+	color: #111827;
+	cursor: pointer;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+	transition: transform .2s, background-color .2s
+}
+
+.nexvio-sp__close:hover {
+	transform: scale(1.08)
+}
+
+.nexvio-sp__close svg {
+	width: 18px;
+	height: 18px
+}
+
+/* the scrolling area (on phones; on desktop only the info column scrolls) */
+.nexvio-sp__scroll {
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+	overscroll-behavior: contain;
+	-webkit-overflow-scrolling: touch
+}
+
+.nexvio-sp__grid {
+	display: grid;
+	grid-template-columns: var(--nexvio-sp-media, 52%) minmax(0, 1fr);
+	align-items: stretch
+}
+
+/* ---------- left: main image 100% width, thumbnails inside it ---------- */
+.nexvio-sp__media {
+	min-width: 0;
+	align-self: start
+}
+
+.nexvio-sp__stage {
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+	background: #f3f4f6
+}
+
+.nexvio-sp__main {
+	width: 100%;
+	line-height: 0
+}
+
+.nexvio-sp__img {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	max-height: var(--nexvio-sp-maxh, 90vh); /* never taller than the popup */
+	aspect-ratio: auto; /* the popup follows the size of the image */
+	object-fit: cover; /* no empty bars around the image */
+	transition: opacity .2s ease;
+	user-select: none;
+	-webkit-user-drag: none
+}
+
+.nexvio-sp__img.is-swap {
+	opacity: 0
+}
+
+/* the box keeps the ratio of the first image, so the popup does not jump when the gallery changes */
+.nexvio-sp--ar-lock .nexvio-sp__main {
+	position: relative;
+	aspect-ratio: var(--nexvio-sp-ar);
+	max-height: var(--nexvio-sp-maxh, 90vh)
+}
+
+.nexvio-sp--ar-lock .nexvio-sp__img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	max-height: none;
+	aspect-ratio: auto
+}
+
+.nexvio-sp--thumbs-below .nexvio-sp__img,
+.nexvio-sp--thumbs-below.nexvio-sp--ar-lock .nexvio-sp__main {
+	max-height: calc(var(--nexvio-sp-maxh, 90vh) - 56px)
+}
+
+.nexvio-sp--thumbs-below.nexvio-sp--ar-lock .nexvio-sp__img {
+	max-height: none
+}
+
+/* thumbnails at the bottom, inside the image */
+.nexvio-sp__thumbs {
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	gap: 6px;
+	padding: 8px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	scroll-snap-type: x proximity;
+	-webkit-overflow-scrolling: touch
+}
+
+.nexvio-sp__thumbs::-webkit-scrollbar {
+	display: none
+}
+
+.nexvio-sp--thumbs-overlay .nexvio-sp__thumbs {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	padding-top: 30px;
+	background: linear-gradient(to top, rgba(0, 0, 0, .55), rgba(0, 0, 0, 0))
+}
+
+.nexvio-sp--thumbs-below .nexvio-sp__thumbs {
+	position: static;
+	background: #fff
+}
+
+.nexvio-sp__thumb:first-child {
+	margin-left: auto /* with the rule below: centred, and still scrollable when there are many */
+}
+
+.nexvio-sp__thumb:last-child {
+	margin-right: auto
+}
+
+.nexvio-sp__thumbs--hidden {
+	display: none !important
+}
+
+.nexvio-sp__thumb {
+	flex: 0 0 auto;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 2px solid rgba(255, 255, 255, .7);
+	border-radius: 5px;
+	background: #fff;
+	overflow: hidden;
+	cursor: pointer;
+	opacity: .9;
+	scroll-snap-align: center;
+	transition: border-color .2s, opacity .2s, transform .2s
+}
+
+.nexvio-sp--thumbs-below .nexvio-sp__thumb {
+	border-color: #e5e7eb
+}
+
+.nexvio-sp__thumb:hover {
+	opacity: 1;
+	transform: translateY(-2px)
+}
+
+.nexvio-sp__thumb.is-active {
+	opacity: 1;
+	border-color: #111827
+}
+
+.nexvio-sp__thumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain
+}
+
+.nexvio-sp__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 3;
+	width: 38px;
+	height: 38px;
+	margin-top: -19px;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .88);
+	color: #111827;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+	opacity: 0;
+	transition: opacity .2s, background-color .2s
+}
+
+.nexvio-sp__stage:hover .nexvio-sp__nav,
+.nexvio-sp__nav:focus-visible {
+	opacity: 1
+}
+
+@media (hover: none) {
+	.nexvio-sp__nav {
+		opacity: 1
+	}
+}
+
+.nexvio-sp__nav svg {
+	width: 18px;
+	height: 18px
+}
+
+.nexvio-sp__nav--prev {
+	left: 12px
+}
+
+.nexvio-sp__nav--next {
+	right: 12px
+}
+
+/* ---------- right: information ---------- */
+.nexvio-sp__info {
+	min-width: 0;
+	padding: 32px
+}
+
+.nexvio-sp__title {
+	margin: 0 0 10px;
+	padding-right: 36px;
+	font-size: 26px;
+	line-height: 1.25;
+	font-weight: 700;
+	color: #111827
+}
+
+.nexvio-sp__rating {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 10px;
+	font-size: 14px;
+	color: #6b7280
+}
+
+.nexvio-sp__rating .star-rating {
+	margin: 0
+}
+
+.nexvio-sp__price {
+	margin: 0 0 14px;
+	font-size: 22px;
+	font-weight: 700;
+	color: #111827
+}
+
+.nexvio-sp__price del {
+	opacity: .55;
+	font-weight: 400;
+	margin-right: 6px
+}
+
+.nexvio-sp__price ins {
+	text-decoration: none
+}
+
+.nexvio-sp__desc {
+	margin: 0 0 16px;
+	font-size: 15px;
+	line-height: 1.65;
+	color: #4b5563
+}
+
+.nexvio-sp__desc>:last-child {
+	margin-bottom: 0
+}
+
+.nexvio-sp__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 18px;
+	margin: 0 0 18px;
+	font-size: 14px;
+	color: #6b7280
+}
+
+.nexvio-sp__stock.is-in {
+	color: #15803d
+}
+
+.nexvio-sp__stock.is-out {
+	color: #b91c1c
+}
+
+.nexvio-sp__form {
+	margin: 0
+}
+
+/* ---------- variations ---------- */
+.nexvio-sp__var {
+	margin: 0 0 16px
+}
+
+.nexvio-sp__varhead {
+	display: flex;
+	gap: 8px;
+	align-items: baseline;
+	margin-bottom: 8px;
+	font-size: 14px
+}
+
+.nexvio-sp__varlabel {
+	font-weight: 700;
+	color: #111827
+}
+
+.nexvio-sp__varvalue {
+	color: #6b7280
+}
+
+.nexvio-sp__opts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px
+}
+
+.nexvio-sp__opt {
+	position: relative;
+	min-width: 44px;
+	min-height: 40px;
+	padding: 8px 14px;
+	border: 1px solid #d1d5db;
+	border-radius: 8px;
+	background: #fff;
+	color: #111827;
+	font: inherit;
+	font-size: 14px;
+	line-height: 1.2;
+	cursor: pointer;
+	transition: background-color .2s, color .2s, border-color .2s, box-shadow .2s
+}
+
+.nexvio-sp__opt:hover:not(.is-disabled):not(.is-selected) {
+	border-color: #111827
+}
+
+.nexvio-sp__opt.is-selected {
+	background: #111827;
+	color: #fff;
+	border-color: #111827
+}
+
+.nexvio-sp__opt.is-disabled {
+	color: #9ca3af;
+	text-decoration: line-through;
+	cursor: not-allowed;
+	background-image: none
+}
+
+.nexvio-sp__opt--color {
+	width: 38px;
+	height: 38px;
+	min-width: 0;
+	min-height: 0;
+	padding: 3px;
+	border-radius: 50%
+}
+
+.nexvio-sp__opt--color.is-selected {
+	background: #fff;
+	box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111827
+}
+
+.nexvio-sp__opt--color.is-disabled {
+	text-decoration: none;
+	opacity: .4
+}
+
+.nexvio-sp__opt--color.is-disabled::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 4px;
+	bottom: 4px;
+	width: 2px;
+	background: #6b7280;
+	transform: rotate(45deg)
+}
+
+.nexvio-sp__swatch {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 50%;
+	background: var(--nexvio-sp-swatch, #ccc);
+	border: 1px solid rgba(0, 0, 0, .15)
+}
+
+.nexvio-sp__sr {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0
+}
+
+.nexvio-sp__var.is-missing .nexvio-sp__opts {
+	outline: 2px dashed #ef4444;
+	outline-offset: 4px;
+	border-radius: 8px
+}
+
+.nexvio-sp__clear {
+	margin: -6px 0 14px;
+	padding: 0;
+	border: 0;
+	background: none;
+	color: #6b7280;
+	font: inherit;
+	font-size: 13px;
+	text-decoration: underline;
+	cursor: pointer
+}
+
+.nexvio-sp__varprice {
+	margin: 0 0 14px;
+	font-weight: 600
+}
+
+/* ---------- quantity ---------- */
+.nexvio-sp__qtywrap {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin: 0 0 18px
+}
+
+.nexvio-sp__qtylabel {
+	font-size: 14px;
+	font-weight: 700
+}
+
+.nexvio-sp__qty {
+	display: flex;
+	align-items: stretch;
+	width: 140px;
+	height: 46px;
+	border: 1px solid #d1d5db;
+	border-radius: 10px;
+	overflow: hidden;
+	background: #fff
+}
+
+.nexvio-sp__step {
+	flex: 0 0 42px;
+	padding: 0;
+	border: 0;
+	background: #f3f4f6;
+	color: #111827;
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background-color .2s
+}
+
+.nexvio-sp__step:hover:not(:disabled) {
+	background: #e5e7eb
+}
+
+.nexvio-sp__step:disabled {
+	opacity: .4;
+	cursor: not-allowed
+}
+
+.nexvio-sp__qty-input {
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+	padding: 0;
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+	text-align: center;
+	font: inherit;
+	font-weight: 600;
+	color: #111827;
+	-moz-appearance: textfield;
+	appearance: textfield
+}
+
+.nexvio-sp__qty-input::-webkit-outer-spin-button,
+.nexvio-sp__qty-input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0
+}
+
+/* ---------- purchase buttons ---------- */
+.nexvio-sp__btns {
+	display: flex;
+	flex-direction: column;
+	gap: 10px
+}
+
+.nexvio-sp--btns-row .nexvio-sp__btns {
+	flex-direction: row;
+	flex-wrap: wrap
+}
+
+.nexvio-sp--btns-row .nexvio-sp__btn {
+	flex: 1 1 140px
+}
+
+.nexvio-sp__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 50px;
+	padding: 12px 20px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	color: #fff;
+	font: inherit;
+	font-weight: 600;
+	line-height: 1.2;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color .2s, color .2s, border-color .2s, transform .2s, box-shadow .2s, filter .2s, opacity .2s
+}
+
+.nexvio-sp__btn--atc {
+	background: #111827
+}
+
+.nexvio-sp__btn--after {
+	flex-direction: row-reverse
+}
+
+.nexvio-sp__btn.is-unavailable {
+	opacity: .5;
+	cursor: not-allowed
+}
+
+.nexvio-sp__btn.is-locked {
+	pointer-events: none
+}
+
+.nexvio-sp__btn.is-loading {
+	opacity: .75;
+	cursor: progress
+}
+
+.nexvio-sp__btn.is-added {
+	background: #15803d
+}
+
+/* icon / text display modes */
+.nexvio-sp--dm-icon .nexvio-sp__label {
+	position: absolute !important;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap
+}
+
+.nexvio-sp--dm-text .nexvio-sp__btn .nexvio-sp__icon {
+	display: none
+}
+
+/* hover animations */
+.nexvio-sp--hover-lift .nexvio-sp__btn:hover:not(:disabled):not(.is-unavailable) {
+	transform: translateY(-2px);
+	box-shadow: 0 8px 18px rgba(0, 0, 0, .18)
+}
+
+.nexvio-sp--hover-grow .nexvio-sp__btn:hover:not(:disabled):not(.is-unavailable) {
+	transform: scale(1.03)
+}
+
+.nexvio-sp--hover-shine .nexvio-sp__btn:hover:not(:disabled):not(.is-unavailable) {
+	filter: brightness(1.12)
+}
+
+.nexvio-sp__msg {
+	min-height: 0;
+	margin: 12px 0 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #374151
+}
+
+.nexvio-sp__msg:empty {
+	display: none
+}
+
+.nexvio-sp__msg.is-error {
+	color: #b91c1c
+}
+
+.nexvio-sp__msg a {
+	margin-left: 8px;
+	color: inherit;
+	font-weight: 600;
+	text-decoration: underline
+}
+
+/* ---------- popup animation ---------- */
+.nexvio-sp__modal--popup .nexvio-sp__overlay {
+	opacity: 0;
+	transition: opacity var(--nexvio-sp-dur) var(--nexvio-sp-ease)
+}
+
+.nexvio-sp__modal--popup .nexvio-sp__dialog {
+	opacity: 0;
+	transition: opacity var(--nexvio-sp-dur) var(--nexvio-sp-ease), transform var(--nexvio-sp-dur) var(--nexvio-sp-ease);
+	will-change: opacity, transform
+}
+
+.nexvio-sp__modal--popup[data-anim="fade-scale"] .nexvio-sp__dialog {
+	transform: scale(.94)
+}
+
+.nexvio-sp__modal--popup[data-anim="slide-up"] .nexvio-sp__dialog {
+	transform: translateY(48px)
+}
+
+.nexvio-sp__modal--popup[data-anim="slide-down"] .nexvio-sp__dialog {
+	transform: translateY(-48px)
+}
+
+.nexvio-sp__modal--popup[data-anim="zoom"] .nexvio-sp__dialog {
+	transform: scale(.6)
+}
+
+.nexvio-sp__modal--popup[data-anim="none"] .nexvio-sp__dialog,
+.nexvio-sp__modal--popup[data-anim="none"] .nexvio-sp__overlay {
+	transition: none
+}
+
+.nexvio-sp__modal--popup.is-open .nexvio-sp__overlay {
+	opacity: 1
+}
+
+.nexvio-sp__modal--popup.is-open .nexvio-sp__dialog {
+	opacity: 1;
+	transform: none
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.nexvio-sp__modal *,
+	.nexvio-sp__modal *::before,
+	.nexvio-sp__modal *::after,
+	.nexvio-sp__trigger {
+		transition-duration: .01ms !important;
+		animation-duration: .01ms !important
+	}
+}
+
+/* ---------- inline (no popup / editor preview) ---------- */
+.nexvio-sp__modal--inline {
+	position: static;
+	display: block
+}
+
+.nexvio-sp__modal--inline .nexvio-sp__dialog {
+	width: 100% !important;
+	max-height: none !important;
+	opacity: 1;
+	transform: none;
+	box-shadow: none
+}
+
+.nexvio-sp__modal--inline .nexvio-sp__scroll {
+	overflow: visible
+}
+
+.nexvio-sp__modal--inline .nexvio-sp__img,
+.nexvio-sp__modal--inline.nexvio-sp--ar-lock .nexvio-sp__main {
+	max-height: none
+}
+
+/* ---------- desktop popup: the image sets the height, the right side scrolls ---------- */
+@media (min-width: 768px) {
+	.nexvio-sp__modal--popup .nexvio-sp__scroll {
+		overflow: hidden
+	}
+
+	.nexvio-sp__modal--popup .nexvio-sp__grid {
+		position: relative
+	}
+
+	/* the information column does not add to the height: it fills the row the image creates */
+	.nexvio-sp__modal--popup .nexvio-sp__info {
+		position: absolute;
+		grid-column: 2;
+		grid-row: 1;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		overflow-x: hidden;
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		-webkit-overflow-scrolling: touch
+	}
+
+	.nexvio-sp__modal--popup .nexvio-sp__info > * {
+		flex: 0 0 auto
+	}
+
+	/* short content sits in the middle, long content scrolls */
+	.nexvio-sp__modal--popup .nexvio-sp__info > :first-child {
+		margin-top: auto
+	}
+
+	.nexvio-sp__modal--popup .nexvio-sp__info > :last-child {
+		margin-bottom: auto
+	}
+}
+
+/* ---------- tablet ---------- */
+@media (max-width: 1024px) {
+	.nexvio-sp__info {
+		padding: 24px
+	}
+
+	.nexvio-sp__title {
+		font-size: 22px
+	}
+}
+
+/* ---------- mobile: one column, gallery first, normal flow ---------- */
+@media (max-width: 767px) {
+	.nexvio-sp__modal--popup {
+		padding: 16px
+	}
+
+	.nexvio-sp__dialog {
+		width: 360px;
+		max-height: 82vh;
+		border-radius: 14px
+	}
+
+	/* smaller image on phones: square, and never taller than 36% of the screen */
+	.nexvio-sp__img {
+		aspect-ratio: 1 / 1;
+		max-height: 36vh
+	}
+
+	.nexvio-sp__close {
+		width: 34px;
+		height: 34px;
+		top: 8px;
+		right: 8px
+	}
+
+	.nexvio-sp__grid {
+		grid-template-columns: minmax(0, 1fr)
+	}
+
+	.nexvio-sp__info {
+		padding: 20px 16px 24px
+	}
+
+	.nexvio-sp__title {
+		font-size: 20px
+	}
+
+	.nexvio-sp__price {
+		font-size: 20px
+	}
+
+	.nexvio-sp__thumb {
+		width: 28px;
+		height: 28px
+	}
+
+	.nexvio-sp__nav {
+		opacity: 1
+	}
+
+	.nexvio-sp--btns-row .nexvio-sp__btn {
+		flex: 1 1 100%
+	}
+}

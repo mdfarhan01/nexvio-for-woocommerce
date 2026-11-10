@@ -26,6 +26,11 @@ class Nexvio_Product_Related_Widget extends Nexvio_Product_Slider_Widget {
 	}
 
 	/** Gallery hover controls (see the card trait). */
+	/** Related products keep the shared designs. */
+	protected function design_layout_group() {
+		return '';
+	}
+
 	protected function gallery_ui() {
 		return 'full';
 	}

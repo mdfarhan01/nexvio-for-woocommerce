@@ -43,6 +43,7 @@ class Nexvio_Admin {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'assets' ) );
 		add_action( 'wp_ajax_nexvio_toggle_widget', array( __CLASS__, 'ajax_toggle' ) );
 		add_action( 'wp_ajax_nexvio_bulk_widgets', array( __CLASS__, 'ajax_bulk' ) );
+		add_action( 'wp_ajax_nexvio_toggle_feature', array( __CLASS__, 'ajax_feature' ) );
 		add_action( 'admin_post_nexvio_save_settings', array( __CLASS__, 'save_settings' ) );
 		add_action( 'admin_post_nexvio_save_cart_settings', array( __CLASS__, 'save_cart_settings' ) );
 		add_action( 'admin_post_nexvio_save_filters', array( __CLASS__, 'save_filters' ) );
@@ -52,6 +53,16 @@ class Nexvio_Admin {
 	}
 
 	private static function pages() {
+		$all = self::all_pages();
+		foreach ( Nexvio_Plugin::features() as $f => $def ) {
+			if ( ! Nexvio_Plugin::feature_enabled( $f ) ) {
+				unset( $all[ $def['page'] ] );
+			}
+		}
+		return $all;
+	}
+
+	private static function all_pages() {
 		return array(
 			self::SLUG     => array( __( 'Dashboard', 'nexvio' ), 'dashicons-dashboard', 'page_dashboard' ),
 			self::WIDGETS  => array( __( 'Widgets', 'nexvio' ), 'dashicons-screenoptions', 'page_widgets' ),
@@ -129,7 +140,7 @@ class Nexvio_Admin {
 		wp_localize_script( 'nexvio-admin', 'NEXVIO_ADMIN', array(
 			'ajax'  => admin_url( 'admin-ajax.php' ),
 			'nonce' => wp_create_nonce( 'nexvio_admin' ),
-			'total' => count( Nexvio_Plugin::widgets() ),
+			'total' => count( Nexvio_Plugin::visible_widgets() ),
 			'i18n'  => array(
 				'active'   => __( 'Active', 'nexvio' ),
 				'inactive' => __( 'Inactive', 'nexvio' ),
@@ -199,7 +210,7 @@ class Nexvio_Admin {
 	}
 
 	private static function counts() {
-		$keys = array_keys( Nexvio_Plugin::widgets() );
+		$keys = array_keys( Nexvio_Plugin::visible_widgets() );
 		$off  = count( array_intersect( $keys, Nexvio_Plugin::disabled() ) );
 		return array( 'all' => count( $keys ), 'active' => count( $keys ) - $off, 'inactive' => $off );
 	}
@@ -222,6 +233,11 @@ class Nexvio_Admin {
 			array( $wl_ok, __( 'Set the wishlist page', 'nexvio' ), admin_url( 'admin.php?page=' . self::WISHLIST ), __( 'Wishlist', 'nexvio' ) ),
 			array( null, __( 'Add the widgets to your Elementor templates', 'nexvio' ), admin_url( 'admin.php?page=' . self::DOCS . '#setup' ), __( 'Guide', 'nexvio' ) ),
 		);
+		if ( ! Nexvio_Plugin::feature_enabled( 'wishlist' ) ) {
+			$steps = array_values( array_filter( $steps, function ( $st ) {
+				return false === strpos( (string) $st[2], 'page=' . self::WISHLIST );
+			} ) );
+		}
 		self::open( self::SLUG, __( 'Dashboard', 'nexvio' ), __( 'Everything you need to build your WooCommerce shop with Elementor.', 'nexvio' ) );
 		?>
 		<section class="nexvio-hero nexvio-hero--welcome">
@@ -242,6 +258,26 @@ class Nexvio_Admin {
 			<div class="nexvio-glass nexvio-kpi"><span class="dashicons dashicons-randomize" aria-hidden="true"></span><b><?php echo 'yes' === get_option( 'nexvio_auto_related', 'no' ) ? esc_html__( 'Automatic', 'nexvio' ) : esc_html__( 'Widget', 'nexvio' ); ?></b><small><?php esc_html_e( 'Related products', 'nexvio' ); ?></small></div>
 			<div class="nexvio-glass nexvio-kpi"><span class="dashicons dashicons-tag" aria-hidden="true"></span><b><?php echo esc_html( NEXVIO_VERSION ); ?></b><small><?php esc_html_e( 'Plugin version', 'nexvio' ); ?></small></div>
 		</div>
+
+		<section class="nexvio-glass nexvio-card-box" id="nexvio-features">
+			<div class="nexvio-box-head"><div><h2><?php esc_html_e( 'Features', 'nexvio' ); ?></h2><p><?php esc_html_e( 'Switch off what you do not need. Its widgets disappear from the Widgets tab and from Elementor, and its settings page is hidden.', 'nexvio' ); ?></p></div></div>
+			<div class="nexvio-grid">
+				<?php foreach ( Nexvio_Plugin::features() as $fkey => $f ) : $fon = Nexvio_Plugin::feature_enabled( $fkey ); ?>
+					<article class="nexvio-card<?php echo $fon ? '' : ' is-off'; ?>">
+						<span class="nexvio-card__icon dashicons <?php echo esc_attr( $f['icon'] ); ?>" aria-hidden="true"></span>
+						<div class="nexvio-card__body">
+							<h3 class="nexvio-card__title"><?php echo esc_html( $f['label'] ); ?></h3>
+							<p class="nexvio-card__desc"><?php echo esc_html( $f['desc'] ); ?></p>
+						</div>
+						<label class="nexvio-switch">
+							<input type="checkbox" data-feature="<?php echo esc_attr( $fkey ); ?>"<?php checked( $fon ); ?>>
+							<span class="nexvio-switch__track" aria-hidden="true"></span>
+							<span class="screen-reader-text"><?php echo esc_html( sprintf( /* translators: %s: feature name */ __( 'Enable %s', 'nexvio' ), $f['label'] ) ); ?></span>
+						</label>
+					</article>
+				<?php endforeach; ?>
+			</div>
+		</section>
 
 		<section class="nexvio-glass nexvio-card-box">
 			<div class="nexvio-box-head"><div><h2><?php esc_html_e( 'Quick setup', 'nexvio' ); ?></h2><p><?php esc_html_e( 'Four steps and your shop is ready.', 'nexvio' ); ?></p></div></div>
@@ -267,7 +303,7 @@ class Nexvio_Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
 		}
-		$widgets  = Nexvio_Plugin::widgets();
+		$widgets  = Nexvio_Plugin::visible_widgets();
 		$disabled = Nexvio_Plugin::disabled();
 		$c        = self::counts();
 		self::open( self::WIDGETS, __( 'Widgets', 'nexvio' ), __( 'Turn on the widgets you need. Disabled widgets are not loaded in Elementor.', 'nexvio' ) );
@@ -970,22 +1006,11 @@ class Nexvio_Admin {
 						<ul>
 							<li>Header: <em>Header Search</em> + <em>Wishlist Icon</em></li>
 							<li>Products archive (shop and categories): <em>Product Filter</em> in a sidebar + <em>Products Archive</em> (or <em>Products Archive Layouts</em>)</li>
-							<li>Single product: <em>Add to Cart</em> + <em>Related Products</em> (or <em>Related Products Layouts</em>)</li>
-							<li>Home page: <em>Product Slider</em></li>
+							<li>Single product: <em>Product Images</em> + <em>Product Variations</em> + <em>Add to Cart</em> + <em>Related Products</em> (or <em>Related Products Layouts</em>)</li>
+							<li>Home page: <em>Products Slider</em> (or <em>Products Slider Layouts</em>)</li>
 						</ul>
 					</li>
 				</ol>' ),
-			'slider' => array( 'dashicons-images-alt2', 'Product Slider', '
-				<p>A carousel of products with the card design (badges, wishlist heart, stock, price, add to cart).</p>
-				<ul>
-					<li><strong>Products:</strong> latest, featured, on sale, best sellers or chosen IDs; filter by categories and tags.</li>
-					<li><strong>Slider:</strong> cards visible per device, peek of the next card, arrows (header or sides), dots, loop, mouse drag, autoplay.</li>
-					<li><strong>Badges:</strong> language (product attribute), category, new, sale (percentage), pre-order (tag <code>precommande</code> or backorder).</li>
-					<li><strong>Background by category:</strong> give each category its own colours.</li>
-				</ul>
-				<p><strong>Design Layout</strong> (Content tab, first section): pick one of 12 card designs from preview images: Classic Vault, Minimal Light, Image Overlay, Horizontal, Glass, Neon Outline, Elevated Shop, Compact Tiles, Editorial, Price Tag, Spotlight and Boutique. The same picker is in Products Card Layouts, Products Archive Layouts, Related Products Layouts and Wishlist Card Layouts. The colours, image shape and effects of the chosen design are in <em>Style &gt; Layout design</em>; only the controls that apply to that design are shown. You can also choose an icon or text add-to-cart button and show star ratings.</p>
-				<p><strong>Motion</strong> (Slider section): <em>Slide</em> works with arrows, swipe and optional autoplay. <em>Continuous infinite scroll</em> moves the products at a steady speed in an endless loop with no visible restart; set the speed per device, the direction and pause on hover. Arrows and drag / swipe still work in this mode.</p>
-				<p><strong>Tips:</strong> the Horizontal design looks best with 2 or 3 visible cards, Compact Tiles with 5 or 6. Glass is made for colourful or image backgrounds.</p>' ),
 			'products-card' => array( 'dashicons-index-card', 'Products Card', '
 				<p>A grid of <strong>simple product cards</strong>: the image on top, then the title, description, price and a full-width button. It uses the same product query, columns and pagination as Products Card Layouts, with one plain design and a short Style tab.</p>
 				<ul>
@@ -1003,6 +1028,26 @@ class Nexvio_Admin {
 					<li>Each Products Card Layouts widget uses its own page number in the URL, so several grids on one page paginate separately.</li>
 					<li>"Products per page" is in the Products (query) section.</li>
 				</ul>' ),
+			'products-slider' => array( 'dashicons-images-alt2', 'Products Slider', '
+				<p>A product <strong>carousel</strong> that shows the products with the Products Card design (image on top, title, description, price and button). It works like Products Slider Layouts.</p>
+				<ul>
+					<li><strong>Products:</strong> latest, featured, on sale, best sellers or chosen IDs; filter by categories and tags.</li>
+					<li><strong>Slider:</strong> cards visible per device, peek of the next card, space between cards, arrows (header or sides), dots, drag with the mouse and autoplay.</li>
+					<li><strong>Endless scroll:</strong> with <em>Infinite loop</em> on (or Autoplay on) the first product follows the last one, there is no jump back to the start. <em>Continuous infinite scroll</em> moves the products at a steady speed (speed per device, direction, pause on hover).</li>
+					<li><strong>Mouse:</strong> drag the cards with the mouse and let go, they slide to the nearest card. A sideways mouse wheel or trackpad also moves them.</li>
+					<li>The Content and Style tabs are the same as Products Card: layout design, image, card content, button, badges and gallery hover, plus the header and arrows.</li>
+				</ul>' ),
+			'slider' => array( 'dashicons-images-alt2', 'Products Slider Layouts', '
+				<p><strong>Products Slider Layouts</strong> is a carousel of products with 12 card designs made for sliders (badges, wishlist heart, stock, price, add to cart).</p>
+				<ul>
+					<li><strong>Products:</strong> latest, featured, on sale, best sellers or chosen IDs; filter by categories and tags.</li>
+					<li><strong>Slider:</strong> cards visible per device, peek of the next card, arrows (header or sides), dots, infinite loop, mouse drag, autoplay.</li>
+					<li><strong>Badges:</strong> language (product attribute), category, new, sale (percentage), pre-order (tag <code>precommande</code> or backorder).</li>
+				</ul>
+				<p><strong>Design Layout</strong> (Content tab, first section): pick one of the 12 slider designs from preview images: Showcase, Poster, Pill Cards, Landscape, Midnight Gold, Photo Frame, Aurora, Clean Line, Arch, Circle Stage, Accent Bar and Sand Studio. These designs are only in this widget; the other Layouts widgets have their own set of 12. The colours, image shape and effects of the chosen design are in <em>Style &gt; Layout design</em>. The Style tab has the same sections as Products Card Layouts (layout design, image, card content, button, badges, wishlist heart) plus the header and arrows. You can also choose an icon or text add-to-cart button and show star ratings.</p>
+				<p><strong>Endless loop:</strong> with <em>Infinite loop</em> on (or Autoplay on) the slider never goes back to the start: after the last product the first one follows. <strong>Continuous infinite scroll</strong> (Motion) moves the products at a steady speed in an endless loop; set the speed per device, the direction and pause on hover.</p>
+				<p><strong>Mouse:</strong> drag the cards with the mouse and let go, they slide to the nearest card; a sideways mouse wheel or trackpad moves them too. Arrows and swipe work in every mode.</p>
+				<p><strong>Tips:</strong> Landscape looks best with 3 or 4 visible cards, Circle Stage and Arch with 4 or 5. Aurora and Midnight Gold are made for colourful or dark sections.</p>' ),
 			'products-archive' => array( 'dashicons-grid-view', 'Products Archive', '
 				<p>The <strong>shop and product archive</strong> widget with the Products Card design: image on top, then title, description, price and button. Put it in your shop / category template.</p>
 				<ul>
@@ -1016,7 +1061,7 @@ class Nexvio_Admin {
 				<ul>
 					<li>Use the source <strong>Current query</strong> in your archive template: the grid shows the products of the page being viewed and works with the Product Filter.</li>
 					<li>Products per page: <a href="' . esc_url( $s ) . '">Settings</a> &gt; Shop.</li>
-					<li><strong>Design Layout</strong> (Content tab): the same 12 designs as the Product Slider, with their own settings in <em>Style &gt; Layout design</em>.</li>
+					<li><strong>Design Layout</strong> (Content tab): 12 designs (Classic Vault, Minimal Light, Image Overlay, Horizontal, Glass, Neon Outline, Elevated Shop, Compact Tiles, Editorial, Price Tag, Spotlight, Boutique), with their own settings in <em>Style &gt; Layout design</em>.</li>
 					<li><strong>View Mode</strong> (Content tab): <em>Grid View</em> (cards in rows and columns, columns per device in <em>Grid layout</em>) or <em>List View</em> (image and details side by side). List view has its own settings: image width and shape, price and button in a right column or below, vertical and text alignment, short description, stacking on mobile, and its own spacing, colours and typography in <em>Style &gt; List view</em>.</li>
 					<li>Turn on <em>Let shoppers switch Grid / List</em> to show two buttons above the products; the choice can be remembered and stays when the filter reloads the products.</li>
 				</ul>' ),
@@ -1046,7 +1091,7 @@ class Nexvio_Admin {
 				<p>Related products for the <strong>single product page</strong>, with the Products Card design. It uses the same query as Related Products Layouts: other products of the same category, most popular first (or best rated, random, newest).</p>
 				<ul>
 					<li>Category used: most specific, primary (Yoast / Rank Math), top-level or all. <em>Fill from the parent category</em> completes a short list.</li>
-					<li>Show as a slider or a grid; slider and header options are the same as in the Product Slider.</li>
+					<li>Show as a slider or a grid; slider and header options are the same as in Products Slider Layouts.</li>
 					<li>The Style tab is the Products Card one (layout design, image, card content, button, badges) plus the header and slider arrows. Gallery hover is in the Content tab.</li>
 				</ul>' ),
 			'related' => array( 'dashicons-randomize', 'Related Products Layouts', '
@@ -1057,7 +1102,20 @@ class Nexvio_Admin {
 					<li>No Elementor Pro? Turn on <em>automatic related products</em> in <a href="' . esc_url( $s ) . '">Settings</a>, or use the shortcode.</li>
 				</ul>' ),
 			'cart' => array( 'dashicons-cart', 'Add to Cart', '
-				<p>Quantity selector, "Add to cart" button and wishlist heart for the single product page. Simple products are added with AJAX and the mini-cart updates. Stock, minimum / maximum quantity and "sold individually" are respected. Variable and grouped products use the WooCommerce form, styled to match.</p>' ),
+				<p>Quantity selector, "Add to cart" button and wishlist heart for the single product page, in one aligned row. Products are added with AJAX and the mini-cart updates. Stock, minimum / maximum quantity and "sold individually" are respected.</p>
+				<ul>
+					<li><strong>Variable products:</strong> add the <em>Product Variations</em> widget where the options should appear. The Add to Cart widget adds the variation chosen there. Until all options are chosen, a click shows a message and highlights what is missing.</li>
+					<li>Prefer the WooCommerce form? Set <em>Elements &gt; Variable products</em> to "Show the options inside this widget". Grouped and external products always use the WooCommerce form, styled to match, with the heart in the same row.</li>
+				</ul>' ),
+			'product-variations' => array( 'dashicons-art', 'Product Variations', '
+				<p>The options of a <strong>variable product</strong> (Color, Size…) in their own widget, for the single product template. Place it above the <em>Add to Cart</em> widget.</p>
+				<ul>
+					<li><strong>Selector type:</strong> Dropdown, Buttons, Colour / image swatches, Checkbox style or Automatic (swatches for colours and images, buttons for the rest).</li>
+					<li><strong>Type of each attribute:</strong> <em>Options &gt; Type of each attribute</em> lists every attribute (Color, Size…), for example Color as swatches and Size as buttons. With <em>Automatic</em>, the type chosen in <em>Products &gt; Attributes</em> (Colour, Image, Button, Radio, Checkbox) is used.</li>
+					<li>Clear link, stock line (Availability: 100 in stock), optional price of the chosen variation. Options that are not available with the current choice are dimmed or hidden.</li>
+					<li>With the <em>Product Images</em> widget on the page, the main image changes to the image of the chosen variation.</li>
+					<li>Colour swatches use the colour or image set on the attribute value (Products &gt; Attributes &gt; Configure terms), or the colour name.</li>
+				</ul>' ),
 			'side-cart' => array( 'dashicons-cart', 'Side cart, Header Cart and Floating Cart', '
 				<p>A luxury cart panel that slides in from the right. It uses the real WooCommerce cart: prices, variations, stock limits, coupons, shipping and totals are all calculated by WooCommerce.</p>
 				<ul>
@@ -1084,7 +1142,7 @@ class Nexvio_Admin {
 					<li>The Style tab is the Products Card one, plus the title and the empty wishlist. Gallery hover is in the Content tab.</li>
 				</ul>' ),
 			'wishlist-layouts' => array( 'dashicons-star-filled', 'Wishlist Card Layouts', '
-				<p>The same wishlist page widget (saved products, live removal, empty message) with the 12 selectable card designs of the Product Slider. Pick the design in <em>Content &gt; Design Layout</em>; its colours are in <em>Style &gt; Layout design</em>.</p>' ),
+				<p>The same wishlist page widget (saved products, live removal, empty message) with the 12 selectable card designs. Pick the design in <em>Content &gt; Design Layout</em>; its colours are in <em>Style &gt; Layout design</em>.</p>' ),
 			'gallery-hover' => array( 'dashicons-format-gallery', 'Hover gallery image', '
 				<p>Products Card, Products Archive, Related Products, Wishlist Card and the three Layouts widgets (Products Archive Layouts, Related Products Layouts, Wishlist Card Layouts) can show another picture of the product when the pointer is over the card. Each widget has its own settings in <em>Content &gt; Hover gallery image</em>.</p>
 				<ul>
@@ -1096,13 +1154,13 @@ class Nexvio_Admin {
 					<li>The three Layouts widgets also have <em>Go through the gallery images while hovering</em> (number of images and time per image).</li>
 				</ul>' ),
 			'desc-rating' => array( 'dashicons-star-half', 'Short description & rating', '
-				<p>In every product widget (Slider, Products Card Layouts, Products Archive Layouts, Related Products Layouts, Wishlist Card Layouts): <em>Content &gt; Description &amp; rating</em>. Each widget has its own settings.</p>
+				<p>In every product widget (Products Slider Layouts, Products Card Layouts, Products Archive Layouts, Related Products Layouts, Wishlist Card Layouts): <em>Content &gt; Description &amp; rating</em>. Each widget has its own settings.</p>
 				<ul>
 					<li><strong>Show short description:</strong> the product\'s WooCommerce short description, cut to a number of words (0 = all). Products without one show nothing; optionally use the long description instead. <em>Style &gt; Short description</em>: colour, typography, line height, alignment, spacing, maximum lines, and "Same height on every card" to keep prices and buttons lined up.</li>
 					<li><strong>Show rating:</strong> the WooCommerce star rating with the review count (87) or (87 reviews), and optionally the average (4.5). Products without reviews show nothing, or the text "No reviews yet" if you choose; they never get stars. <em>Style &gt; Rating</em>: star colour and size, alignment, spacing, count colour and typography.</li>
 				</ul>' ),
 			'swatches' => array( 'dashicons-art', 'Colour swatches', '
-				<p>Every product widget (Slider and the Layouts widgets) can show a dot per colour under the image: <em>Content &gt; Colour swatches &gt; Show colour swatches</em>.</p>
+				<p>Every product widget (Products Slider and the Layouts widgets) can show a dot per colour under the image: <em>Content &gt; Colour swatches &gt; Show colour swatches</em>.</p>
 				<ul>
 					<li>The colour attribute is found automatically (named Color, Colour, Couleur…), or enter its slug, e.g. <code>pa_color</code>.</li>
 					<li>On <strong>variable products</strong>, choosing a colour shows that variation\'s image on the card (on click, or on hover). The card then links to the product with that colour already selected.</li>
@@ -1170,6 +1228,24 @@ class Nexvio_Admin {
 		}
 		update_option( 'nexvio_disabled_widgets', array_values( array_unique( $disabled ) ) );
 		wp_send_json_success( array( 'key' => $key, 'enabled' => $enabled, 'counts' => self::counts() ) );
+	}
+
+	public static function ajax_feature() {
+		check_ajax_referer( 'nexvio_admin', 'nonce' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( null, 403 );
+		}
+		$key     = isset( $_POST['feature'] ) ? sanitize_key( wp_unslash( $_POST['feature'] ) ) : '';
+		$enabled = isset( $_POST['enabled'] ) && '1' === sanitize_text_field( wp_unslash( $_POST['enabled'] ) );
+		if ( ! array_key_exists( $key, Nexvio_Plugin::features() ) ) {
+			wp_send_json_error( null, 400 );
+		}
+		$off = array_diff( Nexvio_Plugin::features_off(), array( $key ) );
+		if ( ! $enabled ) {
+			$off[] = $key;
+		}
+		update_option( 'nexvio_features_off', array_values( array_unique( $off ) ) );
+		wp_send_json_success( array( 'feature' => $key, 'enabled' => $enabled ) );
 	}
 
 	public static function ajax_bulk() {

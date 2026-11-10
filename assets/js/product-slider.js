@@ -103,6 +103,18 @@
 		root.addEventListener('focusin', function () { paused = true; });
 		root.addEventListener('focusout', function () { paused = !!cfg.pauseOnHover && root.matches(':hover'); });
 
+		/* images and links must not start the browser's own drag, it cancels the mouse drag of the rail */
+		track.addEventListener('dragstart', function (e) { e.preventDefault(); });
+
+		/* sideways mouse wheel / trackpad (or Shift + wheel) moves the rail; the normal up / down wheel still scrolls the page */
+		track.addEventListener('wheel', function (e) {
+			var d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+			if (!d) { return; }
+			e.preventDefault();
+			nudge = null;
+			offset += d;
+		}, { passive: false });
+
 		/* drag / swipe (mouse and touch) */
 		if (cfg.drag !== false) {
 			var startX = 0, startOff = 0, pid = null;
@@ -113,7 +125,7 @@
 			window.addEventListener('pointermove', function (e) {
 				if (pid !== e.pointerId) { return; }
 				var dx = e.clientX - startX;
-				if (!dragging && Math.abs(dx) > 6) { dragging = true; moved = true; track.classList.add('is-dragging'); }
+				if (!dragging && Math.abs(dx) > 6) { dragging = true; moved = true; track.classList.add('is-dragging'); try { track.setPointerCapture(pid); } catch (err) { /* not supported */ } }
 				if (dragging) { offset = startOff - dx; }
 			});
 			var end = function (e) {
@@ -139,7 +151,7 @@
 	function fitFew(root, track) {
 		root.style.removeProperty('--nexvio-ps-spv');
 		root.style.removeProperty('--nexvio-ps-peek');
-		var n = track.querySelectorAll('.nexvio-ps__slide').length;
+		var n = track.querySelectorAll('.nexvio-ps__slide:not(.is-clone)').length;
 		var spv = cssNum(root, '--nexvio-ps-spv', 4);
 		var few = n > 0 && n <= spv;
 		root.classList.toggle('is-few', few);
@@ -165,9 +177,9 @@
 
 		fitFew(root, track);
 		var fitTimer;
-		window.addEventListener('resize', function () { clearTimeout(fitTimer); fitTimer = setTimeout(function () { fitFew(root, track); }, 150); });
+		var originals = Array.prototype.slice.call(track.querySelectorAll('.nexvio-ps__slide'));
+		var realCount = originals.length;
 
-		var slides = function () { return track.querySelectorAll('.nexvio-ps__slide'); };
 		var gap = function () { return parseFloat(getComputedStyle(track).columnGap) || 0; };
 		var step = function () {
 			var s = track.querySelector('.nexvio-ps__slide');
@@ -180,8 +192,69 @@
 		var atEnd = function () { return track.scrollLeft >= maxLeft() - 2; };
 		var behavior = reduceMotion ? 'auto' : 'smooth';
 
+		/* ----------------------------------------------------------
+		 * Endless loop: the real cards sit between identical copies,
+		 * so after the last card the first one simply follows. When the
+		 * scrolling stops inside a copy, the position is moved by exactly
+		 * one set of cards, which looks identical: no jump back to start.
+		 * ---------------------------------------------------------- */
+		var infinite = false, copies = 0, dragActive = false, idleT = null, jumping = false;
+
+		function setWidth() { return realCount * step(); }
+		function before() { return copies * setWidth(); }
+
+		function makeClone(o) {
+			var c = o.cloneNode(true);
+			c.classList.add('is-clone');
+			c.setAttribute('aria-hidden', 'true');
+			c.querySelectorAll('a, button, input, select').forEach(function (x) { x.setAttribute('tabindex', '-1'); });
+			return c;
+		}
+
+		function jumpTo(x) {
+			jumping = true;
+			track.style.scrollSnapType = 'none';
+			track.style.scrollBehavior = 'auto';
+			track.scrollLeft = x;
+			window.requestAnimationFrame(function () {
+				track.style.scrollSnapType = '';
+				track.style.scrollBehavior = '';
+				jumping = false;
+			});
+		}
+
+		function buildClones() {
+			track.querySelectorAll('.is-clone').forEach(function (c) { c.remove(); });
+			copies = 0;
+			infinite = !!(cfg.loop || cfg.autoplay) && realCount > 1 && !root.classList.contains('is-few');
+			if (!infinite) { return; }
+			var sw = setWidth();
+			if (!sw) { infinite = false; return; }
+			copies = Math.max(1, Math.ceil(((track.clientWidth || 1) + step()) / sw));
+			var pre = document.createDocumentFragment(), post = document.createDocumentFragment();
+			for (var k = 0; k < copies; k++) {
+				originals.forEach(function (o) { pre.appendChild(makeClone(o)); post.appendChild(makeClone(o)); });
+			}
+			track.insertBefore(pre, originals[0]);
+			track.appendChild(post);
+		}
+
+		/* put the position back inside the real cards (same picture, different place) */
+		function normalize() {
+			if (!infinite || dragActive) { return; }
+			var sw = setWidth();
+			if (!sw) { return; }
+			var k = Math.floor((track.scrollLeft - before()) / sw);
+			if (k) { jumpTo(track.scrollLeft - k * sw); }
+		}
+
+		function realIndex() {
+			var i = Math.round((track.scrollLeft - before()) / step());
+			return ((i % realCount) + realCount) % realCount;
+		}
+
 		function go(dir) {
-			if (cfg.loop) {
+			if (!infinite && cfg.loop) {
 				if (dir > 0 && atEnd()) { track.scrollTo({ left: 0, behavior: behavior }); return; }
 				if (dir < 0 && atStart()) { track.scrollTo({ left: maxLeft(), behavior: behavior }); return; }
 			}
@@ -189,7 +262,8 @@
 		}
 
 		function pageCount() {
-			var n = slides().length, pv = perView(), b = by();
+			var n = realCount, pv = perView(), b = by();
+			if (infinite) { return Math.max(1, Math.ceil(n / b)); }
 			if (n <= pv) { return 1; }
 			return Math.ceil((n - pv) / b) + 1;
 		}
@@ -206,6 +280,12 @@
 				d.setAttribute('aria-label', (cfg.dotLabel || 'Slide') + ' ' + (i + 1));
 				(function (idx) {
 					d.addEventListener('click', function () {
+						if (infinite) {
+							var base = before() + idx * by() * step(), sw = setWidth();
+							var k = Math.round((track.scrollLeft - base) / sw);
+							track.scrollTo({ left: base + k * sw, behavior: behavior });
+							return;
+						}
 						track.scrollTo({ left: Math.min(maxLeft(), idx * step() * by()), behavior: behavior });
 					});
 				})(i);
@@ -214,14 +294,43 @@
 		}
 
 		function update() {
-			if (prev) { prev.disabled = !cfg.loop && atStart(); }
-			if (next) { next.disabled = !cfg.loop && atEnd(); }
+			if (prev) { prev.disabled = !cfg.loop && !infinite && atStart(); }
+			if (next) { next.disabled = !cfg.loop && !infinite && atEnd(); }
 			if (dotsWrap && cfg.dots) {
 				var dots = dotsWrap.querySelectorAll('.nexvio-ps__dot');
 				if (!dots.length) { return; }
-				var idx = atEnd() ? dots.length - 1 : Math.round(track.scrollLeft / (step() * by()));
+				var idx;
+				if (infinite) { idx = Math.min(dots.length - 1, Math.floor(realIndex() / by())); }
+				else { idx = atEnd() ? dots.length - 1 : Math.round(track.scrollLeft / (step() * by())); }
 				for (var i = 0; i < dots.length; i++) { dots[i].classList.toggle('is-active', i === idx); }
 			}
+		}
+
+		function rebuild() {
+			var rel = infinite ? (track.scrollLeft - before()) / step() : 0;
+			buildClones();
+			if (infinite) {
+				var r = ((rel % realCount) + realCount) % realCount;
+				jumpTo(before() + Math.round(r) * step());
+			}
+			buildDots();
+			update();
+		}
+
+		window.addEventListener('resize', function () {
+			clearTimeout(fitTimer);
+			fitTimer = setTimeout(function () { fitFew(root, track); rebuild(); }, 150);
+		});
+		if (window.ResizeObserver) {
+			var lastW = track.clientWidth;
+			new window.ResizeObserver(function () {
+				var w = track.clientWidth;
+				if (Math.abs(w - lastW) > 1) {
+					lastW = w;
+					clearTimeout(fitTimer);
+					fitTimer = setTimeout(function () { fitFew(root, track); rebuild(); }, 150);
+				}
+			}).observe(track);
 		}
 
 		if (prev) { prev.addEventListener('click', function () { go(-1); restart(); }); }
@@ -229,39 +338,59 @@
 
 		var ticking = false;
 		track.addEventListener('scroll', function () {
-			if (ticking) { return; }
-			ticking = true;
-			requestAnimationFrame(function () { update(); ticking = false; });
+			if (!ticking) {
+				ticking = true;
+				requestAnimationFrame(function () { update(); ticking = false; });
+			}
+			if (infinite && !jumping) {
+				var p = track.scrollLeft;
+				if (p < step() || p > maxLeft() - step()) { normalize(); } /* never run out of copies */
+				clearTimeout(idleT);
+				idleT = setTimeout(normalize, 140);
+			}
 		}, { passive: true });
 
-		var resizeTimer;
-		window.addEventListener('resize', function () {
-			clearTimeout(resizeTimer);
-			resizeTimer = setTimeout(function () { buildDots(); update(); }, 150);
-		});
-
-		/* mouse drag (touch already scrolls natively) */
+		/* mouse drag with a short flick (touch already scrolls natively) */
+		track.addEventListener('dragstart', function (e) { e.preventDefault(); });
 		if (cfg.drag) {
-			var down = false, moved = false, startX = 0, startLeft = 0;
+			var down = false, moved = false, startX = 0, startLeft = 0, pid = null, samples = [];
 			track.addEventListener('pointerdown', function (e) {
 				if (e.pointerType !== 'mouse' || e.button !== 0) { return; }
-				down = true; moved = false; startX = e.clientX; startLeft = track.scrollLeft;
+				if (e.target.closest && e.target.closest('input, select, textarea')) { return; }
+				normalize();
+				down = true; moved = false; pid = e.pointerId; startX = e.clientX; startLeft = track.scrollLeft;
+				samples = [{ x: startLeft, t: e.timeStamp }];
 			});
 			window.addEventListener('pointermove', function (e) {
 				if (!down) { return; }
 				var dx = e.clientX - startX;
-				if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-dragging'); }
-				if (moved) { track.scrollLeft = startLeft - dx; }
+				if (!moved && Math.abs(dx) > 5) {
+					moved = true; dragActive = true;
+					track.classList.add('is-dragging');
+					try { track.setPointerCapture(pid); } catch (err) { /* not supported */ }
+				}
+				if (moved) {
+					track.scrollLeft = startLeft - dx;
+					samples.push({ x: track.scrollLeft, t: e.timeStamp });
+					if (samples.length > 6) { samples.shift(); }
+				}
 			});
-			window.addEventListener('pointerup', function () {
+			var release = function () {
 				if (!down) { return; }
 				down = false;
 				if (moved) {
+					var a = samples[0], z = samples[samples.length - 1];
+					var v = (z.x - a.x) / Math.max(1, z.t - a.t); /* px per ms */
+					var st = step();
+					var target = Math.round((track.scrollLeft + v * 160) / st) * st;
+					if (!infinite) { target = Math.max(0, Math.min(maxLeft(), target)); }
 					track.classList.remove('is-dragging');
-					var target = Math.round(track.scrollLeft / step()) * step();
+					dragActive = false;
 					track.scrollTo({ left: target, behavior: behavior });
 				}
-			});
+			};
+			window.addEventListener('pointerup', release);
+			window.addEventListener('pointercancel', release);
 			track.addEventListener('click', function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
 		}
 
@@ -273,7 +402,7 @@
 			timer = setInterval(function () {
 				if (!document.body.contains(root)) { stop(); return; }
 				if (!paused && !document.hidden) {
-					if (!cfg.loop && atEnd()) { track.scrollTo({ left: 0, behavior: behavior }); }
+					if (!infinite && !cfg.loop && atEnd()) { track.scrollTo({ left: 0, behavior: behavior }); }
 					else { go(1); }
 				}
 			}, Math.max(1000, cfg.autoplaySpeed || 4000));
@@ -294,6 +423,9 @@
 			if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
 		});
 
+		buildClones();
+		if (infinite) { jumpTo(before()); }
+		window.addEventListener('load', function () { rebuild(); });
 		buildDots();
 		update();
 		start();
@@ -434,6 +566,12 @@
 		if (!btn) { return; }
 		e.preventDefault();
 		if (!DATA.ajax) { return; }
+		var root = btn.closest('.nexvio-wb');
+		if (root) { root.classList.add('nexvio-wb--ready'); }
+		if (btn.getAttribute('data-on-action') === 'page' && btn.classList.contains('is-on') && DATA.wishlist) {
+			window.location.href = DATA.wishlist;
+			return;
+		}
 		var id = btn.getAttribute('data-id');
 		var w = rootCfg(btn).wish || {};
 		var want = !btn.classList.contains('is-on');
@@ -594,9 +732,9 @@
 	/* Elementor editor and frontend re-renders */
 	window.addEventListener('elementor/frontend/init', function () {
 		if (!window.elementorFrontend || !window.elementorFrontend.hooks) { return; }
-		window.elementorFrontend.hooks.addAction('frontend/element_ready/nexvio_product_slider.default', function ($scope) {
+		window.elementorFrontend.hooks.addAction('frontend/element_ready/global', function ($scope) {
 			var el = $scope && $scope[0] ? $scope[0] : null;
-			if (el) { initAll(el); }
+			if (el && /^nexvio_/.test(el.getAttribute('data-widget_type') || '')) { initAll(el); }
 		});
 	});
 })();

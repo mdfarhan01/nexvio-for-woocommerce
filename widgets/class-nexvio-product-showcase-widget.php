@@ -46,7 +46,7 @@ class Nexvio_Product_Showcase_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio-add-to-cart', 'nexvio-product-showcase' );
+		return array( 'nexvio-layout', 'nexvio-add-to-cart', 'nexvio-product-showcase' );
 	}
 
 	public function get_script_depends() {

@@ -38,7 +38,7 @@ class Nexvio_Wishlist_Icon_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio-wishlist-widgets' );
+		return array( 'nexvio-layout', 'nexvio-wishlist-widgets' );
 	}
 
 	public function get_script_depends() {

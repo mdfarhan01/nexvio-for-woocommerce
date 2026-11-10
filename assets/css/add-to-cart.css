@@ -1,6 +1,6 @@
 /* Nexvio Add to Cart widget */
 .nexvio-atc {
-	--nexvio-atc-h: 56px;
+	--nexvio-atc-h: 46px;
 	--nexvio-atc-gap: 12px;
 	--nexvio-atc-qbg: #1f252e;
 	--nexvio-atc-ibg: #181d24;
@@ -8,8 +8,8 @@
 	--nexvio-atc-qcolor: #e8edf4;
 	--nexvio-atc-step: #e8edf4;
 	--nexvio-atc-step-h: #262d37;
-	--nexvio-atc-stepw: 44px;
-	--nexvio-atc-iw: 52px;
+	--nexvio-atc-stepw: 34px;
+	--nexvio-atc-iw: 40px;
 	--nexvio-atc-qradius: 4px;
 	--nexvio-atc-bg: #3d8bff;
 	--nexvio-atc-bg-h: #5a9dff;
@@ -19,13 +19,12 @@
 	--nexvio-atc-dis-bg: #424b58;
 	--nexvio-atc-dis-tc: #aab3c0;
 	--nexvio-atc-cut: 10px;
-	--nexvio-atc-bradius: 0px;
 	--nexvio-atc-wbg: #13171d;
 	--nexvio-atc-wborder: #313945;
 	--nexvio-atc-wborder-h: #ff6b8a;
 	--nexvio-atc-wicon: #e8edf4;
 	--nexvio-atc-won: #ff6b8a;
-	--nexvio-atc-ww: 56px;
+	--nexvio-atc-ww: 46px;
 	--nexvio-atc-wradius: 4px;
 	--nexvio-atc-wis: 20px;
 	--nexvio-atc-mcolor: #8f9aab;
@@ -136,7 +135,7 @@
 	cursor: pointer;
 	text-transform: none;
 	box-shadow: none;
-	border-radius: var(--nexvio-atc-bradius);
+	border-radius: var(--nexvio-atc-bradius, 0px);
 	transition: background .15s, color .15s;
 	clip-path: polygon(var(--nexvio-atc-cut) 0, 100% 0, 100% calc(100% - var(--nexvio-atc-cut)), calc(100% - var(--nexvio-atc-cut)) 100%, 0 100%, 0 var(--nexvio-atc-cut))
 }
@@ -246,11 +245,12 @@
 	display: none !important
 }
 
-/* other product types: native WooCommerce form */
-.nexvio-atc--native {
+/* other product types (and variable products with the options inside this widget): native WooCommerce form */
+.nexvio-atc.nexvio-atc--native {
+	color: inherit; /* labels, Clear and the stock line follow the page text colour, not the dark card colour */
 	display: flex;
 	gap: var(--nexvio-atc-gap);
-	align-items: flex-end;
+	align-items: flex-start;
 	flex-wrap: wrap
 }
 
@@ -259,15 +259,68 @@
 	min-width: 0
 }
 
+/* the heart sits in the same row as the quantity and the button, same height */
 .nexvio-atc--native .nexvio-atc__wish {
-	height: var(--nexvio-atc-h) !important
+	height: var(--nexvio-atc-h) !important;
+	align-self: stretch
 }
 
 .nexvio-atc--native form.cart {
 	margin: 0 !important
 }
 
+.nexvio-atc--native form.cart .nexvio-atc__wish,
+.nexvio-atc--native .woocommerce-variation-add-to-cart .nexvio-atc__wish {
+	flex: 0 0 auto;
+	width: var(--nexvio-atc-ww)
+}
+
+.nexvio-atc--native .variations {
+	width: 100%;
+	margin: 0 0 12px;
+	border: 0
+}
+
+.nexvio-atc--native .variations th,
+.nexvio-atc--native .variations td {
+	display: block;
+	padding: 0;
+	border: 0;
+	text-align: left
+}
+
+.nexvio-atc--native .variations th label {
+	display: block;
+	margin: 0 0 6px;
+	color: inherit;
+	font-weight: 700
+}
+
+.nexvio-atc--native .variations td {
+	margin-bottom: 14px
+}
+
+.nexvio-atc--native .reset_variations {
+	display: inline-block;
+	margin-top: 8px;
+	color: var(--nexvio-atc-mcolor) !important;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: .04em
+}
+
+.nexvio-atc--native .woocommerce-variation {
+	margin: 0 0 14px
+}
+
+.nexvio-atc--native .woocommerce-variation-availability .stock,
+.nexvio-atc--native .woocommerce-variation .stock {
+	margin: 0
+}
+
 .nexvio-atc--native .variations select {
+	width: 100%;
+	min-height: 44px;
 	background: var(--nexvio-atc-ibg);
 	color: var(--nexvio-atc-qcolor);
 	border: 1px solid var(--nexvio-atc-qborder);
@@ -289,7 +342,7 @@
 
 .nexvio-atc--native .quantity input.qty {
 	height: var(--nexvio-atc-h);
-	width: calc(var(--nexvio-atc-iw) + 40px);
+	width: calc(var(--nexvio-atc-iw) + 20px);
 	background: var(--nexvio-atc-ibg);
 	color: var(--nexvio-atc-qcolor);
 	border: 1px solid var(--nexvio-atc-qborder);
@@ -305,7 +358,7 @@
 	background: var(--nexvio-atc-bg) !important;
 	color: var(--nexvio-atc-tc) !important;
 	font: 600 16px/1 "Chakra Petch", "Segoe UI", sans-serif !important;
-	border-radius: var(--nexvio-atc-bradius) !important;
+	border-radius: var(--nexvio-atc-bradius, 0px) !important;
 	float: none !important;
 	clip-path: polygon(var(--nexvio-atc-cut) 0, 100% 0, 100% calc(100% - var(--nexvio-atc-cut)), calc(100% - var(--nexvio-atc-cut)) 100%, 0 100%, 0 var(--nexvio-atc-cut))
 }
@@ -319,6 +372,32 @@
 	color: var(--nexvio-atc-dis-tc) !important
 }
 
+/* hint shown only in the Elementor editor (variable product, options in the Product Variations widget) */
+.nexvio-atc__hint {
+	margin: 10px 0 0;
+	padding: 8px 10px;
+	border: 1px dashed rgba(128, 128, 128, .55);
+	border-radius: 6px;
+	font-size: 12px;
+	line-height: 1.4;
+	color: var(--nexvio-atc-mcolor)
+}
+
+@media (max-width:767px) {
+	.nexvio-atc {
+		--nexvio-atc-stepw: 28px;
+		--nexvio-atc-iw: 32px
+	}
+
+	.nexvio-atc .nexvio-atc__input {
+		font-size: 15px
+	}
+
+	.nexvio-atc .nexvio-atc__step {
+		font-size: 18px
+	}
+}
+
 @media (max-width:420px) {
 	.nexvio-atc .nexvio-atc__btn {
 		padding: 0 14px;
@@ -326,26 +405,28 @@
 	}
 
 	.nexvio-atc {
-		--nexvio-atc-stepw: 38px;
-		--nexvio-atc-iw: 42px;
-		--nexvio-atc-ww: 50px
+		--nexvio-atc-ww: 44px
 	}
 }
 
-.nexvio-atc__btn {
-	gap: 8px
+.nexvio-atc .nexvio-atc__btn {
+	gap: var(--nexvio-atc-igap, 8px)
 }
 
 .nexvio-atc__icon {
 	display: inline-grid;
 	place-items: center;
-	font-size: 1.1em;
-	line-height: 1
+	font-size: var(--nexvio-atc-isize, 1.1em);
+	line-height: 1;
+	color: var(--nexvio-atc-icolor, inherit)
 }
 
 .nexvio-atc__icon svg {
-	width: 1.1em;
-	height: 1.1em;
+	width: 1em;
+	height: 1em
+}
+
+.nexvio-atc__icon svg:not([fill="none"]) {
 	fill: currentColor
 }
 
@@ -353,3 +434,178 @@
 	opacity: .6;
 	pointer-events: none
 }
+
+/* ==========================================================================
+   Designs (the Classic design is the base style above and is not changed)
+   ========================================================================== */
+.nexvio-atc--d-solid { --_r: 8px }
+.nexvio-atc--d-pill { --_r: 999px }
+.nexvio-atc--d-outline {
+	--_r: 8px;
+	--_bg: transparent;
+	--_bg-h: var(--nexvio-atc-bg);
+	--_c: var(--nexvio-atc-bg);
+	--_c-h: var(--nexvio-atc-tc-h);
+	--_bd: var(--nexvio-atc-bw, 2px) solid var(--nexvio-atc-bg)
+}
+.nexvio-atc--d-gradient {
+	--_r: 10px;
+	--_bgi: linear-gradient(135deg, var(--nexvio-atc-bg), var(--nexvio-atc-g2, var(--nexvio-atc-bg-h)));
+	--_sh: 0 10px 22px -10px var(--nexvio-atc-bg)
+}
+.nexvio-atc--d-split { --_r: 6px }
+.nexvio-atc--d-minimal {
+	--_r: 0px;
+	--_bg: transparent;
+	--_bg-h: transparent;
+	--_c: var(--nexvio-atc-qcolor);
+	--_c-h: var(--nexvio-atc-qcolor);
+	--_bd: 0
+}
+.nexvio-atc--d-slide { --_r: 4px }
+
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn,
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--native .single_add_to_cart_button {
+	clip-path: none !important;
+	border-radius: var(--nexvio-atc-bradius, var(--_r, 8px)) !important;
+	background-color: var(--_bg, var(--nexvio-atc-bg)) !important;
+	background-image: var(--_bgi, none) !important;
+	color: var(--_c, var(--nexvio-atc-tc)) !important;
+	border: var(--_bd, 0) !important;
+	box-shadow: var(--_sh, none) !important
+}
+
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn:hover,
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn:focus-visible,
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--native .single_add_to_cart_button:hover {
+	background-color: var(--_bg-h, var(--nexvio-atc-bg-h)) !important;
+	color: var(--_c-h, var(--nexvio-atc-tc-h)) !important
+}
+
+.nexvio-atc--d-gradient .nexvio-atc__btn:hover { filter: brightness(1.08) }
+
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--d-minimal .nexvio-atc__btn,
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--d-minimal.nexvio-atc--native .single_add_to_cart_button {
+	border-bottom: var(--nexvio-atc-bw, 2px) solid var(--nexvio-atc-bg) !important;
+	letter-spacing: .08em;
+	text-transform: uppercase
+}
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--d-minimal .nexvio-atc__btn:hover,
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--d-minimal.nexvio-atc--native .single_add_to_cart_button:hover {
+	border-bottom-color: var(--nexvio-atc-bg-h) !important;
+	background-image: linear-gradient(rgba(127, 127, 127, .14), rgba(127, 127, 127, .14)) !important
+}
+
+/* states after the design colours */
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn.is-added {
+	background-color: var(--nexvio-atc-ok) !important;
+	background-image: none !important;
+	color: #fff !important;
+	border-color: var(--nexvio-atc-ok) !important
+}
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn.is-disabled,
+.nexvio-atc:not(.nexvio-atc--d-classic) .nexvio-atc__btn[disabled],
+.nexvio-atc:not(.nexvio-atc--d-classic).nexvio-atc--native .single_add_to_cart_button.disabled {
+	background-color: var(--nexvio-atc-dis-bg) !important;
+	background-image: none !important;
+	color: var(--nexvio-atc-dis-tc) !important;
+	border-color: transparent !important;
+	box-shadow: none !important
+}
+
+/* icon block */
+.nexvio-atc--d-split .nexvio-atc__btn { padding-left: 0; gap: 16px; overflow: hidden }
+.nexvio-atc--d-split .nexvio-atc__icon {
+	align-self: stretch;
+	width: var(--nexvio-atc-h);
+	flex-shrink: 0;
+	background: var(--nexvio-atc-ibox, rgba(0, 0, 0, .2))
+}
+.nexvio-atc--d-split.nexvio-atc--ip-right .nexvio-atc__btn { padding-left: 28px; padding-right: 0 }
+
+/* slide icon */
+.nexvio-atc--d-slide .nexvio-atc__icon {
+	max-width: 0;
+	opacity: 0;
+	overflow: hidden;
+	margin-right: calc(var(--nexvio-atc-igap, 8px) * -1);
+	transition: max-width .28s ease, opacity .2s ease, margin .28s ease
+}
+.nexvio-atc--d-slide .nexvio-atc__btn:hover .nexvio-atc__icon,
+.nexvio-atc--d-slide .nexvio-atc__btn:focus-visible .nexvio-atc__icon,
+.nexvio-atc--d-slide .nexvio-atc__btn.is-loading .nexvio-atc__icon {
+	max-width: 2.2em;
+	opacity: 1;
+	margin-right: 0
+}
+.nexvio-atc--d-slide.nexvio-atc--ip-right .nexvio-atc__icon { margin-right: 0; margin-left: calc(var(--nexvio-atc-igap, 8px) * -1) }
+.nexvio-atc--d-slide.nexvio-atc--ip-right .nexvio-atc__btn:hover .nexvio-atc__icon { margin-left: 0 }
+@media (hover: none) {
+	.nexvio-atc--d-slide .nexvio-atc__icon { max-width: 2.2em; opacity: 1; margin: 0 }
+}
+
+/* icon after the text */
+.nexvio-atc--ip-right .nexvio-atc__icon { order: 2 }
+
+/* hover effects */
+.nexvio-atc--anim-lift .nexvio-atc__btn { transition: background .15s, color .15s, transform .18s, box-shadow .18s }
+.nexvio-atc--anim-lift .nexvio-atc__btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -10px rgba(0, 0, 0, .55) !important }
+.nexvio-atc--anim-pulse .nexvio-atc__btn { transition: background .15s, color .15s, transform .18s }
+.nexvio-atc--anim-pulse .nexvio-atc__btn:hover { transform: scale(1.03) }
+.nexvio-atc--anim-shine .nexvio-atc__btn { overflow: hidden }
+.nexvio-atc--anim-shine .nexvio-atc__btn::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: -60%;
+	width: 40%;
+	background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .35), transparent);
+	transform: skewX(-18deg);
+	pointer-events: none
+}
+.nexvio-atc--anim-shine .nexvio-atc__btn:hover::before { left: 130%; transition: left .6s ease }
+.nexvio-atc--anim-icon .nexvio-atc__btn:hover .nexvio-atc__icon { animation: nexvio-atc-bounce .55s ease }
+@keyframes nexvio-atc-bounce { 30% { transform: translateY(-4px) rotate(-8deg) } 60% { transform: translateY(1px) rotate(6deg) } }
+@media (prefers-reduced-motion: reduce) {
+	.nexvio-atc__btn, .nexvio-atc__btn * { animation: none !important; transition: none !important }
+}
+
+/* icon only on phones */
+@media (max-width: 480px) {
+	.nexvio-atc--io-m .nexvio-atc__label { display: none }
+	.nexvio-atc--io-m .nexvio-atc__btn { padding: 0 18px }
+	.nexvio-atc--io-m .nexvio-atc__btn .nexvio-atc__icon { max-width: none; opacity: 1; margin: 0 }
+}
+
+/* arrangements (simple products) */
+.nexvio-atc--a-stack:not(.nexvio-atc--native) .nexvio-atc__form {
+	flex-wrap: wrap;
+	height: auto
+}
+.nexvio-atc--a-stack:not(.nexvio-atc--native) .nexvio-atc__qty { order: 1; height: var(--nexvio-atc-h) }
+.nexvio-atc--a-stack:not(.nexvio-atc--native) .nexvio-atc__wish { order: 2; margin-left: auto !important; height: var(--nexvio-atc-h) !important }
+.nexvio-atc--a-stack:not(.nexvio-atc--native) .nexvio-atc__btn { order: 3; flex: 1 0 100%; height: var(--nexvio-atc-h) }
+
+.nexvio-atc--a-above:not(.nexvio-atc--native) .nexvio-atc__form {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	height: auto
+}
+.nexvio-atc--a-above:not(.nexvio-atc--native) .nexvio-atc__qty { grid-column: 1 / -1; justify-self: start; height: var(--nexvio-atc-h) }
+.nexvio-atc--a-above:not(.nexvio-atc--native) .nexvio-atc__btn { height: var(--nexvio-atc-h); min-width: 0 }
+.nexvio-atc--a-above:not(.nexvio-atc--native) .nexvio-atc__wish { height: var(--nexvio-atc-h) !important }
+
+.nexvio-atc--a-wishfirst:not(.nexvio-atc--native) .nexvio-atc__wish { order: -1 }
+.nexvio-atc--a-wishfirst.nexvio-atc--native .nexvio-atc__wish { order: -1 }
+
+/* heart look */
+.nexvio-atc.nexvio-atc--wd-circle .nexvio-ps__wish.nexvio-atc__wish { border-radius: 999px; width: var(--nexvio-atc-h) }
+.nexvio-atc.nexvio-atc--wd-filled .nexvio-ps__wish.nexvio-atc__wish {
+	background: var(--nexvio-atc-won);
+	border-color: var(--nexvio-atc-won);
+	color: #fff
+}
+.nexvio-atc.nexvio-atc--wd-filled .nexvio-ps__wish.nexvio-atc__wish:hover,
+.nexvio-atc.nexvio-atc--wd-filled .nexvio-ps__wish.nexvio-atc__wish.is-on { color: #fff; filter: brightness(1.1) }
+.nexvio-atc.nexvio-atc--wd-ghost .nexvio-ps__wish.nexvio-atc__wish { background: transparent; border-color: transparent }

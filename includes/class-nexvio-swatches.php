@@ -52,10 +52,14 @@ class Nexvio_Swatches {
 		}
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'term_assets' ) );
 		foreach ( wc_get_attribute_taxonomy_names() as $taxonomy ) {
-			add_action( $taxonomy . '_add_form_fields', array( __CLASS__, 'field_add' ) );
-			add_action( $taxonomy . '_edit_form_fields', array( __CLASS__, 'field_edit' ) );
+			add_action( $taxonomy . '_add_form_fields', array( __CLASS__, 'field_add' ), 10, 1 );
+			add_action( $taxonomy . '_edit_form_fields', array( __CLASS__, 'field_edit' ), 10, 2 );
 			add_action( 'created_' . $taxonomy, array( __CLASS__, 'save' ) );
 			add_action( 'edited_' . $taxonomy, array( __CLASS__, 'save' ) );
+			add_filter( 'manage_edit-' . $taxonomy . '_columns', function ( $columns ) use ( $taxonomy ) {
+				return self::add_column( $columns, $taxonomy );
+			} );
+			add_filter( 'manage_' . $taxonomy . '_custom_column', array( __CLASS__, 'column_content' ), 10, 3 );
 		}
 	}
 
@@ -82,13 +86,31 @@ jQuery(function($){
 		});
 		frame.open();
 	});
+	function h6(h){h=String(h).replace('#','');if(h.length===3){h=h.replace(/(.)/g,'$1$1');}return '#'+h.toLowerCase();}
+	function r2h(r,g,b){return '#'+[r,g,b].map(function(n){n=Math.max(0,Math.min(255,parseInt(n,10)||0));return ('0'+n.toString(16)).slice(-2);}).join('');}
+	function fill(w,hex,from){
+		hex=h6(hex);
+		w.find('.nexvio-clr-pick').val(hex);
+		if(from!=='hex'){w.find('.nexvio-clr-hex').val(hex);}
+		if(from!=='rgb'){w.find('.nexvio-clr-r').val(parseInt(hex.substr(1,2),16));w.find('.nexvio-clr-g').val(parseInt(hex.substr(3,2),16));w.find('.nexvio-clr-b').val(parseInt(hex.substr(5,2),16));}
+	}
+	$(document).on('input change','.nexvio-clr-pick',function(){fill($(this).closest('.nexvio-clr'),this.value,'pick');});
+	$(document).on('input','.nexvio-clr-hex',function(){
+		var v=$.trim(this.value);
+		if(v&&v.charAt(0)!=='#'){v='#'+v;}
+		if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)){fill($(this).closest('.nexvio-clr'),v,'hex');}
+	});
+	$(document).on('input','.nexvio-clr-r,.nexvio-clr-g,.nexvio-clr-b',function(){
+		var w=$(this).closest('.nexvio-clr');
+		fill(w,r2h(w.find('.nexvio-clr-r').val(),w.find('.nexvio-clr-g').val(),w.find('.nexvio-clr-b').val()),'rgb');
+	});
 	$(document).on('click','.nexvio-swimg-remove',function(e){
 		e.preventDefault();
 		var w=$(this).closest('.nexvio-swimg');
 		w.find('input').val('');w.find('.nexvio-swimg-preview').empty();$(this).hide();
 	});
 	$(document).ajaxComplete(function(ev,x,o){
-		if(o&&o.data&&String(o.data).indexOf('action=add-tag')>-1){$('.nexvio-swimg input').val('');$('.nexvio-swimg-preview').empty();$('.nexvio-swimg-remove').hide();}
+		if(o&&o.data&&String(o.data).indexOf('action=add-tag')>-1){$('.nexvio-clr input[type=text],.nexvio-clr input[type=number]').val('');$('.nexvio-clr-pick').val('#cccccc');$('.nexvio-swimg input').val('');$('.nexvio-swimg-preview').empty();$('.nexvio-swimg-remove').hide();}
 	});
 });
 NEXVIOJS;
@@ -104,45 +126,102 @@ NEXVIOJS;
 		echo '<button type="button" class="button-link nexvio-swimg-remove"' . ( $url ? '' : ' style="display:none"' ) . '>' . esc_html__( 'Remove', 'nexvio' ) . '</button></div>';
 	}
 
-	public static function field_add() {
-		wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' );
+	/** What the attribute's type asks for on the term screens: "color", "image" or "" (nothing extra). */
+	private static function term_field_type( $taxonomy ) {
+		$type = class_exists( 'Nexvio_Attribute_Types' ) ? Nexvio_Attribute_Types::type_of( $taxonomy ) : '';
+		return in_array( $type, array( 'color', 'image' ), true ) ? $type : '';
+	}
+
+	/** Colour picker + HEX code + R / G / B boxes, kept in step by the script above. Empty HEX = use the colour name. */
+	private static function color_inputs( $value ) {
+		$hex = '';
+		$rgb = array( '', '', '' );
+		if ( is_string( $value ) && preg_match( '/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', trim( $value ), $m ) ) {
+			$h = strtolower( $m[1] );
+			if ( 3 === strlen( $h ) ) {
+				$h = $h[0] . $h[0] . $h[1] . $h[1] . $h[2] . $h[2];
+			}
+			$hex = '#' . $h;
+			$rgb = array( hexdec( substr( $h, 0, 2 ) ), hexdec( substr( $h, 2, 2 ) ), hexdec( substr( $h, 4, 2 ) ) );
+		}
+		?>
+		<div class="nexvio-clr" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+			<input type="color" class="nexvio-clr-pick" id="nexvio-swatch" value="<?php echo esc_attr( $hex ? $hex : '#cccccc' ); ?>" aria-label="<?php esc_attr_e( 'Pick a colour', 'nexvio' ); ?>" style="width:48px;height:34px;padding:2px">
+			<label style="font-weight:400">HEX <input type="text" class="nexvio-clr-hex" name="nexvio_swatch_color" value="<?php echo esc_attr( $hex ); ?>" maxlength="7" placeholder="#000000" autocomplete="off" spellcheck="false" style="width:96px;margin-left:4px"></label>
+			<label style="font-weight:400">R <input type="number" class="nexvio-clr-r" min="0" max="255" value="<?php echo esc_attr( $rgb[0] ); ?>" style="width:64px;margin-left:4px"></label>
+			<label style="font-weight:400">G <input type="number" class="nexvio-clr-g" min="0" max="255" value="<?php echo esc_attr( $rgb[1] ); ?>" style="width:64px;margin-left:4px"></label>
+			<label style="font-weight:400">B <input type="number" class="nexvio-clr-b" min="0" max="255" value="<?php echo esc_attr( $rgb[2] ); ?>" style="width:64px;margin-left:4px"></label>
+		</div>
+		<p class="description"><?php esc_html_e( 'Pick a colour, type a HEX code (#ff0000) or the R, G, B numbers. Leave empty to use the colour name. Used by Nexvio colour swatches on product cards and in filters.', 'nexvio' ); ?></p>
+		<?php
+	}
+
+	private static function color_field_add() {
 		?>
 		<div class="form-field">
 			<label for="nexvio-swatch"><?php esc_html_e( 'Swatch colour', 'nexvio' ); ?></label>
-			<input type="color" id="nexvio-swatch" name="nexvio_swatch_color" value="#cccccc" style="width:64px;height:34px;padding:2px">
-			<label style="display:inline-block;margin-left:8px;font-weight:400"><input type="checkbox" name="nexvio_swatch_none" value="1" checked> <?php esc_html_e( 'No colour (use the name)', 'nexvio' ); ?></label>
-			<p class="description"><?php esc_html_e( 'Used by Nexvio colour swatches on product cards and in filters.', 'nexvio' ); ?></p>
+			<?php self::color_inputs( '' ); ?>
 		</div>
+		<?php
+	}
+
+	private static function image_field_add() {
+		?>
 		<div class="form-field">
 			<label><?php esc_html_e( 'Swatch image', 'nexvio' ); ?></label>
 			<?php self::image_field( 0 ); ?>
-			<p class="description"><?php esc_html_e( 'Optional: a small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
+			<p class="description"><?php esc_html_e( 'A small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
 		</div>
 		<?php
 	}
 
-	public static function field_edit( $term ) {
-		$value = get_term_meta( $term->term_id, self::META, true );
+	/** "Add new term" form: the field follows the attribute type (Colour -> colour picker, Image -> image picker). */
+	public static function field_add( $taxonomy = '' ) {
+		$type = self::term_field_type( $taxonomy );
+		if ( '' === $type ) {
+			return;
+		}
+		wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' );
+		if ( 'color' === $type ) {
+			self::color_field_add();
+		} else {
+			self::image_field_add();
+		}
+	}
+
+	/** "Edit term" form. */
+	public static function field_edit( $term, $taxonomy = '' ) {
+		$taxonomy = $taxonomy ? $taxonomy : ( isset( $term->taxonomy ) ? $term->taxonomy : '' );
+		$type     = self::term_field_type( $taxonomy );
+		if ( '' === $type ) {
+			return;
+		}
+		if ( 'color' === $type ) {
+			$value = get_term_meta( $term->term_id, self::META, true );
+			?>
+			<tr class="form-field">
+				<th scope="row"><label for="nexvio-swatch"><?php esc_html_e( 'Swatch colour', 'nexvio' ); ?></label></th>
+				<td>
+					<?php wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); ?>
+					<?php self::color_inputs( $value ); ?>
+				</td>
+			</tr>
+			<?php
+			return;
+		}
 		?>
-		<tr class="form-field">
-			<th scope="row"><label for="nexvio-swatch"><?php esc_html_e( 'Swatch colour', 'nexvio' ); ?></label></th>
-			<td>
-				<?php wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); ?>
-				<input type="color" id="nexvio-swatch" name="nexvio_swatch_color" value="<?php echo esc_attr( $value ? $value : '#cccccc' ); ?>" style="width:64px;height:34px;padding:2px">
-				<label style="margin-left:8px"><input type="checkbox" name="nexvio_swatch_none" value="1"<?php checked( '' === (string) $value ); ?>> <?php esc_html_e( 'No colour (use the name)', 'nexvio' ); ?></label>
-				<p class="description"><?php esc_html_e( 'Used by Nexvio colour swatches on product cards and in filters.', 'nexvio' ); ?></p>
-			</td>
-		</tr>
 		<tr class="form-field">
 			<th scope="row"><?php esc_html_e( 'Swatch image', 'nexvio' ); ?></th>
 			<td>
+				<?php wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); ?>
 				<?php self::image_field( (int) get_term_meta( $term->term_id, self::IMAGE, true ) ); ?>
-				<p class="description"><?php esc_html_e( 'Optional: a small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
+				<p class="description"><?php esc_html_e( 'A small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
 			</td>
 		</tr>
 		<?php
 	}
 
+	/** Saves only the field that was on the screen, so a value is never wiped by a form that did not show it. */
 	public static function save( $term_id ) {
 		if ( ! isset( $_POST['nexvio_swatch_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nexvio_swatch_nonce'] ) ), 'nexvio_swatch' ) ) {
 			return;
@@ -150,19 +229,54 @@ NEXVIOJS;
 		if ( ! current_user_can( 'manage_product_terms' ) && ! current_user_can( 'manage_woocommerce' ) ) {
 			return;
 		}
-		$image = isset( $_POST['nexvio_swatch_image'] ) ? absint( wp_unslash( $_POST['nexvio_swatch_image'] ) ) : 0;
-		if ( $image ) {
-			update_term_meta( $term_id, self::IMAGE, $image );
-		} else {
-			delete_term_meta( $term_id, self::IMAGE );
+		if ( isset( $_POST['nexvio_swatch_image'] ) ) {
+			$image = absint( wp_unslash( $_POST['nexvio_swatch_image'] ) );
+			if ( $image ) {
+				update_term_meta( $term_id, self::IMAGE, $image );
+			} else {
+				delete_term_meta( $term_id, self::IMAGE );
+			}
 		}
-		$none  = ! empty( $_POST['nexvio_swatch_none'] );
-		$color = isset( $_POST['nexvio_swatch_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['nexvio_swatch_color'] ) ) : '';
-		if ( $none || ! $color ) {
-			delete_term_meta( $term_id, self::META );
-		} else {
-			update_term_meta( $term_id, self::META, $color );
+		if ( isset( $_POST['nexvio_swatch_color'] ) ) {
+			$raw   = trim( sanitize_text_field( wp_unslash( $_POST['nexvio_swatch_color'] ) ) );
+			$color = '' === $raw ? '' : sanitize_hex_color( '#' . ltrim( $raw, '#' ) );
+			if ( ! $color ) {
+				delete_term_meta( $term_id, self::META ); /* empty or not a valid HEX: use the colour name */
+			} else {
+				update_term_meta( $term_id, self::META, strtolower( $color ) );
+			}
 		}
+	}
+
+	/** Colour / image preview column in the terms list of a Colour or Image attribute. */
+	public static function add_column( $columns, $taxonomy ) {
+		if ( '' === self::term_field_type( $taxonomy ) || ! is_array( $columns ) ) {
+			return $columns;
+		}
+		$out = array();
+		foreach ( $columns as $key => $label ) {
+			$out[ $key ] = $label;
+			if ( 'cb' === $key ) {
+				$out['nexvio_swatch'] = esc_html__( 'Swatch', 'nexvio' );
+			}
+		}
+		return isset( $out['nexvio_swatch'] ) ? $out : $columns + array( 'nexvio_swatch' => esc_html__( 'Swatch', 'nexvio' ) );
+	}
+
+	public static function column_content( $content, $column, $term_id ) {
+		if ( 'nexvio_swatch' !== $column ) {
+			return $content;
+		}
+		$img = self::image_for( (int) $term_id );
+		if ( $img ) {
+			return '<img src="' . esc_url( $img ) . '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover">';
+		}
+		$term  = get_term( (int) $term_id );
+		$color = self::color_for( $term && ! is_wp_error( $term ) ? $term->name : '', (int) $term_id );
+		if ( $color ) {
+			return '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;border:1px solid #c3c4c7;background:' . esc_attr( $color ) . '"></span>';
+		}
+		return '&ndash;';
 	}
 
 	/* ------------------------------------------------------------------
@@ -245,6 +359,9 @@ NEXVIOJS;
 					return array( $key, $attr );
 				}
 				continue;
+			}
+			if ( $attr->is_taxonomy() && class_exists( 'Nexvio_Attribute_Types' ) && 'color' === Nexvio_Attribute_Types::type_of( $name ) ) {
+				return array( $key, $attr );
 			}
 			$hay = self::normalize( $attr->is_taxonomy() ? wc_attribute_label( $name ) . ' ' . $name : $name );
 			foreach ( self::$keywords as $word ) {

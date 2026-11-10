@@ -25,7 +25,12 @@ class Nexvio_Product_Slider_Widget extends Widget_Base {
 	}
 
 	public function get_title() {
-		return esc_html__( 'Product Slider', 'nexvio' );
+		return esc_html__( 'Products Slider Layouts', 'nexvio' );
+	}
+
+	/** The slider has its own 12 designs. */
+	protected function design_layout_group() {
+		return 'slider';
 	}
 
 	public function get_icon() {
@@ -41,7 +46,7 @@ class Nexvio_Product_Slider_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'nexvio' );
+		return array( 'nexvio-layout', 'nexvio' );
 	}
 
 	public function get_script_depends() {
@@ -58,9 +63,8 @@ class Nexvio_Product_Slider_Widget extends Widget_Base {
 		$this->register_query_section();
 		$this->register_card_sections();
 		$this->register_slider_section();
-		$this->register_layout_style_section();
+		$this->register_gs_card_styles();
 		$this->register_header_style_section();
-		$this->register_card_style_sections();
 		$this->register_nav_style_section();
 		$this->limit_classic_controls();
 	}
@@ -181,7 +185,7 @@ class Nexvio_Product_Slider_Widget extends Widget_Base {
 			'separator' => 'before',
 			'condition' => array( 'scroll_mode' => 'slide' ),
 		) );
-		$this->switcher( 'loop', esc_html__( 'Loop back to start', 'nexvio' ), 'yes', array( 'condition' => array( 'scroll_mode' => 'slide' ) ) );
+		$this->switcher( 'loop', esc_html__( 'Infinite loop (no jump back to the start)', 'nexvio' ), 'yes', array( 'condition' => array( 'scroll_mode' => 'slide' ) ) );
 		$this->switcher( 'drag', esc_html__( 'Drag with mouse', 'nexvio' ), 'yes' );
 		$this->switcher( 'autoplay', esc_html__( 'Autoplay', 'nexvio' ), '', array( 'separator' => 'before', 'condition' => array( 'scroll_mode' => 'slide' ) ) );
 		$this->add_control( 'autoplay_speed', array(

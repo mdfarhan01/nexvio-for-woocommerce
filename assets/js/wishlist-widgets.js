@@ -6,6 +6,10 @@
 
 	function setCount(n) {
 		n = parseInt(n, 10) || 0;
+		document.querySelectorAll('.nexvio-wb__count').forEach(function (c) {
+			c.textContent = n;
+			c.classList.toggle('is-hidden', c.getAttribute('data-hide-zero') === '1' && n < 1);
+		});
 		document.querySelectorAll('.nexvio-wli').forEach(function (a) {
 			var c = a.querySelector('.nexvio-wli__count');
 			a.classList.toggle('has-items', n > 0);
@@ -23,7 +27,7 @@
 
 	var fetching = false;
 	function refreshCount() {
-		if (!DATA.ajax || fetching || !document.querySelector('.nexvio-wli')) { return; }
+		if (!DATA.ajax || fetching || !document.querySelector('.nexvio-wli, .nexvio-wb__count')) { return; }
 		fetching = true;
 		var body = new FormData();
 		body.append('action', 'nexvio_wishlist_count');
@@ -146,7 +150,7 @@
 
 	function start() {
 		bind();
-		var needs = document.querySelector('.nexvio-wli[data-refresh="1"]');
+		var needs = document.querySelector('.nexvio-wli[data-refresh="1"], .nexvio-wb__count');
 		if (needs) { refreshCount(); }
 	}
 

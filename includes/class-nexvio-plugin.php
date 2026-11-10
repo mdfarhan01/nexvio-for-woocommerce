@@ -150,14 +150,6 @@ final class Nexvio_Plugin {
 	 */
 	public static function widgets() {
 		return array(
-			'product_slider' => array(
-				'class' => 'Nexvio_Product_Slider_Widget',
-				'file'  => 'class-nexvio-product-slider-widget.php',
-				'title' => __( 'Product Slider', 'nexvio' ),
-				'desc'  => __( 'Carousel of WooCommerce products with the card design, e.g. singles or new arrivals.', 'nexvio' ),
-				'icon'  => 'dashicons-images-alt2',
-				'group' => __( 'Products', 'nexvio' ),
-			),
 			'products_card' => array(
 				'class' => 'Nexvio_Products_Card_Widget',
 				'file'  => 'class-nexvio-products-card-widget.php',
@@ -172,6 +164,54 @@ final class Nexvio_Plugin {
 				'title' => __( 'Products Card Layouts', 'nexvio' ),
 				'desc'  => __( 'A grid of chosen products for any page (featured, on sale, categories…), with pagination and 11 designs.', 'nexvio' ),
 				'icon'  => 'dashicons-screenoptions',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'category_grid' => array(
+				'class' => 'Nexvio_Category_Grid_Widget',
+				'file'  => 'class-nexvio-category-grid-widget.php',
+				'title' => __( 'Product Category Grid', 'nexvio' ),
+				'desc'  => __( 'A responsive grid of product categories with image, name and product count. 3 designs, choose which categories, 3 main colours.', 'nexvio' ),
+				'icon'  => 'dashicons-category',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'category_slider' => array(
+				'class' => 'Nexvio_Category_Slider_Widget',
+				'file'  => 'class-nexvio-category-slider-widget.php',
+				'title' => __( 'Product Category Slider', 'nexvio' ),
+				'desc'  => __( 'The Product Category Grid as a slider: arrows, dots, swipe and mouse drag, autoplay and endless loop.', 'nexvio' ),
+				'icon'  => 'dashicons-images-alt2',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'category_grid_layouts' => array(
+				'class' => 'Nexvio_Category_Grid_Layouts_Widget',
+				'file'  => 'class-nexvio-category-grid-layouts-widget.php',
+				'title' => __( 'Category Grid Layouts', 'nexvio' ),
+				'desc'  => __( 'The Product Category Grid with 12 ready design layouts (cards, fade, round, pill, arch, frame, badge, bar, line, numbered…). Pick a picture, then change the 3 main colours.', 'nexvio' ),
+				'icon'  => 'dashicons-screenoptions',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'category_slider_layouts' => array(
+				'class' => 'Nexvio_Category_Slider_Layouts_Widget',
+				'file'  => 'class-nexvio-category-slider-layouts-widget.php',
+				'title' => __( 'Category Slider Layouts', 'nexvio' ),
+				'desc'  => __( 'The Product Category Slider with 12 ready design layouts. Arrows, dots, swipe, autoplay and endless loop.', 'nexvio' ),
+				'icon'  => 'dashicons-images-alt2',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'products_slider' => array(
+				'class' => 'Nexvio_Products_Slider_Widget',
+				'file'  => 'class-nexvio-products-slider-widget.php',
+				'title' => __( 'Products Slider', 'nexvio' ),
+				'desc'  => __( 'Product carousel with the Products Card design: arrows, swipe, mouse drag, autoplay and endless loop.', 'nexvio' ),
+				'icon'  => 'dashicons-images-alt2',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'product_slider' => array(
+				'class' => 'Nexvio_Product_Slider_Widget',
+				'file'  => 'class-nexvio-product-slider-widget.php',
+				'title' => __( 'Products Slider Layouts', 'nexvio' ),
+				'desc'  => __( 'Carousel of WooCommerce products with 12 slider card designs, endless loop and mouse drag.', 'nexvio' ),
+				'icon'  => 'dashicons-images-alt2',
 				'group' => __( 'Products', 'nexvio' ),
 			),
 			'product_showcase' => array(
@@ -220,6 +260,38 @@ final class Nexvio_Plugin {
 				'title' => __( 'Add to Cart', 'nexvio' ),
 				'desc'  => __( 'Quantity selector, "Add to cart" button (AJAX) and wishlist heart.', 'nexvio' ),
 				'icon'  => 'dashicons-cart',
+				'group' => __( 'Single product', 'nexvio' ),
+			),
+			'product_tabs' => array(
+				'class' => 'Nexvio_Product_Tabs_Widget',
+				'file'  => 'class-nexvio-product-tabs-widget.php',
+				'title' => __( 'Product Tabs', 'nexvio' ),
+				'desc'  => __( 'Three tabs: Description, Reviews and Add Review. Rating summary with star filter, sort, load more, and a premium review form with a big star selector.', 'nexvio' ),
+				'icon'  => 'dashicons-star-filled',
+				'group' => __( 'Single product', 'nexvio' ),
+			),
+			'product_variations' => array(
+				'class' => 'Nexvio_Product_Variations_Widget',
+				'file'  => 'class-nexvio-product-variations-widget.php',
+				'title' => __( 'Product Variations', 'nexvio' ),
+				'desc'  => __( 'The options of a variable product (Color, Size…) as dropdown, buttons, colour / image swatches or checkbox style, with a clear link and the stock line. Works together with the Add to Cart widget.', 'nexvio' ),
+				'icon'  => 'dashicons-art',
+				'group' => __( 'Single product', 'nexvio' ),
+			),
+			'smart_purchase' => array(
+				'class' => 'Nexvio_Smart_Purchase_Widget',
+				'file'  => 'class-nexvio-smart-purchase-widget.php',
+				'title' => __( 'Smart Purchase', 'nexvio' ),
+				'desc'  => __( 'A products grid with the Products Card design. Every card has an Add to cart button and opens a product popup (full-width image with gallery thumbnails, variations, quantity).', 'nexvio' ),
+				'icon'  => 'dashicons-cart',
+				'group' => __( 'Products', 'nexvio' ),
+			),
+			'product_images' => array(
+				'class' => 'Nexvio_Product_Images_Widget',
+				'file'  => 'class-nexvio-product-images-widget.php',
+				'title' => __( 'Product Images', 'nexvio' ),
+				'desc'  => __( 'Only the product image with its gallery below, above, left or right. Every image has the same size, is never cropped and loads in full resolution.', 'nexvio' ),
+				'icon'  => 'dashicons-format-gallery',
 				'group' => __( 'Single product', 'nexvio' ),
 			),
 			'product_filter' => array(
@@ -278,6 +350,14 @@ final class Nexvio_Plugin {
 				'icon'  => 'dashicons-heart',
 				'group' => __( 'Header', 'nexvio' ),
 			),
+			'wishlist_button' => array(
+				'class' => 'Nexvio_Wishlist_Button_Widget',
+				'file'  => 'class-nexvio-wishlist-button-widget.php',
+				'title' => __( 'Wishlist Button', 'nexvio' ),
+				'desc'  => __( 'Add to wishlist button with full control: 7 designs, own icons, text, counter, effects and every colour per state.', 'nexvio' ),
+				'icon'  => 'dashicons-heart',
+				'group' => __( 'Single product', 'nexvio' ),
+			),
 			'wishlist_card' => array(
 				'class' => 'Nexvio_Wishlist_Card_Widget',
 				'file'  => 'class-nexvio-wishlist-card-widget.php',
@@ -311,7 +391,74 @@ final class Nexvio_Plugin {
 		return is_array( $d ) ? $d : array();
 	}
 
+	/**
+	 * Feature switches of the dashboard (Filters, Add to Cart, Wishlist).
+	 * A feature that is switched off hides its widgets (Elementor + the Widgets page),
+	 * its dashboard page, and its front-end parts.
+	 * key => label, description, icon, dashboard page slug, widget keys
+	 */
+	public static function features() {
+		return array(
+			'filters'     => array(
+				'label'   => __( 'Filters', 'nexvio' ),
+				'desc'    => __( 'Product Filter and Filter Popup widgets, and the Filters settings page.', 'nexvio' ),
+				'icon'    => 'dashicons-filter',
+				'page'    => 'nexvio-filters',
+				'widgets' => array( 'product_filter', 'filter_drawer' ),
+			),
+			'add_to_cart' => array(
+				'label'   => __( 'Add to Cart', 'nexvio' ),
+				'desc'    => __( 'Add to Cart, Product Variations and Smart Purchase widgets, and the Add to Cart settings page.', 'nexvio' ),
+				'icon'    => 'dashicons-cart',
+				'page'    => 'nexvio-cart',
+				'widgets' => array( 'add_to_cart', 'product_variations', 'smart_purchase' ),
+			),
+			'wishlist'    => array(
+				'label'   => __( 'Wishlist', 'nexvio' ),
+				'desc'    => __( 'Wishlist widgets, the hearts on the product cards, and the Wishlist settings page.', 'nexvio' ),
+				'icon'    => 'dashicons-heart',
+				'page'    => 'nexvio-wishlist',
+				'widgets' => array( 'wishlist_icon', 'wishlist_button', 'wishlist_card', 'wishlist_grid' ),
+			),
+		);
+	}
+
+	public static function features_off() {
+		$d = get_option( 'nexvio_features_off', array() );
+		return is_array( $d ) ? $d : array();
+	}
+
+	public static function feature_enabled( $feature ) {
+		return ! in_array( $feature, self::features_off(), true );
+	}
+
+	/** The feature a widget belongs to ('' = none). */
+	public static function widget_feature( $key ) {
+		foreach ( self::features() as $f => $def ) {
+			if ( in_array( $key, $def['widgets'], true ) ) {
+				return $f;
+			}
+		}
+		return '';
+	}
+
+	/** The widgets that are not hidden by a switched-off feature. */
+	public static function visible_widgets() {
+		$out = array();
+		foreach ( self::widgets() as $key => $w ) {
+			$f = self::widget_feature( $key );
+			if ( '' === $f || self::feature_enabled( $f ) ) {
+				$out[ $key ] = $w;
+			}
+		}
+		return $out;
+	}
+
 	public static function is_enabled( $key ) {
+		$f = self::widget_feature( $key );
+		if ( '' !== $f && ! self::feature_enabled( $f ) ) {
+			return false;
+		}
 		return ! in_array( $key, self::disabled(), true );
 	}
 
@@ -321,14 +468,17 @@ final class Nexvio_Plugin {
 
 	public function boot() {
 		require_once NEXVIO_PATH . 'includes/class-nexvio-wishlist.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-reviews.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-filter-query.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-layouts.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-attribute-types.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-swatches.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-texts.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-filter-config.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-cart-settings.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-side-cart.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-showcase-ajax.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-smart-purchase-ajax.php';
 		require_once NEXVIO_PATH . 'admin/class-nexvio-admin.php';
 
 		Nexvio_Admin::init();
@@ -350,11 +500,14 @@ final class Nexvio_Plugin {
 		}
 
 		Nexvio_Wishlist::init();
+		Nexvio_Reviews::init();
 		Nexvio_Filter_Query::init();
+		Nexvio_Attribute_Types::init();
 		add_filter( 'safe_style_css', array( __CLASS__, 'safe_style_css' ) );
 		add_action( 'admin_init', array( 'Nexvio_Swatches', 'init_admin' ) );
 		add_action( 'woocommerce_init', array( 'Nexvio_Side_Cart', 'init' ) );
 		add_action( 'woocommerce_init', array( 'Nexvio_Showcase_Ajax', 'init' ) );
+		add_action( 'woocommerce_init', array( 'Nexvio_Smart_Purchase_Ajax', 'init' ) );
 
 		/* Elementor */
 		add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
@@ -443,11 +596,14 @@ final class Nexvio_Plugin {
 
 	public static function load_widget_classes() {
 		require_once NEXVIO_PATH . 'includes/class-nexvio-layouts.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-reviews.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-attribute-types.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-swatches.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-texts.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-filter-config.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-cart-settings.php';
 		require_once NEXVIO_PATH . 'includes/class-nexvio-side-cart.php';
+		require_once NEXVIO_PATH . 'includes/class-nexvio-smart-purchase-ajax.php';
 		require_once NEXVIO_PATH . 'includes/trait-nexvio-card.php';
 		foreach ( self::widgets() as $w ) {
 			require_once NEXVIO_PATH . 'widgets/' . $w['file'];
@@ -473,13 +629,20 @@ final class Nexvio_Plugin {
 			return;
 		}
 		$styles = array(
-			'nexvio'   => array( 'product-slider.css', array() ),
+			'nexvio-layout' => array( 'widget-layout.css', array() ),
+			'nexvio'   => array( 'product-slider.css', array( 'nexvio-layout' ) ),
 			'nexvio-add-to-cart'      => array( 'add-to-cart.css', array( 'nexvio' ) ),
 			'nexvio-wishlist-widgets' => array( 'wishlist-widgets.css', array() ),
+			'nexvio-wishlist-button'  => array( 'wishlist-button.css', array( 'nexvio' ) ),
 			'nexvio-product-filter'   => array( 'product-filter.css', array() ),
 			'nexvio-filter-drawer'    => array( 'filter-drawer.css', array( 'nexvio-product-filter' ) ),
 			'nexvio-header-search'    => array( 'header-search.css', array() ),
 			'nexvio-product-showcase' => array( 'product-showcase.css', array( 'nexvio-add-to-cart' ) ),
+			'nexvio-smart-purchase'   => array( 'smart-purchase.css', array( 'nexvio' ) ),
+			'nexvio-product-images'   => array( 'product-images.css', array() ),
+			'nexvio-product-variations' => array( 'product-variations.css', array() ),
+			'nexvio-product-tabs'     => array( 'product-tabs.css', array() ),
+			'nexvio-category-grid'    => array( 'category-grid.css', array() ),
 		);
 		foreach ( $styles as $handle => $st ) {
 			wp_register_style( $handle, NEXVIO_URL . 'assets/css/' . $st[0], $st[1], self::ver( 'assets/css/' . $st[0] ) );
@@ -497,6 +660,11 @@ final class Nexvio_Plugin {
 			'nexvio-view-switch'      => array( 'view-switch.js', array() ),
 			'nexvio-filter-drawer'    => array( 'filter-drawer.js', array() ),
 			'nexvio-product-showcase' => array( 'product-showcase.js', array() ),
+			'nexvio-smart-purchase'   => array( 'smart-purchase.js', array() ),
+			'nexvio-product-images'   => array( 'product-images.js', array() ),
+			'nexvio-product-variations' => array( 'product-variations.js', array() ),
+			'nexvio-product-tabs'     => array( 'product-tabs.js', array() ),
+			'nexvio-category-slider'  => array( 'category-slider.js', array() ),
 		);
 		foreach ( $scripts as $handle => $sc ) {
 			wp_register_script( $handle, NEXVIO_URL . 'assets/js/' . $sc[0], $sc[1], self::ver( 'assets/js/' . $sc[0] ), true );

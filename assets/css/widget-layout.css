@@ -1,0 +1,162 @@
+/* Nexvio widget layout (1.0.1)
+ * Every Nexvio content widget takes the full width of its column / container and
+ * can shrink inside it, so two widgets never sit on top of each other (desktop,
+ * tablet and phone). A width set in Elementor > Advanced > Layout > Width still wins.
+ * Not included on purpose: Floating Cart (fixed button) and the small header icons
+ * (Header Cart, Header Search, Wishlist Icon), which keep their natural size.
+ */
+
+/* 1. the widget box */
+.elementor-widget-nexvio_add_to_cart,
+.elementor-widget-nexvio_cart_panel,
+.elementor-widget-nexvio_category_grid,
+.elementor-widget-nexvio_category_grid_layouts,
+.elementor-widget-nexvio_category_slider,
+.elementor-widget-nexvio_category_slider_layouts,
+.elementor-widget-nexvio_filter_drawer,
+.elementor-widget-nexvio_product_filter,
+.elementor-widget-nexvio_product_grid,
+.elementor-widget-nexvio_product_images,
+.elementor-widget-nexvio_product_related,
+.elementor-widget-nexvio_product_showcase,
+.elementor-widget-nexvio_product_slider,
+.elementor-widget-nexvio_product_tabs,
+.elementor-widget-nexvio_product_variations,
+.elementor-widget-nexvio_products_archive,
+.elementor-widget-nexvio_products_card,
+.elementor-widget-nexvio_products_grid,
+.elementor-widget-nexvio_products_slider,
+.elementor-widget-nexvio_related_products,
+.elementor-widget-nexvio_smart_purchase,
+.elementor-widget-nexvio_wishlist_button,
+.elementor-widget-nexvio_wishlist_card,
+.elementor-widget-nexvio_wishlist_grid {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	--container-widget-width: 100%;
+	--container-widget-flex-grow: 0;
+}
+
+/* 2. inside Elementor flex containers (same value, higher weight than the container rule) */
+.e-con > .elementor-widget-nexvio_add_to_cart,
+.e-con-inner > .elementor-widget-nexvio_add_to_cart,
+.e-con > .elementor-widget-nexvio_cart_panel,
+.e-con-inner > .elementor-widget-nexvio_cart_panel,
+.e-con > .elementor-widget-nexvio_category_grid,
+.e-con-inner > .elementor-widget-nexvio_category_grid,
+.e-con > .elementor-widget-nexvio_category_grid_layouts,
+.e-con-inner > .elementor-widget-nexvio_category_grid_layouts,
+.e-con > .elementor-widget-nexvio_category_slider,
+.e-con-inner > .elementor-widget-nexvio_category_slider,
+.e-con > .elementor-widget-nexvio_category_slider_layouts,
+.e-con-inner > .elementor-widget-nexvio_category_slider_layouts,
+.e-con > .elementor-widget-nexvio_filter_drawer,
+.e-con-inner > .elementor-widget-nexvio_filter_drawer,
+.e-con > .elementor-widget-nexvio_product_filter,
+.e-con-inner > .elementor-widget-nexvio_product_filter,
+.e-con > .elementor-widget-nexvio_product_grid,
+.e-con-inner > .elementor-widget-nexvio_product_grid,
+.e-con > .elementor-widget-nexvio_product_images,
+.e-con-inner > .elementor-widget-nexvio_product_images,
+.e-con > .elementor-widget-nexvio_product_related,
+.e-con-inner > .elementor-widget-nexvio_product_related,
+.e-con > .elementor-widget-nexvio_product_showcase,
+.e-con-inner > .elementor-widget-nexvio_product_showcase,
+.e-con > .elementor-widget-nexvio_product_slider,
+.e-con-inner > .elementor-widget-nexvio_product_slider,
+.e-con > .elementor-widget-nexvio_product_tabs,
+.e-con-inner > .elementor-widget-nexvio_product_tabs,
+.e-con > .elementor-widget-nexvio_product_variations,
+.e-con-inner > .elementor-widget-nexvio_product_variations,
+.e-con > .elementor-widget-nexvio_products_archive,
+.e-con-inner > .elementor-widget-nexvio_products_archive,
+.e-con > .elementor-widget-nexvio_products_card,
+.e-con-inner > .elementor-widget-nexvio_products_card,
+.e-con > .elementor-widget-nexvio_products_grid,
+.e-con-inner > .elementor-widget-nexvio_products_grid,
+.e-con > .elementor-widget-nexvio_products_slider,
+.e-con-inner > .elementor-widget-nexvio_products_slider,
+.e-con > .elementor-widget-nexvio_related_products,
+.e-con-inner > .elementor-widget-nexvio_related_products,
+.e-con > .elementor-widget-nexvio_smart_purchase,
+.e-con-inner > .elementor-widget-nexvio_smart_purchase,
+.e-con > .elementor-widget-nexvio_wishlist_button,
+.e-con-inner > .elementor-widget-nexvio_wishlist_button,
+.e-con > .elementor-widget-nexvio_wishlist_card,
+.e-con-inner > .elementor-widget-nexvio_wishlist_card,
+.e-con > .elementor-widget-nexvio_wishlist_grid,
+.e-con-inner > .elementor-widget-nexvio_wishlist_grid {
+	width: var(--container-widget-width, 100%);
+	max-width: 100%;
+	min-width: 0;
+	flex-shrink: 1;
+}
+
+/* 3. the box inside the widget */
+.elementor-widget-nexvio_add_to_cart > .elementor-widget-container,
+.elementor-widget-nexvio_cart_panel > .elementor-widget-container,
+.elementor-widget-nexvio_category_grid > .elementor-widget-container,
+.elementor-widget-nexvio_category_grid_layouts > .elementor-widget-container,
+.elementor-widget-nexvio_category_slider > .elementor-widget-container,
+.elementor-widget-nexvio_category_slider_layouts > .elementor-widget-container,
+.elementor-widget-nexvio_filter_drawer > .elementor-widget-container,
+.elementor-widget-nexvio_product_filter > .elementor-widget-container,
+.elementor-widget-nexvio_product_grid > .elementor-widget-container,
+.elementor-widget-nexvio_product_images > .elementor-widget-container,
+.elementor-widget-nexvio_product_related > .elementor-widget-container,
+.elementor-widget-nexvio_product_showcase > .elementor-widget-container,
+.elementor-widget-nexvio_product_slider > .elementor-widget-container,
+.elementor-widget-nexvio_product_tabs > .elementor-widget-container,
+.elementor-widget-nexvio_product_variations > .elementor-widget-container,
+.elementor-widget-nexvio_products_archive > .elementor-widget-container,
+.elementor-widget-nexvio_products_card > .elementor-widget-container,
+.elementor-widget-nexvio_products_grid > .elementor-widget-container,
+.elementor-widget-nexvio_products_slider > .elementor-widget-container,
+.elementor-widget-nexvio_related_products > .elementor-widget-container,
+.elementor-widget-nexvio_smart_purchase > .elementor-widget-container,
+.elementor-widget-nexvio_wishlist_button > .elementor-widget-container,
+.elementor-widget-nexvio_wishlist_card > .elementor-widget-container,
+.elementor-widget-nexvio_wishlist_grid > .elementor-widget-container {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+}
+
+/* 4. the first element of each widget can not be wider than its box */
+.nexvio-ps,
+.nexvio-pg,
+.nexvio-pf,
+.nexvio-shw,
+.nexvio-sp,
+.nexvio-pi,
+.nexvio-var,
+.nexvio-wlg,
+.nexvio-atc,
+.nxt,
+.nxcg {
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box;
+}
+
+/* 5. long words, big images and wide tables stay inside the box */
+.nexvio-ps img,
+.nexvio-pg img,
+.nexvio-sp img,
+.nexvio-pi img,
+.nexvio-wlg img,
+.nxt img,
+.nxcg img {
+	max-width: 100%;
+}
+
+.nexvio-ps__title,
+.nexvio-ps__desc,
+.nxt-item,
+.nxt-list {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
