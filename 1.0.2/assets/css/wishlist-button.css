@@ -1,0 +1,173 @@
+/* Nexvio Wishlist Button */
+.nexvio-wb {
+	display: flex;
+	width: 100%;
+	--_w: 44px; --_h: 44px; --_r: 50%; --_pad: 0px; --_bw: 1px;
+	--_c: #e8edf4; --_c-h: #ff6b8a; --_c-a: #ff6b8a;
+	--_t: #e8edf4; --_t-h: #ffffff; --_t-a: #ffffff;
+	--_bg: #1f252e; --_bg-h: #262d37; --_bg-a: #1f252e;
+	--_bc: #313945; --_bc-h: #ff6b8a; --_bc-a: #ff6b8a
+}
+.nexvio-wb *, .nexvio-wb *::before, .nexvio-wb *::after { box-sizing: border-box }
+.nexvio-wb__note { margin: 0; font-size: 14px; color: #8f9aab }
+
+/* designs */
+.nexvio-wb--d-square { --_r: 8px }
+.nexvio-wb--d-pill { --_w: auto; --_r: 999px; --_pad: 0 20px }
+.nexvio-wb--d-outline {
+	--_w: auto; --_r: 6px; --_pad: 0 20px; --_bw: 2px;
+	--_c: #ff6b8a; --_t: #ff6b8a; --_bg: transparent; --_bc: #ff6b8a;
+	--_c-h: #fff; --_t-h: #fff; --_bg-h: #ff6b8a;
+	--_c-a: #fff; --_t-a: #fff; --_bg-a: #ff6b8a
+}
+.nexvio-wb--d-stack { --_w: auto; --_h: auto; --_r: 10px; --_pad: 12px 20px; --_bg-a: #1f252e }
+.nexvio-wb--d-link {
+	--_w: auto; --_h: auto; --_r: 0px; --_pad: 0px; --_bw: 0px;
+	--_bg: transparent; --_bg-h: transparent; --_bg-a: transparent;
+	--_bc: transparent; --_bc-h: transparent; --_bc-a: transparent; --_c-h: #ff6b8a
+}
+.nexvio-wb--d-count { --_w: auto; --_r: 999px; --_pad: 0 8px 0 20px }
+
+.nexvio-wb .nexvio-wb__btn.nexvio-ps__wish {
+	position: static;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--nexvio-wb-gap, 8px);
+	width: var(--nexvio-wb-w, var(--_w));
+	height: var(--nexvio-wb-h, var(--_h));
+	min-width: var(--nexvio-wb-h, var(--_h));
+	max-width: 100%;
+	margin: 0;
+	padding: var(--nexvio-wb-pad, var(--_pad));
+	border: var(--nexvio-wb-bw, var(--_bw)) solid var(--nexvio-wb-bc, var(--_bc));
+	border-radius: var(--nexvio-wb-r, var(--_r));
+	background: var(--nexvio-wb-bg, var(--_bg));
+	color: var(--nexvio-wb-c, var(--_c));
+	font: 600 15px/1.2 "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+	letter-spacing: .02em;
+	text-transform: none;
+	text-decoration: none;
+	cursor: pointer;
+	box-shadow: none;
+	transition: background var(--nexvio-wb-dur, .18s), color var(--nexvio-wb-dur, .18s), border-color var(--nexvio-wb-dur, .18s), box-shadow var(--nexvio-wb-dur, .18s), transform .18s;
+	-webkit-tap-highlight-color: transparent
+}
+.nexvio-wb--d-link .nexvio-wb__btn.nexvio-ps__wish,
+.nexvio-wb--d-stack .nexvio-wb__btn.nexvio-ps__wish { min-width: 0 }
+.nexvio-wb--d-stack .nexvio-wb__btn.nexvio-ps__wish { flex-direction: column }
+.nexvio-wb--d-stack .nexvio-wb__btn.nexvio-ps__wish { min-width: 90px }
+
+.nexvio-wb--full .nexvio-wb__btn.nexvio-ps__wish { width: 100% }
+
+/* text position */
+.nexvio-wb--lp-right .nexvio-wb__btn.nexvio-ps__wish { flex-direction: row }
+.nexvio-wb--lp-left .nexvio-wb__btn.nexvio-ps__wish { flex-direction: row-reverse }
+.nexvio-wb--lp-bottom .nexvio-wb__btn.nexvio-ps__wish { flex-direction: column }
+.nexvio-wb--lp-top .nexvio-wb__btn.nexvio-ps__wish { flex-direction: column-reverse }
+.nexvio-wb--lp-bottom .nexvio-wb__btn.nexvio-ps__wish,
+.nexvio-wb--lp-top .nexvio-wb__btn.nexvio-ps__wish { height: var(--nexvio-wb-h, auto); padding-top: var(--nexvio-wb-pad, 10px); padding-bottom: var(--nexvio-wb-pad, 10px) }
+
+/* states */
+.nexvio-wb .nexvio-wb__btn.nexvio-ps__wish:hover,
+.nexvio-wb .nexvio-wb__btn.nexvio-ps__wish:focus-visible {
+	background: var(--nexvio-wb-bg-h, var(--_bg-h));
+	border-color: var(--nexvio-wb-bc-h, var(--_bc-h));
+	color: var(--nexvio-wb-c-h, var(--_c-h))
+}
+.nexvio-wb .nexvio-wb__btn.nexvio-ps__wish.is-on {
+	background: var(--nexvio-wb-bg-a, var(--_bg-a));
+	border-color: var(--nexvio-wb-bc-a, var(--_bc-a));
+	color: var(--nexvio-wb-c-a, var(--_c-a))
+}
+.nexvio-wb .nexvio-wb__btn.nexvio-ps__wish.is-on:hover { filter: brightness(1.08) }
+.nexvio-wb .nexvio-wb__btn:focus-visible { outline: 2px solid var(--nexvio-wb-c-a, #ff6b8a); outline-offset: 2px }
+
+/* icon */
+.nexvio-wb__icon {
+	position: relative;
+	display: inline-grid;
+	place-items: center;
+	flex-shrink: 0;
+	width: var(--nexvio-wb-is, 20px);
+	height: var(--nexvio-wb-is, 20px);
+	font-size: var(--nexvio-wb-is, 20px);
+	line-height: 1
+}
+.nexvio-wb--d-stack .nexvio-wb__icon { width: var(--nexvio-wb-is, 26px); height: var(--nexvio-wb-is, 26px); font-size: var(--nexvio-wb-is, 26px) }
+.nexvio-wb--d-link .nexvio-wb__icon { width: var(--nexvio-wb-is, 18px); height: var(--nexvio-wb-is, 18px); font-size: var(--nexvio-wb-is, 18px) }
+.nexvio-wb__i { display: grid; place-items: center; width: 100%; height: 100%; grid-area: 1 / 1 }
+.nexvio-wb__i svg { width: 100%; height: 100%; display: block }
+.nexvio-wb__i i { font-size: 1em; line-height: 1 }
+.nexvio-wb .nexvio-wb__btn.is-on svg { fill: none }
+.nexvio-wb--fill .nexvio-wb__btn.is-on svg { fill: currentColor }
+.nexvio-wb--two-icons .nexvio-wb__i--on { display: none }
+.nexvio-wb--two-icons .is-on .nexvio-wb__i--on { display: grid }
+.nexvio-wb--two-icons .is-on .nexvio-wb__i--off { display: none }
+
+/* text swap */
+.nexvio-wb__label { color: var(--nexvio-wb-t, var(--_t)); white-space: nowrap; transition: color var(--nexvio-wb-dur, .18s) }
+.nexvio-wb__btn:hover .nexvio-wb__label { color: var(--nexvio-wb-t-h, var(--_t-h)) }
+.nexvio-wb__btn.is-on .nexvio-wb__label { color: var(--nexvio-wb-t-a, var(--_t-a)) }
+.nexvio-wb__t--on { display: none }
+.nexvio-wb__btn.is-on .nexvio-wb__t--on { display: inline }
+.nexvio-wb__btn.is-on .nexvio-wb__t--off { display: none }
+.nexvio-wb--d-link .nexvio-wb__label { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px }
+
+/* counter */
+.nexvio-wb__count {
+	display: inline-grid;
+	place-items: center;
+	min-width: var(--nexvio-wb-cs, 22px);
+	height: var(--nexvio-wb-cs, 22px);
+	padding: 0 6px;
+	border-radius: 999px;
+	background: var(--nexvio-wb-cbg, #3d8bff);
+	color: var(--nexvio-wb-cc, #fff);
+	font: 600 12px/1 "Barlow", "Segoe UI", system-ui, sans-serif
+}
+.nexvio-wb__count.is-hidden { display: none }
+.nexvio-wb__count.is-bump { animation: nexvio-wb-pop .35s ease }
+
+/* tooltip */
+.nexvio-wb__btn[data-tip] { position: relative }
+.nexvio-wb__btn[data-tip]::after {
+	content: attr(data-tip);
+	position: absolute;
+	bottom: calc(100% + 8px);
+	left: 50%;
+	transform: translate(-50%, 4px);
+	padding: 6px 10px;
+	border-radius: 5px;
+	background: var(--nexvio-wb-tipbg, #0e1116);
+	color: var(--nexvio-wb-tipc, #fff);
+	font: 500 12px/1.2 "Barlow", "Segoe UI", system-ui, sans-serif;
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity .15s, transform .15s;
+	z-index: 5
+}
+.nexvio-wb__btn[data-tip]:hover::after,
+.nexvio-wb__btn[data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0) }
+
+/* effects (only after the first click, never on page load) */
+.nexvio-wb--ready.nexvio-wb--anim-pop .is-on .nexvio-wb__icon { animation: nexvio-wb-pop .45s cubic-bezier(.3, 1.6, .5, 1) }
+.nexvio-wb--ready.nexvio-wb--anim-beat .is-on .nexvio-wb__icon { animation: nexvio-wb-beat .7s ease }
+.nexvio-wb--ready.nexvio-wb--anim-spin .is-on .nexvio-wb__icon { animation: nexvio-wb-spin .55s ease }
+.nexvio-wb--ready.nexvio-wb--anim-burst .is-on .nexvio-wb__icon::after {
+	content: "";
+	position: absolute;
+	inset: -4px;
+	border-radius: 50%;
+	border: 2px solid var(--nexvio-wb-c-a, #ff6b8a);
+	animation: nexvio-wb-burst .6s ease-out forwards;
+	pointer-events: none
+}
+@keyframes nexvio-wb-pop { 40% { transform: scale(1.4) } 100% { transform: scale(1) } }
+@keyframes nexvio-wb-beat { 20% { transform: scale(1.3) } 40% { transform: scale(.95) } 60% { transform: scale(1.2) } 100% { transform: scale(1) } }
+@keyframes nexvio-wb-spin { to { transform: rotate(360deg) scale(1) } }
+@keyframes nexvio-wb-burst { from { transform: scale(.6); opacity: .9 } to { transform: scale(2.1); opacity: 0 } }
+@media (prefers-reduced-motion: reduce) {
+	.nexvio-wb .nexvio-wb__icon, .nexvio-wb .nexvio-wb__icon::after, .nexvio-wb__count { animation: none !important }
+}

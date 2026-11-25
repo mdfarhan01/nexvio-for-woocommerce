@@ -1,0 +1,756 @@
+/* Nexvio Product Images: main image + gallery. Same box for every image, never cropped. */
+.elementor-widget-nexvio_product_images,
+.elementor-widget-nexvio_product_images > .elementor-widget-container {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0
+}
+
+.nexvio-pi {
+	--nexvio-pi-thumb: 64px;
+	--nexvio-pi-gap: 10px;
+	--nexvio-pi-below: 84px;
+	--nexvio-pi-below-gap: 10px;
+	--nexvio-pi-wrap-gap: 12px;
+	--nexvio-pi-tb: rgba(255, 255, 255, .7);
+	--nexvio-pi-tbh: #fff;
+	--nexvio-pi-tba: #fff;
+	--nexvio-pi-bb: #e5e7eb;
+	--nexvio-pi-bbh: #9ca3af;
+	--nexvio-pi-bba: #111827;
+	--nexvio-pi-bbw: 2px;
+	--nexvio-pi-bbr: 8px;
+	--nexvio-pi-bbg: #fff;
+	position: relative;
+	isolation: isolate; /* the arrows / thumbnails never paint over the next section */
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	box-sizing: border-box
+}
+
+.nexvio-pi *,
+.nexvio-pi *::before,
+.nexvio-pi *::after {
+	box-sizing: border-box
+}
+
+.nexvio-pi--empty {
+	padding: 24px;
+	border: 1px dashed #cbd5e1;
+	border-radius: 8px;
+	color: #64748b;
+	font-size: 14px;
+	text-align: center
+}
+
+.nexvio-pi__wrap {
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--nexvio-pi-wrap-gap);
+	align-items: stretch
+}
+
+/* ---------- main image ---------- */
+.nexvio-pi__stage {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	overflow: hidden;
+	background: #f3f4f6
+}
+
+.nexvio-pi__img {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	object-fit: contain; /* the whole picture is visible */
+	transition: opacity .2s ease, transform .2s ease;
+	user-select: none;
+	-webkit-user-drag: none
+}
+
+/* hover zoom (magnifier): the image grows around the mouse, the box stays the same */
+.nexvio-pi.has-lightbox .nexvio-pi__stage {
+	cursor: pointer
+}
+
+.nexvio-pi.has-zoom .nexvio-pi__stage {
+	cursor: zoom-in
+}
+
+.nexvio-pi__stage:focus {
+	outline: none
+}
+
+.nexvio-pi__stage:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: -2px
+}
+
+.nexvio-pi__stage.is-zooming .nexvio-pi__img {
+	transform: scale(var(--nexvio-pi-zoom, 2));
+	transition: opacity .2s ease, transform .15s ease
+}
+
+.nexvio-pi__img.is-swap {
+	opacity: 0
+}
+
+/* ---------- thumbnails inside the image, at the bottom, centred ---------- */
+.nexvio-pi__thumbs-wrap {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 2;
+	pointer-events: none
+}
+
+.nexvio-pi__thumbs {
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	gap: var(--nexvio-pi-gap);
+	padding: 28px 10px 10px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	background: linear-gradient(to top, rgba(0, 0, 0, .45), rgba(0, 0, 0, 0));
+	pointer-events: none;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch
+}
+
+.nexvio-pi__thumbs::-webkit-scrollbar {
+	display: none
+}
+
+.nexvio-pi__thumb {
+	flex: 0 0 auto;
+	width: min(var(--nexvio-pi-thumb), 48px);
+	height: min(var(--nexvio-pi-thumb), 48px);
+	padding: 0;
+	margin: 0;
+	border: 2px solid var(--nexvio-pi-tb);
+	border-radius: 8px;
+	background: #fff;
+	overflow: hidden;
+	cursor: pointer;
+	line-height: 0;
+	pointer-events: auto;
+	transition: border-color .2s, opacity .2s, transform .2s
+}
+
+/* centred, and still scrollable when there are many (works with hidden thumbnails too) */
+.nexvio-pi__thumbs::before,
+.nexvio-pi__thumbs::after {
+	content: "";
+	flex: 0 0 0;
+	width: 0
+}
+
+.nexvio-pi__thumbs::before {
+	margin-left: auto
+}
+
+.nexvio-pi__thumbs::after {
+	margin-right: auto
+}
+
+.nexvio-pi .nexvio-pi__thumb:hover,
+.nexvio-pi .nexvio-pi__thumb:focus {
+	opacity: 1 !important;
+	border-color: var(--nexvio-pi-tbh);
+	box-shadow: none
+}
+
+.nexvio-pi .nexvio-pi__thumb.is-active,
+.nexvio-pi .nexvio-pi__thumb.is-active:hover,
+.nexvio-pi .nexvio-pi__thumb.is-active:focus {
+	border-color: var(--nexvio-pi-tba)
+}
+
+/* how many thumbnails inside the image: desktop / tablet / phone */
+@media (min-width: 1025px) {
+	.nexvio-pi__thumb.hide-d { display: none }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) {
+	.nexvio-pi__thumb.hide-t { display: none }
+}
+
+@media (max-width: 767px) {
+	.nexvio-pi__thumb.hide-m { display: none }
+}
+
+.nexvio-pi__thumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain
+}
+
+/* ---------- gallery images outside the main image (position: top / bottom / left / right) ---------- */
+.nexvio-pi__below {
+	position: relative;
+	flex: 0 0 auto;
+	min-width: 0
+}
+
+/* ---------- gallery arrows: only on hover, only when the row can scroll ---------- */
+.nexvio-pi__gnav {
+	position: absolute;
+	z-index: 4;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .92);
+	color: #111827;
+	cursor: pointer;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, .2);
+	opacity: 0;
+	visibility: hidden;
+	pointer-events: none;
+	transition: opacity .2s, transform .2s, visibility .2s
+}
+
+.nexvio-pi__gnav svg {
+	width: 55%;
+	height: 55%
+}
+
+/* a row (gallery at the bottom / top): left and right */
+.nexvio-pi__gnav--a {
+	left: 4px;
+	top: 50%;
+	margin-top: -15px
+}
+
+.nexvio-pi__gnav--b {
+	right: 4px;
+	top: 50%;
+	margin-top: -15px
+}
+
+/* a column (gallery at the left / right): top and bottom */
+.nexvio-pi__below.is-vertical .nexvio-pi__gnav--a {
+	left: 50%;
+	top: 4px;
+	margin: 0 0 0 -15px
+}
+
+.nexvio-pi__below.is-vertical .nexvio-pi__gnav--b {
+	left: 50%;
+	right: auto;
+	top: auto;
+	bottom: 4px;
+	margin: 0 0 0 -15px
+}
+
+.nexvio-pi__below.is-vertical .nexvio-pi__gnav svg {
+	transform: rotate(90deg)
+}
+
+.nexvio-pi__below.is-scrollable:hover .nexvio-pi__gnav:not(.is-off),
+.nexvio-pi__below.is-scrollable:focus-within .nexvio-pi__gnav:not(.is-off) {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto
+}
+
+.nexvio-pi .nexvio-pi__gnav:hover {
+	background: #fff;
+	color: #111827;
+	transform: scale(1.1)
+}
+
+.nexvio-pi__below.is-vertical .nexvio-pi__gnav--a:hover,
+.nexvio-pi__below.is-vertical .nexvio-pi__gnav--b:hover {
+	transform: scale(1.1)
+}
+
+.nexvio-pi__gnav:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 2px
+}
+
+.nexvio-pi__below-list {
+	max-width: 100%;
+	display: flex;
+	flex-wrap: nowrap;
+	gap: var(--nexvio-pi-below-gap);
+	padding: 2px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none; /* no scrollbar: arrows instead */
+	-ms-overflow-style: none;
+	-webkit-overflow-scrolling: touch
+}
+
+.nexvio-pi__below-list::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0
+}
+
+.nexvio-pi__bthumb {
+	flex: 0 0 auto;
+	width: var(--nexvio-pi-below);
+	height: var(--nexvio-pi-below);
+	padding: 0;
+	margin: 0;
+	border: var(--nexvio-pi-bbw) solid var(--nexvio-pi-bb);
+	border-radius: var(--nexvio-pi-bbr);
+	background: var(--nexvio-pi-bbg);
+	overflow: hidden;
+	cursor: pointer;
+	line-height: 0;
+	transition: border-color .2s, opacity .2s, transform .2s
+}
+
+/* the theme's own button:hover / button:focus colours must not win here */
+.nexvio-pi .nexvio-pi__bthumb:hover,
+.nexvio-pi .nexvio-pi__bthumb:focus {
+	transform: translateY(-2px);
+	opacity: 1;
+	border-color: var(--nexvio-pi-bbh);
+	background: var(--nexvio-pi-bbg);
+	box-shadow: none
+}
+
+.nexvio-pi .nexvio-pi__bthumb.is-active,
+.nexvio-pi .nexvio-pi__bthumb.is-active:hover,
+.nexvio-pi .nexvio-pi__bthumb.is-active:focus {
+	border-color: var(--nexvio-pi-bba)
+}
+
+.nexvio-pi__bthumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain
+}
+
+.nexvio-pi__thumb:focus-visible,
+.nexvio-pi__bthumb:focus-visible,
+.nexvio-pi__nav:focus-visible {
+	outline: 2px solid #2563eb;
+	outline-offset: 2px
+}
+
+/* ---------- arrows ---------- */
+.nexvio-pi__nav {
+	position: absolute;
+	top: 50%;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 38px;
+	height: 38px;
+	padding: 0;
+	margin: -19px 0 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .9);
+	color: #111827;
+	cursor: pointer;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, .18);
+	opacity: 0;
+	transition: opacity .2s, transform .2s
+}
+
+.nexvio-pi__nav svg {
+	width: 55%;
+	height: 55%
+}
+
+.nexvio-pi__nav--prev {
+	left: 10px
+}
+
+.nexvio-pi__nav--next {
+	right: 10px
+}
+
+.nexvio-pi__stage:hover .nexvio-pi__nav,
+.nexvio-pi__nav:focus-visible {
+	opacity: 1
+}
+
+.nexvio-pi__nav:hover {
+	transform: scale(1.08)
+}
+
+@media (hover: none) {
+	.nexvio-pi__nav {
+		opacity: 1
+	}
+}
+
+/* ---------- position of the gallery images: desktop / tablet ---------- */
+@media (min-width: 768px) {
+	.nexvio-pi--pos-top .nexvio-pi__wrap {
+		flex-direction: column-reverse
+	}
+
+	.nexvio-pi--pos-bottom .nexvio-pi__wrap {
+		flex-direction: column
+	}
+
+	.nexvio-pi--pos-left .nexvio-pi__wrap {
+		flex-direction: row-reverse;
+		gap: var(--nexvio-pi-side-gap, var(--nexvio-pi-wrap-gap))
+	}
+
+	.nexvio-pi--pos-right .nexvio-pi__wrap {
+		flex-direction: row;
+		gap: var(--nexvio-pi-side-gap, var(--nexvio-pi-wrap-gap))
+	}
+
+	.nexvio-pi--pos-left .nexvio-pi__stage,
+	.nexvio-pi--pos-right .nexvio-pi__stage {
+		width: auto;
+		flex: 1 1 0
+	}
+
+	/* vertical row: as tall as the main image, scrolls when there are many images */
+	.nexvio-pi--pos-left .nexvio-pi__below,
+	.nexvio-pi--pos-right .nexvio-pi__below {
+		position: relative;
+		width: calc(var(--nexvio-pi-below) + 4px)
+	}
+
+	.nexvio-pi--pos-left .nexvio-pi__below-list,
+	.nexvio-pi--pos-right .nexvio-pi__below-list {
+		position: absolute;
+		inset: 0;
+		flex-direction: column;
+		overflow-x: hidden;
+		overflow-y: auto
+	}
+}
+
+/* ---------- position of the gallery images: phones ---------- */
+@media (max-width: 767px) {
+	.nexvio-pi--mpos-top .nexvio-pi__wrap {
+		flex-direction: column-reverse
+	}
+
+	.nexvio-pi--mpos-bottom .nexvio-pi__wrap {
+		flex-direction: column
+	}
+
+	.nexvio-pi--mpos-left .nexvio-pi__wrap {
+		flex-direction: row-reverse;
+		gap: var(--nexvio-pi-side-gap, var(--nexvio-pi-wrap-gap))
+	}
+
+	.nexvio-pi--mpos-right .nexvio-pi__wrap {
+		flex-direction: row;
+		gap: var(--nexvio-pi-side-gap, var(--nexvio-pi-wrap-gap))
+	}
+
+	.nexvio-pi--mpos-left .nexvio-pi__stage,
+	.nexvio-pi--mpos-right .nexvio-pi__stage {
+		width: auto;
+		flex: 1 1 0
+	}
+
+	/* vertical row: as tall as the main image, scrolls when there are many images */
+	.nexvio-pi--mpos-left .nexvio-pi__below,
+	.nexvio-pi--mpos-right .nexvio-pi__below {
+		position: relative;
+		width: calc(var(--nexvio-pi-below) + 4px)
+	}
+
+	.nexvio-pi--mpos-left .nexvio-pi__below-list,
+	.nexvio-pi--mpos-right .nexvio-pi__below-list {
+		position: absolute;
+		inset: 0;
+		flex-direction: column;
+		overflow-x: hidden;
+		overflow-y: auto
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+	.nexvio-pi__img,
+	.nexvio-pi__thumb,
+	.nexvio-pi__bthumb,
+	.nexvio-pi__nav,
+	.nexvio-pi__gnav,
+	.nexvio-lb,
+	.nexvio-lb__img {
+		transition-duration: .01ms !important
+	}
+}
+
+
+/* ---------- lightbox (full screen viewer) ---------- */
+html.nexvio-lb-open {
+	overflow: hidden
+}
+
+.nexvio-lb {
+	position: fixed;
+	inset: 0;
+	z-index: 2147483000;
+	display: block;
+	opacity: 0;
+	transition: opacity .25s ease;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-lb[hidden] {
+	display: none
+}
+
+.nexvio-lb.is-open {
+	opacity: 1
+}
+
+.nexvio-lb *,
+.nexvio-lb *::before,
+.nexvio-lb *::after {
+	box-sizing: border-box
+}
+
+.nexvio-lb__bg {
+	position: absolute;
+	inset: 0;
+	background: rgba(10, 10, 12, .94)
+}
+
+.nexvio-lb__stage {
+	position: absolute;
+	inset: 56px 72px 112px 72px;
+	display: flex;
+	align-items: center;
+	justify-content: center
+}
+
+.nexvio-lb.is-single .nexvio-lb__stage {
+	bottom: 56px
+}
+
+.nexvio-lb__img {
+	display: block;
+	max-width: 100%;
+	max-height: 100%;
+	width: auto;
+	height: auto;
+	object-fit: contain;
+	border-radius: 4px;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+	transition: opacity .2s ease;
+	user-select: none;
+	-webkit-user-drag: none
+}
+
+.nexvio-lb__img.is-swap {
+	opacity: 0
+}
+
+.nexvio-lb__x,
+.nexvio-lb__nav {
+	position: absolute;
+	z-index: 3;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	margin: 0;
+	border: 0;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, .14);
+	color: #fff;
+	cursor: pointer;
+	box-shadow: none;
+	transition: background .2s, transform .2s
+}
+
+.nexvio-lb .nexvio-lb__x:hover,
+.nexvio-lb .nexvio-lb__x:focus,
+.nexvio-lb .nexvio-lb__nav:hover,
+.nexvio-lb .nexvio-lb__nav:focus {
+	background: rgba(255, 255, 255, .28);
+	color: #fff;
+	box-shadow: none
+}
+
+.nexvio-lb__x:focus-visible,
+.nexvio-lb__nav:focus-visible,
+.nexvio-lb__thumb:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px
+}
+
+.nexvio-lb__x {
+	top: 12px;
+	right: 14px;
+	width: 42px;
+	height: 42px
+}
+
+.nexvio-lb__x svg {
+	width: 20px;
+	height: 20px
+}
+
+.nexvio-lb__nav {
+	top: 50%;
+	width: 48px;
+	height: 48px;
+	margin-top: -24px
+}
+
+.nexvio-lb__nav svg {
+	width: 55%;
+	height: 55%
+}
+
+.nexvio-lb__nav--prev {
+	left: 14px
+}
+
+.nexvio-lb__nav--next {
+	right: 14px
+}
+
+.nexvio-lb.is-single .nexvio-lb__nav {
+	display: none
+}
+
+.nexvio-lb__count {
+	position: absolute;
+	top: 22px;
+	left: 20px;
+	z-index: 3;
+	color: rgba(255, 255, 255, .85);
+	font-size: 14px;
+	letter-spacing: .04em;
+	line-height: 1
+}
+
+.nexvio-lb.is-single .nexvio-lb__count {
+	display: none
+}
+
+.nexvio-lb__strip {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 3;
+	display: flex;
+	flex-wrap: nowrap;
+	gap: 10px;
+	padding: 12px 16px 16px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch
+}
+
+.nexvio-lb__strip::-webkit-scrollbar {
+	display: none
+}
+
+/* centred when it fits, scrollable when there are many */
+.nexvio-lb__strip::before,
+.nexvio-lb__strip::after {
+	content: "";
+	flex: 0 0 0;
+	width: 0
+}
+
+.nexvio-lb__strip::before {
+	margin-left: auto
+}
+
+.nexvio-lb__strip::after {
+	margin-right: auto
+}
+
+.nexvio-lb__thumb {
+	flex: 0 0 auto;
+	width: 72px;
+	height: 72px;
+	padding: 0;
+	margin: 0;
+	border: 2px solid rgba(255, 255, 255, .25);
+	border-radius: 8px;
+	background: #fff;
+	overflow: hidden;
+	cursor: pointer;
+	line-height: 0;
+	opacity: .6;
+	box-shadow: none;
+	transition: opacity .2s, border-color .2s
+}
+
+.nexvio-lb .nexvio-lb__thumb:hover,
+.nexvio-lb .nexvio-lb__thumb:focus {
+	opacity: 1;
+	background: #fff;
+	border-color: rgba(255, 255, 255, .7);
+	box-shadow: none
+}
+
+.nexvio-lb .nexvio-lb__thumb.is-active {
+	opacity: 1;
+	border-color: #fff
+}
+
+.nexvio-lb__thumb img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain
+}
+
+@media (max-width: 767px) {
+	.nexvio-lb__stage {
+		inset: 56px 8px 96px 8px
+	}
+
+	.nexvio-lb.is-single .nexvio-lb__stage {
+		bottom: 56px
+	}
+
+	.nexvio-lb__nav {
+		width: 38px;
+		height: 38px;
+		margin-top: -19px;
+		background: rgba(0, 0, 0, .4)
+	}
+
+	.nexvio-lb__nav--prev {
+		left: 6px
+	}
+
+	.nexvio-lb__nav--next {
+		right: 6px
+	}
+
+	.nexvio-lb__thumb {
+		width: 56px;
+		height: 56px
+	}
+}

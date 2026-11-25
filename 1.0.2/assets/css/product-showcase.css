@@ -1,0 +1,878 @@
+/* Nexvio Product Showcase - values come from Elementor controls through CSS variables.
+   The defaults below also work before Elementor prints its own CSS (desktop: 2 columns, tablet/mobile: image on top). */
+.nexvio-shw {
+	--shw-img-w: 40%;
+	--shw-gap: 48px;
+	--shw-block-gap: 36px;
+	--shw-info-gap: 20px;
+	--shw-st-cols: minmax(0, var(--shw-img-w)) minmax(0, 1fr);
+	--shw-img-o: 1;
+	--shw-info-o: 2;
+	--shw-price-w: 170px;
+	--shw-buy-cols: var(--shw-price-w) minmax(0, 1fr);
+	--shw-ratio: 1 / 1;
+	--shw-list-d: flex;
+	--shw-list-cols: none;
+	--shw-list-wrap: wrap;
+	--shw-list-ov: visible;
+	--shw-list-gap: 14px;
+	--shw-item-fs: 1;
+	--shw-ok: #3ccf91;
+	--shw-low: #e8b949;
+	--shw-out: #ff6371;
+	display: flex;
+	flex-direction: column;
+	gap: var(--shw-block-gap);
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	color: inherit;
+}
+
+.nexvio-shw--list-above .nexvio-shw__list {
+	order: -1
+}
+
+.nexvio-shw *,
+.nexvio-shw *::before,
+.nexvio-shw *::after {
+	box-sizing: border-box
+}
+
+.nexvio-shw__empty {
+	margin: 0;
+	padding: 24px;
+	border: 1px dashed #555;
+	border-radius: 8px;
+	text-align: center;
+	color: #8f9aab
+}
+
+/* ---------- product view ---------- */
+.nexvio-shw__panel {
+	display: grid;
+	grid-template-columns: var(--shw-st-cols);
+	gap: var(--shw-gap);
+	align-items: start;
+	min-width: 0
+}
+
+.nexvio-shw__panel[hidden] {
+	display: none !important
+}
+
+/* the stage holds the panels; JS cross-fades them and animates the height (no jump, no layout shift) */
+.nexvio-shw__stage {
+	position: relative;
+	min-width: 0;
+	overflow-anchor: none
+}
+
+.nexvio-shw__stage.is-moving {
+	overflow: hidden
+}
+
+.nexvio-shw__panel.is-leaving {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	pointer-events: none
+}
+
+.nexvio-shw__panel.is-entering {
+	will-change: opacity, transform
+}
+
+.nexvio-shw__media {
+	order: var(--shw-img-o);
+	position: relative;
+	min-width: 0;
+	width: 100%;
+	overflow: hidden;
+	background: #fff;
+	border: 0 solid #2a2a2a;
+	border-radius: 16px;
+	aspect-ratio: var(--shw-ratio);
+	display: grid;
+	place-items: center
+}
+
+.nexvio-shw__media-link {
+	display: block;
+	width: 100%;
+	height: 100%
+}
+
+.nexvio-shw .nexvio-shw__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	max-width: 100%;
+	object-fit: contain;
+	margin: 0;
+	border: 0;
+	border-radius: 0;
+	box-shadow: none
+}
+
+.nexvio-shw__info {
+	order: var(--shw-info-o);
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--shw-info-gap);
+	container-type: inline-size;
+	container-name: nexvio-shw-info
+}
+
+.nexvio-shw .nexvio-shw__title {
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: clamp(22px, 2.4vw, 30px);
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none
+}
+
+.nexvio-shw .nexvio-shw__title a {
+	color: inherit;
+	text-decoration: none
+}
+
+.nexvio-shw .nexvio-shw__desc {
+	color: inherit;
+	font-size: 15px;
+	line-height: 1.6
+}
+
+.nexvio-shw .nexvio-shw__desc p {
+	margin: 0 0 .8em;
+	color: inherit;
+	font-size: inherit;
+	line-height: inherit
+}
+
+.nexvio-shw .nexvio-shw__desc>:last-child {
+	margin-bottom: 0
+}
+
+/* price | payments + button */
+.nexvio-shw__buy {
+	display: grid;
+	grid-template-columns: var(--shw-buy-cols);
+	gap: 24px 32px;
+	align-items: start;
+	min-width: 0
+}
+
+.nexvio-shw__pricebox {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px
+}
+
+.nexvio-shw__price {
+	color: inherit;
+	font-weight: 700;
+	font-size: 20px;
+	line-height: 1.3;
+	white-space: nowrap
+}
+
+.nexvio-shw__price .amount,
+.nexvio-shw__price bdi {
+	color: inherit
+}
+
+.nexvio-shw__price del {
+	opacity: .75;
+	font-weight: 500;
+	font-size: .8em;
+	margin-right: 6px
+}
+
+.nexvio-shw__price ins {
+	background: transparent;
+	text-decoration: none
+}
+
+.nexvio-shw__side {
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px
+}
+
+@container nexvio-shw-info (max-width:460px) {
+	.nexvio-shw .nexvio-shw__buy {
+		grid-template-columns: minmax(0, 1fr)
+	}
+}
+
+/* stock countdown */
+.nexvio-shw__stock {
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	width: 100%;
+	color: var(--shw-ok);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.3
+}
+
+.nexvio-shw__stock.is-low,
+.nexvio-shw__stock.is-pre {
+	color: var(--shw-low)
+}
+
+.nexvio-shw__stock.is-out {
+	color: var(--shw-out)
+}
+
+.nexvio-shw__bar {
+	display: block;
+	width: 100%;
+	height: 6px;
+	border-radius: 99px;
+	background: rgba(128, 128, 128, .28);
+	overflow: hidden
+}
+
+.nexvio-shw__bar-fill {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: currentColor;
+	transition: width .6s ease
+}
+
+.nexvio-shw--pulse .nexvio-shw__stock.is-low .nexvio-shw__bar-fill {
+	animation: nexvio-shw-pulse 1.4s ease-in-out infinite
+}
+
+@keyframes nexvio-shw-pulse {
+
+	0%,
+	100% {
+		opacity: 1
+	}
+
+	50% {
+		opacity: .45
+	}
+}
+
+/* payment options */
+.nexvio-shw__pays {
+	display: flex;
+	flex-direction: column;
+	gap: 14px
+}
+
+.nexvio-shw__pay {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px 16px;
+	border: 1px solid #e3e6ec;
+	border-radius: 8px;
+	background: #fff;
+	color: #1d2330;
+	font-size: 13px;
+	line-height: 1.45
+}
+
+.nexvio-shw__pay-text {
+	flex: 1;
+	min-width: 0;
+	color: inherit;
+	overflow-wrap: break-word;
+	word-break: normal;
+	hyphens: none
+}
+
+.nexvio-shw__pay .woocommerce-Price-amount,
+.nexvio-shw__pay bdi {
+	color: inherit;
+	font-weight: 700
+}
+
+.nexvio-shw__pay-link {
+	color: #3d6fd6;
+	font-weight: 600;
+	text-decoration: underline;
+	text-underline-offset: 2px
+}
+
+.nexvio-shw__pay-badge {
+	flex: 0 0 auto;
+	display: inline-block;
+	padding: 2px 10px;
+	border-radius: 6px;
+	background: #3bffb1;
+	color: #111;
+	font-weight: 800;
+	font-size: 15px;
+	line-height: 1.35;
+	letter-spacing: -.01em;
+	text-transform: lowercase
+}
+
+.nexvio-shw__pay-logo {
+	flex: 0 0 auto;
+	display: block;
+	height: 22px;
+	width: auto;
+	max-width: 120px;
+	object-fit: contain
+}
+
+/* payment options that come from the Tabby / Tamara plugins (their own widgets draw the card) */
+.nexvio-shw__ext {
+	display: block;
+	min-width: 0;
+	max-width: 100%;
+	margin: 0
+}
+
+.nexvio-shw__ext--tabby {
+	min-height: 1px
+}
+
+.nexvio-shw__ext tamara-widget {
+	display: block;
+	max-width: 100%
+}
+
+/* add to cart (re-uses the Add to Cart widget markup + AJAX).
+   Defaults sit on .nexvio-shw__atc (1 class, loaded after add-to-cart.css) so they beat .nexvio-atc; Elementor's controls (2 classes) beat these. */
+.nexvio-shw__atc {
+	--nexvio-atc-h: 40px;
+	--nexvio-atc-gap: 12px;
+	--nexvio-atc-bg: #0a6df0;
+	--nexvio-atc-bg-h: #2d86ff;
+	--nexvio-atc-tc: #fff;
+	--nexvio-atc-tc-h: #fff;
+	--nexvio-atc-bradius: 999px;
+	--nexvio-atc-qbg: transparent;
+	--nexvio-atc-ibg: transparent;
+	--nexvio-atc-qborder: currentColor;
+	--nexvio-atc-qcolor: currentColor;
+	--nexvio-atc-step: currentColor;
+	--nexvio-atc-step-h: rgba(128, 128, 128, .22);
+	--nexvio-atc-iw: 38px;
+	--nexvio-atc-stepw: 36px;
+	--nexvio-atc-qradius: 2px;
+}
+
+.nexvio-shw .nexvio-shw__atc {
+	width: auto;
+	max-width: 100%
+}
+
+.nexvio-shw.nexvio-shw--btnfull .nexvio-shw__atc {
+	width: 100%
+}
+
+.nexvio-shw--btnfull .nexvio-shw__atc .nexvio-atc__btn {
+	flex: 1;
+	min-width: 0
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__form {
+	height: var(--nexvio-atc-h)
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__btn {
+	clip-path: none;
+	padding: 0 26px;
+	min-width: 140px;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 13px;
+	line-height: 1.1;
+	letter-spacing: .06em;
+	text-transform: uppercase;
+	text-decoration: none;
+	border-radius: var(--nexvio-atc-bradius)
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__btn:hover {
+	text-decoration: none
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__btn.is-disabled {
+	opacity: .9
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__qty {
+	border-radius: var(--nexvio-atc-qradius)
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__input {
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 14px
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-shw__qtyin {
+	flex: 0 0 auto;
+	width: var(--nexvio-atc-iw);
+	height: auto;
+	padding: 0 4px;
+	border: 1px solid var(--nexvio-atc-qborder);
+	border-radius: var(--nexvio-atc-qradius);
+	background: var(--nexvio-atc-qbg);
+	color: var(--nexvio-atc-qcolor)
+}
+
+.nexvio-shw .nexvio-shw__atc .nexvio-atc__msg {
+	margin-top: 8px
+}
+
+/* product list */
+.nexvio-shw__list {
+	position: relative;
+	display: var(--shw-list-d);
+	grid-template-columns: var(--shw-list-cols);
+	flex-wrap: var(--shw-list-wrap);
+	overflow-x: var(--shw-list-ov);
+	gap: var(--shw-list-gap);
+	min-width: 0;
+	-webkit-overflow-scrolling: touch;
+	scrollbar-width: thin
+}
+
+.nexvio-shw .nexvio-shw__item {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-width: 0;
+	min-height: 48px;
+	margin: 0;
+	padding: 10px 24px;
+	border: 1px solid #262626;
+	border-radius: 10px;
+	background: #050505;
+	color: #fff;
+	box-shadow: none;
+	cursor: pointer;
+	font-family: inherit;
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none;
+	text-align: center;
+	white-space: normal;
+	transition: background-color .18s, border-color .18s, color .18s, transform .18s;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-shw .nexvio-shw__item:hover:not(.is-active) {
+	background: #111;
+	border-color: #555;
+	color: #fff
+}
+
+.nexvio-shw .nexvio-shw__item.is-active {
+	background: #050505;
+	border-color: #fff;
+	color: #fff
+}
+
+.nexvio-shw .nexvio-shw__item:active {
+	transform: scale(.98)
+}
+
+.nexvio-shw .nexvio-shw__item:focus-visible {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+.nexvio-shw__item-label {
+	min-width: 0;
+	overflow-wrap: anywhere
+}
+
+.nexvio-shw__item-img {
+	flex: 0 0 auto;
+	display: block;
+	width: 32px;
+	aspect-ratio: 1/1;
+	border-radius: 6px;
+	overflow: hidden;
+	background: #fff
+}
+
+.nexvio-shw .nexvio-shw__item-img img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+	margin: 0;
+	border: 0;
+	border-radius: 0
+}
+
+/* one-row scroll mode: items keep their width (--shw-item-fs is 0 there) */
+.nexvio-shw .nexvio-shw__item {
+	flex-shrink: var(--shw-item-fs, 1)
+}
+
+/* defaults for tablet and mobile (Elementor's own per-device values override these) */
+@media (max-width:1024px) {
+	.nexvio-shw {
+		--shw-st-cols: minmax(0, 1fr);
+		--shw-img-o: 1;
+		--shw-info-o: 2;
+		--shw-gap: 28px
+	}
+
+	.nexvio-shw__media {
+		max-width: 520px;
+		margin-inline: auto
+	}
+}
+
+@media (max-width:767px) {
+	.nexvio-shw {
+		--shw-buy-cols: minmax(0, 1fr);
+		--shw-list-d: grid;
+		--shw-list-cols: repeat(2, minmax(0, 1fr));
+		--shw-block-gap: 28px;
+		--shw-list-gap: 10px
+	}
+
+	.nexvio-shw .nexvio-shw__item {
+		padding: 10px 12px;
+		font-size: 13px
+	}
+
+	.nexvio-shw__price {
+		font-size: 19px
+	}
+}
+
+@media (prefers-reduced-motion:reduce) {
+	.nexvio-shw__bar-fill {
+		animation: none !important;
+		transition: none !important
+	}
+}
+
+/* ---------- variations (colour, size…) ----------
+   Defaults live in CSS variables on .nexvio-shw__vars; the Elementor controls set the same variables (2 classes) and win. */
+.nexvio-shw__vars {
+	--shw-v-dir: row;
+	--shw-v-align: center;
+	--shw-v-gap: 14px;
+	--shw-v-optgap: 8px;
+	--shw-v-labelgap: 12px;
+	--shw-v-labelw: 0px;
+	--shw-v-ddbg: #ffffff;
+	--shw-v-ddc: #111111;
+	--shw-v-ddbc: #cfd4dc;
+	--shw-v-ddw: min(100%, 280px);
+	--shw-v-ddh: 40px;
+	--shw-v-ddr: 8px;
+	--shw-v-bh: 38px;
+	--shw-v-pad: 6px 16px;
+	--shw-v-bw: 1px;
+	--shw-v-br: 8px;
+	--shw-v-bg: transparent;
+	--shw-v-c: currentColor;
+	--shw-v-bc: rgba(128, 128, 128, .55);
+	--shw-v-bg-h: rgba(128, 128, 128, .16);
+	--shw-v-c-h: currentColor;
+	--shw-v-bc-h: currentColor;
+	--shw-v-bg-a: rgba(128, 128, 128, .22);
+	--shw-v-c-a: currentColor;
+	--shw-v-bc-a: currentColor;
+	--shw-v-swsize: 32px;
+	--shw-v-swr: 999px;
+	--shw-v-swbc: rgba(128, 128, 128, .6);
+	--shw-v-swring: currentColor;
+	--shw-v-cbs: 18px;
+	--shw-v-cbr: 4px;
+	--shw-v-cbc: currentColor;
+	--shw-v-cba: #0a6df0;
+	--shw-v-cbt: #ffffff;
+	--shw-v-unav: .35;
+	--shw-v-missing: #ff6371;
+	display: flex;
+	flex-direction: column;
+	gap: var(--shw-v-gap);
+	min-width: 0;
+	max-width: 100%;
+}
+
+.nexvio-shw__var {
+	display: flex;
+	flex-direction: var(--shw-v-dir);
+	align-items: var(--shw-v-align);
+	gap: var(--shw-v-labelgap);
+	min-width: 0
+}
+
+.nexvio-shw .nexvio-shw__var-label {
+	flex: 0 0 auto;
+	min-width: var(--shw-v-labelw);
+	margin: 0;
+	padding: 0;
+	color: inherit;
+	font-family: inherit;
+	font-weight: 700;
+	font-size: 15px;
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-transform: none
+}
+
+.nexvio-shw__var-opts {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--shw-v-optgap)
+}
+
+.nexvio-shw__vars--checkbox .nexvio-shw__var-opts {
+	gap: 8px 20px
+}
+
+.nexvio-shw__var.is-missing .nexvio-shw__var-label {
+	color: var(--shw-v-missing)
+}
+
+.nexvio-shw__var.is-missing .nexvio-shw__var-opts {
+	animation: nexvio-shw-shake .35s ease
+}
+
+@keyframes nexvio-shw-shake {
+
+	0%,
+	100% {
+		transform: translateX(0)
+	}
+
+	25% {
+		transform: translateX(-5px)
+	}
+
+	75% {
+		transform: translateX(5px)
+	}
+}
+
+/* dropdown */
+.nexvio-shw .nexvio-shw__select {
+	display: block;
+	width: var(--shw-v-ddw);
+	max-width: 100%;
+	height: var(--shw-v-ddh);
+	margin: 0;
+	padding: 0 38px 0 12px;
+	border: 1px solid var(--shw-v-ddbc);
+	border-radius: var(--shw-v-ddr);
+	background-color: var(--shw-v-ddbg);
+	color: var(--shw-v-ddc);
+	box-shadow: none;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.2;
+	cursor: pointer;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	appearance: none;
+	background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+	background-position: calc(100% - 19px) 50%, calc(100% - 14px) 50%;
+	background-size: 5px 5px, 5px 5px;
+	background-repeat: no-repeat
+}
+
+.nexvio-shw .nexvio-shw__select:focus-visible {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+.nexvio-shw .nexvio-shw__select option.is-unavailable {
+	color: #9aa3b2
+}
+
+/* buttons */
+.nexvio-shw .nexvio-shw__opt--btn {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: var(--shw-v-bh);
+	margin: 0;
+	padding: var(--shw-v-pad);
+	border: var(--shw-v-bw) solid var(--shw-v-bc);
+	border-radius: var(--shw-v-br);
+	background: var(--shw-v-bg);
+	color: var(--shw-v-c);
+	box-shadow: none;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.2;
+	letter-spacing: 0;
+	text-transform: none;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color .18s, border-color .18s, color .18s, box-shadow .18s;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-shw .nexvio-shw__opt--btn:hover:not(.is-selected) {
+	background: var(--shw-v-bg-h);
+	color: var(--shw-v-c-h);
+	border-color: var(--shw-v-bc-h)
+}
+
+.nexvio-shw .nexvio-shw__opt--btn.is-selected {
+	background: var(--shw-v-bg-a);
+	color: var(--shw-v-c-a);
+	border-color: var(--shw-v-bc-a);
+	box-shadow: 0 0 0 1px var(--shw-v-bc-a)
+}
+
+.nexvio-shw .nexvio-shw__opt--btn:focus-visible,
+.nexvio-shw .nexvio-shw__opt--sw:focus-visible {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+/* swatches */
+.nexvio-shw .nexvio-shw__opt--sw {
+	position: relative;
+	display: inline-block;
+	flex: 0 0 auto;
+	width: var(--shw-v-swsize);
+	height: var(--shw-v-swsize);
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	border: 1px solid var(--shw-v-swbc);
+	border-radius: var(--shw-v-swr);
+	background: var(--sw, #999);
+	box-shadow: none;
+	cursor: pointer;
+	transition: outline-color .15s, transform .15s;
+	-webkit-tap-highlight-color: transparent
+}
+
+.nexvio-shw .nexvio-shw__opt--sw.is-image {
+	background: var(--sw-img) center/cover no-repeat, var(--sw, #999)
+}
+
+.nexvio-shw .nexvio-shw__opt--sw:hover:not(.is-selected) {
+	transform: scale(1.08)
+}
+
+.nexvio-shw .nexvio-shw__opt--sw.is-selected {
+	outline: 2px solid var(--shw-v-swring);
+	outline-offset: 3px
+}
+
+/* checkbox style */
+.nexvio-shw .nexvio-shw__opt--check {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 2px 0;
+	color: inherit;
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: 1.3;
+	cursor: pointer
+}
+
+.nexvio-shw .nexvio-shw__opt--check input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	pointer-events: none
+}
+
+.nexvio-shw__box {
+	flex: 0 0 auto;
+	display: inline-grid;
+	place-items: center;
+	width: var(--shw-v-cbs);
+	height: var(--shw-v-cbs);
+	border: 2px solid var(--shw-v-cbc);
+	border-radius: var(--shw-v-cbr);
+	background: transparent;
+	transition: background-color .15s, border-color .15s
+}
+
+.nexvio-shw__box::after {
+	content: "";
+	display: block;
+	width: 32%;
+	height: 58%;
+	margin-top: -12%;
+	border: solid var(--shw-v-cbt);
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
+	opacity: 0;
+	transition: opacity .12s
+}
+
+.nexvio-shw__opt--check input:checked+.nexvio-shw__box {
+	background: var(--shw-v-cba);
+	border-color: var(--shw-v-cba)
+}
+
+.nexvio-shw__opt--check input:checked+.nexvio-shw__box::after {
+	opacity: 1
+}
+
+.nexvio-shw__opt--check input:focus-visible+.nexvio-shw__box {
+	outline: 2px solid #3d8bff;
+	outline-offset: 2px
+}
+
+/* options that are not available with the current choice */
+.nexvio-shw__opt.is-unavailable {
+	opacity: var(--shw-v-unav)
+}
+
+.nexvio-shw__opt--btn.is-unavailable::after,
+.nexvio-shw__opt--sw.is-unavailable::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	background: linear-gradient(to top right, transparent calc(50% - 1px), currentColor, transparent calc(50% + 1px))
+}
+
+.nexvio-shw__vars[data-unav="hide"] .is-unavailable {
+	display: none !important
+}
+
+@media (max-width:767px) {
+	.nexvio-shw__vars {
+		--shw-v-ddw: 100%
+	}
+}
