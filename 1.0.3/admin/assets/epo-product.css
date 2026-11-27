@@ -1,0 +1,30 @@
+#woocommerce-product-data ul.wc-tabs li.nexvio_epo_options a::before{content:"\f175";font-family:dashicons}
+#nexvio_epo_data.nexvio-pt{padding:14px!important;box-sizing:border-box}
+#nexvio_epo_data label,#nexvio_epo_data legend{float:none;width:auto;margin:0;padding:0}
+#nexvio_epo_data input,#nexvio_epo_data select,#nexvio_epo_data textarea{float:none}
+#nexvio_epo_data #nexvio-app.nexvio-pt__app{display:block;min-height:0;background:transparent;overflow:visible;isolation:auto;padding:0}
+#nexvio_epo_data #nexvio-app.nexvio-pt__app::before,#nexvio_epo_data #nexvio-app.nexvio-pt__app::after{display:none}
+.nexvio-pt__hero{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;margin:0 0 16px;border-radius:16px;color:#fff;background:linear-gradient(135deg,#7c5cff 0%,#5b6cff 45%,#2f9bff 100%);box-shadow:0 10px 26px rgba(91,108,255,.28)}
+.nexvio-pt__hero strong{display:block;font-size:16px;margin:0 0 4px;color:#fff}
+.nexvio-pt__hero p{margin:0;color:rgba(255,255,255,.9);font-size:13px;line-height:1.55;max-width:760px}
+.nexvio-pt__hero-ico{flex:0 0 auto;width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff}
+.nexvio-pt__hero-ico::before{width:22px;height:22px;font-size:22px;line-height:22px}
+.nexvio-pt__forms{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 16px;font-size:13px;color:#6b7489}
+.nexvio-pt__chip{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;background:#eef1ff;color:#4a5af0;font-weight:600;text-decoration:none}
+.nexvio-pt__chip:hover{background:#e0e5ff;color:#3446e8}
+.nexvio-pt__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:20px;align-items:start}
+.nexvio-pt__grid>*{min-width:0}
+.nexvio-pt__note{margin:12px 4px 0;color:#6b7489;font-size:12.5px}
+
+/* Product data box: these boxes clip (WooCommerce tab background is 9999px tall) but must never become a scroll area (it hid the banner text after a scroll) */
+#woocommerce-product-data,#woocommerce-product-data>.inside,#woocommerce-product-data .panel-wrap,#woocommerce-product-data .panel-wrap.product_data,#woocommerce-product-data .wc-metaboxes-wrapper{overflow:hidden!important;overflow:clip!important;display:flow-root}
+#woocommerce-product-data #nexvio_epo_data{overflow:visible!important}
+
+/* Compact "Fields of this product" header */
+#nexvio_epo_data .nexvio-set__head{gap:12px;padding:12px 18px;align-items:center}
+#nexvio_epo_data .nexvio-set__icon{width:36px;height:36px;line-height:36px;font-size:18px;border-radius:10px}
+#nexvio_epo_data .nexvio-set__icon::before{width:auto;height:auto;line-height:36px;font-size:18px}
+#nexvio_epo_data .nexvio-set__head h2{margin:0!important;padding:0!important;font-size:15px;line-height:1.3;text-align:left}
+#nexvio_epo_data .nexvio-set__head p{margin:2px 0 0!important;padding:0!important;font-size:12.5px;line-height:1.4;text-align:left}
+#nexvio_epo_data .nexvio-fb__list{padding:12px 18px 2px}
+#nexvio_epo_data .nexvio-fb__add{padding:8px 18px 16px}

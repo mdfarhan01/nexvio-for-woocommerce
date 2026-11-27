@@ -1,0 +1,357 @@
+<?php
+ if ( ! defined( 'ABSPATH' ) ) { exit; } class Nexvio_Swatches { const META = 'nexvio_swatch_color'; const IMAGE = 'nexvio_swatch_image'; private static $keywords = array( 'color', 'colour', 'couleur', 'farbe', 'colore', 'kleur', 'cor' ); private static $names = array( 'black' => '#111111', 'noir' => '#111111', 'white' => '#ffffff', 'blanc' => '#ffffff', 'ivory' => '#fffff0', 'ivoire' => '#fffff0', 'cream' => '#f5ecd7', 'creme' => '#f5ecd7', 'off white' => '#f6f3ea', 'beige' => '#e8dcc4', 'sand' => '#d8c7a3', 'sable' => '#d8c7a3', 'grey' => '#9ca3af', 'gray' => '#9ca3af', 'gris' => '#9ca3af', 'light grey' => '#d1d5db', 'light gray' => '#d1d5db', 'gris clair' => '#d1d5db', 'dark grey' => '#4b5563', 'dark gray' => '#4b5563', 'gris fonce' => '#4b5563', 'charcoal' => '#36454f', 'anthracite' => '#383e42', 'silver' => '#c0c0c0', 'argent' => '#c0c0c0', 'red' => '#dc2626', 'rouge' => '#dc2626', 'burgundy' => '#800020', 'bordeaux' => '#6d071a', 'maroon' => '#800000', 'wine' => '#722f37', 'pink' => '#f4a6b8', 'rose' => '#f4a6b8', 'light pink' => '#ffc9d6', 'rose clair' => '#ffc9d6', 'hot pink' => '#ff4f9a', 'fuchsia' => '#d946ef', 'blush' => '#f3c6c1', 'coral' => '#ff7f50', 'corail' => '#ff7f50', 'orange' => '#f97316', 'peach' => '#ffcba4', 'peche' => '#ffcba4', 'apricot' => '#fbceb1', 'yellow' => '#facc15', 'jaune' => '#facc15', 'mustard' => '#e1ad01', 'moutarde' => '#e1ad01', 'gold' => '#d4af37', 'or' => '#d4af37', 'lemon' => '#fff44f', 'green' => '#16a34a', 'vert' => '#16a34a', 'light green' => '#86efac', 'vert clair' => '#86efac', 'dark green' => '#14532d', 'vert fonce' => '#14532d', 'olive' => '#708238', 'kaki' => '#8a8650', 'khaki' => '#c3b091', 'mint' => '#98ff98', 'menthe' => '#98ff98', 'emerald' => '#2e8b57', 'emeraude' => '#2e8b57', 'emerald green' => '#2e8b57', 'lime' => '#84cc16', 'sage' => '#9caf88', 'blue' => '#2563eb', 'bleu' => '#2563eb', 'light blue' => '#add8e6', 'bleu clair' => '#add8e6', 'sky blue' => '#87ceeb', 'baby blue' => '#a7c7e7', 'dark blue' => '#1e3a8a', 'bleu fonce' => '#1e3a8a', 'navy' => '#0b1f60', 'navy blue' => '#0b1f60', 'marine' => '#0b1f60', 'bleu marine' => '#0b1f60', 'royal blue' => '#4169e1', 'denim' => '#4a6fa5', 'teal' => '#0f766e', 'turquoise' => '#40e0d0', 'cyan' => '#06b6d4', 'aqua' => '#00ffff', 'purple' => '#7e22ce', 'violet' => '#7c3aed', 'lavender' => '#c4b5fd', 'lavande' => '#c4b5fd', 'lilac' => '#c8a2c8', 'lilas' => '#c8a2c8', 'plum' => '#8e4585', 'prune' => '#8e4585', 'mauve' => '#b784a7', 'brown' => '#7c4a1e', 'marron' => '#7c4a1e', 'brun' => '#7c4a1e', 'chocolate' => '#5c3317', 'chocolat' => '#5c3317', 'camel' => '#c19a6b', 'tan' => '#d2b48c', 'cognac' => '#9a463d', 'caramel' => '#af6f09', 'taupe' => '#8b8589', 'coffee' => '#6f4e37', 'multicolor' => 'linear-gradient(135deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)', 'multicolour' => 'linear-gradient(135deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)', 'multicolore' => 'linear-gradient(135deg,#ef4444,#f59e0b,#22c55e,#3b82f6,#a855f7)', 'transparent' => 'repeating-conic-gradient(#e5e7eb 0 25%,#fff 0 50%) 50%/8px 8px', 'clear' => 'repeating-conic-gradient(#e5e7eb 0 25%,#fff 0 50%) 50%/8px 8px', ); public static function init_admin() { if ( ! function_exists( 'wc_get_attribute_taxonomy_names' ) ) { return; } add_action( 'admin_enqueue_scripts', array( __CLASS__, 'term_assets' ) ); foreach ( wc_get_attribute_taxonomy_names() as $taxonomy ) { add_action( $taxonomy . '_add_form_fields', array( __CLASS__, 'field_add' ), 10, 1 ); add_action( $taxonomy . '_edit_form_fields', array( __CLASS__, 'field_edit' ), 10, 2 ); add_action( 'created_' . $taxonomy, array( __CLASS__, 'save' ) ); add_action( 'edited_' . $taxonomy, array( __CLASS__, 'save' ) ); add_filter( 'manage_edit-' . $taxonomy . '_columns', function ( $columns ) use ( $taxonomy ) { return self::add_column( $columns, $taxonomy ); } ); add_filter( 'manage_' . $taxonomy . '_custom_column', array( __CLASS__, 'column_content' ), 10, 3 ); } } public static function term_assets() { $screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null; if ( ! $screen || empty( $screen->taxonomy ) || 0 !== strpos( $screen->taxonomy, 'pa_' ) ) { return; } wp_enqueue_media(); $js = <<<'NEXVIOJS'
+jQuery(function($){
+	var frame;
+	$(document).on('click','.nexvio-swimg-pick',function(e){
+		e.preventDefault();
+		var w=$(this).closest('.nexvio-swimg');
+		frame=wp.media({title:w.data('title'),multiple:false,library:{type:'image'}});
+		frame.on('select',function(){
+			var a=frame.state().get('selection').first().toJSON();
+			var url=a.sizes&&a.sizes.thumbnail?a.sizes.thumbnail.url:a.url;
+			w.find('input').val(a.id);
+			w.find('.nexvio-swimg-preview').empty().append($('<img alt="">').attr('src',url).css({width:48,height:48,borderRadius:'50%',objectFit:'cover'}));
+			w.find('.nexvio-swimg-remove').show();
+		});
+		frame.open();
+	});
+	function h6(h){h=String(h).replace('#','');if(h.length===3){h=h.replace(/(.)/g,'$1$1');}return '#'+h.toLowerCase();}
+	function r2h(r,g,b){return '#'+[r,g,b].map(function(n){n=Math.max(0,Math.min(255,parseInt(n,10)||0));return ('0'+n.toString(16)).slice(-2);}).join('');}
+	function fill(w,hex,from){
+		hex=h6(hex);
+		w.find('.nexvio-clr-pick').val(hex);
+		if(from!=='hex'){w.find('.nexvio-clr-hex').val(hex);}
+		if(from!=='rgb'){w.find('.nexvio-clr-r').val(parseInt(hex.substr(1,2),16));w.find('.nexvio-clr-g').val(parseInt(hex.substr(3,2),16));w.find('.nexvio-clr-b').val(parseInt(hex.substr(5,2),16));}
+	}
+	$(document).on('input change','.nexvio-clr-pick',function(){fill($(this).closest('.nexvio-clr'),this.value,'pick');});
+	$(document).on('input','.nexvio-clr-hex',function(){
+		var v=$.trim(this.value);
+		if(v&&v.charAt(0)!=='#'){v='#'+v;}
+		if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)){fill($(this).closest('.nexvio-clr'),v,'hex');}
+	});
+	$(document).on('input','.nexvio-clr-r,.nexvio-clr-g,.nexvio-clr-b',function(){
+		var w=$(this).closest('.nexvio-clr');
+		fill(w,r2h(w.find('.nexvio-clr-r').val(),w.find('.nexvio-clr-g').val(),w.find('.nexvio-clr-b').val()),'rgb');
+	});
+	$(document).on('click','.nexvio-swimg-remove',function(e){
+		e.preventDefault();
+		var w=$(this).closest('.nexvio-swimg');
+		w.find('input').val('');w.find('.nexvio-swimg-preview').empty();$(this).hide();
+	});
+	$(document).ajaxComplete(function(ev,x,o){
+		if(o&&o.data&&String(o.data).indexOf('action=add-tag')>-1){$('.nexvio-clr input[type=text],.nexvio-clr input[type=number]').val('');$('.nexvio-clr-pick').val('#cccccc');$('.nexvio-swimg input').val('');$('.nexvio-swimg-preview').empty();$('.nexvio-swimg-remove').hide();}
+	});
+});
+NEXVIOJS;
+wp_add_inline_script( 'jquery-core', $js ); } private static function image_field( $value ) { $url = $value ? wp_get_attachment_image_url( (int) $value, 'thumbnail' ) : ''; echo '<div class="nexvio-swimg" data-title="' . esc_attr__( 'Swatch image', 'nexvio' ) . '" style="display:flex;align-items:center;gap:10px">'; echo '<span class="nexvio-swimg-preview">' . ( $url ? '<img src="' . esc_url( $url ) . '" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover">' : '' ) . '</span>'; echo '<input type="hidden" name="nexvio_swatch_image" value="' . esc_attr( $value ? (int) $value : '' ) . '">'; echo '<button type="button" class="button nexvio-swimg-pick">' . esc_html__( 'Choose image', 'nexvio' ) . '</button>'; echo '<button type="button" class="button-link nexvio-swimg-remove"' . ( $url ? '' : ' style="display:none"' ) . '>' . esc_html__( 'Remove', 'nexvio' ) . '</button></div>'; } private static function term_field_type( $taxonomy ) { $type = class_exists( 'Nexvio_Attribute_Types' ) ? Nexvio_Attribute_Types::type_of( $taxonomy ) : ''; return in_array( $type, array( 'color', 'image' ), true ) ? $type : ''; } private static function color_inputs( $value ) { $hex = ''; $rgb = array( '', '', '' ); if ( is_string( $value ) && preg_match( '/^#?([0-9a-f]{3}|[0-9a-f]{6})$/i', trim( $value ), $m ) ) { $h = strtolower( $m[1] ); if ( 3 === strlen( $h ) ) { $h = $h[0] . $h[0] . $h[1] . $h[1] . $h[2] . $h[2]; } $hex = '#' . $h; $rgb = array( hexdec( substr( $h, 0, 2 ) ), hexdec( substr( $h, 2, 2 ) ), hexdec( substr( $h, 4, 2 ) ) ); } ?>
+		<div class="nexvio-clr" style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
+			<input type="color" class="nexvio-clr-pick" id="nexvio-swatch" value="<?php echo esc_attr( $hex ? $hex : '#cccccc' ); ?>" aria-label="<?php esc_attr_e( 'Pick a colour', 'nexvio' ); ?>" style="width:48px;height:34px;padding:2px">
+			<label style="font-weight:400">HEX <input type="text" class="nexvio-clr-hex" name="nexvio_swatch_color" value="<?php echo esc_attr( $hex ); ?>" maxlength="7" placeholder="#000000" autocomplete="off" spellcheck="false" style="width:96px;margin-left:4px"></label>
+			<label style="font-weight:400">R <input type="number" class="nexvio-clr-r" min="0" max="255" value="<?php echo esc_attr( $rgb[0] ); ?>" style="width:64px;margin-left:4px"></label>
+			<label style="font-weight:400">G <input type="number" class="nexvio-clr-g" min="0" max="255" value="<?php echo esc_attr( $rgb[1] ); ?>" style="width:64px;margin-left:4px"></label>
+			<label style="font-weight:400">B <input type="number" class="nexvio-clr-b" min="0" max="255" value="<?php echo esc_attr( $rgb[2] ); ?>" style="width:64px;margin-left:4px"></label>
+		</div>
+		<p class="description"><?php esc_html_e( 'Pick a colour, type a HEX code (#ff0000) or the R, G, B numbers. Leave empty to use the colour name. Used by Nexvio colour swatches on product cards and in filters.', 'nexvio' ); ?></p>
+		<?php
+ } private static function color_field_add() { ?>
+		<div class="form-field">
+			<label for="nexvio-swatch"><?php esc_html_e( 'Swatch colour', 'nexvio' ); ?></label>
+			<?php self::color_inputs( '' ); ?>
+		</div>
+		<?php
+ } private static function image_field_add() { ?>
+		<div class="form-field">
+			<label><?php esc_html_e( 'Swatch image', 'nexvio' ); ?></label>
+			<?php self::image_field( 0 ); ?>
+			<p class="description"><?php esc_html_e( 'A small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
+		</div>
+		<?php
+ } public static function field_add( $taxonomy = '' ) { $type = self::term_field_type( $taxonomy ); if ( '' === $type ) { return; } wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); if ( 'color' === $type ) { self::color_field_add(); } else { self::image_field_add(); } } public static function field_edit( $term, $taxonomy = '' ) { $taxonomy = $taxonomy ? $taxonomy : ( isset( $term->taxonomy ) ? $term->taxonomy : '' ); $type = self::term_field_type( $taxonomy ); if ( '' === $type ) { return; } if ( 'color' === $type ) { $value = get_term_meta( $term->term_id, self::META, true ); ?>
+			<tr class="form-field">
+				<th scope="row"><label for="nexvio-swatch"><?php esc_html_e( 'Swatch colour', 'nexvio' ); ?></label></th>
+				<td>
+					<?php wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); ?>
+					<?php self::color_inputs( $value ); ?>
+				</td>
+			</tr>
+			<?php
+ return; } ?>
+		<tr class="form-field">
+			<th scope="row"><?php esc_html_e( 'Swatch image', 'nexvio' ); ?></th>
+			<td>
+				<?php wp_nonce_field( 'nexvio_swatch', 'nexvio_swatch_nonce' ); ?>
+				<?php self::image_field( (int) get_term_meta( $term->term_id, self::IMAGE, true ) ); ?>
+				<p class="description"><?php esc_html_e( 'A small picture (pattern, fabric, print). Shown instead of the colour.', 'nexvio' ); ?></p>
+			</td>
+		</tr>
+		<?php
+ }
+public static function save( $term_id ) {
+if ( ! isset( $_POST['nexvio_swatch_nonce'] ) || ! wp_verify_nonce( sanitize_key( wp_unslash( $_POST['nexvio_swatch_nonce'] ) ), 'nexvio_swatch' ) ) {
+return;
+}
+if ( ! current_user_can( 'manage_product_terms' ) && ! current_user_can( 'manage_woocommerce' ) ) {
+return;
+}
+if ( isset( $_POST['nexvio_swatch_image'] ) ) {
+$image = absint( wp_unslash( $_POST['nexvio_swatch_image'] ) );
+if ( $image ) {
+update_term_meta( $term_id, self::IMAGE, $image );
+}
+else {
+delete_term_meta( $term_id, self::IMAGE );
+}
+}
+if ( isset( $_POST['nexvio_swatch_color'] ) ) {
+$raw = trim( sanitize_text_field( wp_unslash( $_POST['nexvio_swatch_color'] ) ) );
+$color = '' === $raw ? '' : sanitize_hex_color( '#' . ltrim( $raw, '#' ) );
+if ( ! $color ) {
+delete_term_meta( $term_id, self::META );
+}
+else {
+update_term_meta( $term_id, self::META, strtolower( $color ) );
+}
+}
+}
+public static function add_column( $columns, $taxonomy ) {
+if ( '' === self::term_field_type( $taxonomy ) || ! is_array( $columns ) ) {
+return $columns;
+}
+$out = array();
+foreach ( $columns as $key => $label ) {
+$out[ $key ] = $label;
+if ( 'cb' === $key ) {
+$out['nexvio_swatch'] = esc_html__( 'Swatch', 'nexvio' );
+}
+}
+return isset( $out['nexvio_swatch'] ) ? $out : $columns + array( 'nexvio_swatch' => esc_html__( 'Swatch', 'nexvio' ) );
+}
+public static function column_content( $content, $column, $term_id ) {
+if ( 'nexvio_swatch' !== $column ) {
+return $content;
+}
+$img = self::image_for( (int) $term_id );
+if ( $img ) {
+return '<img src="' . esc_url( $img ) . '" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover">';
+}
+$term = get_term( (int) $term_id );
+$color = self::color_for( $term && ! is_wp_error( $term ) ? $term->name : '', (int) $term_id );
+if ( $color ) {
+return '<span style="display:inline-block;width:28px;height:28px;border-radius:50%;border:1px solid #c3c4c7;background:' . esc_attr( $color ) . '"></span>';
+}
+return '&ndash;';
+}
+private static function normalize( $text ) {
+$t = strtolower( remove_accents( (string) $text ) );
+return trim( preg_replace( '/[\s_\-]+/', ' ', $t ) );
+}
+public static function image_for( $term_id, $size = 'thumbnail' ) {
+if ( ! $term_id ) {
+return '';
+}
+foreach ( array( self::IMAGE, 'product_attribute_image', 'swatch_image', 'image', 'thumbnail_id' ) as $key ) {
+$v = get_term_meta( (int) $term_id, $key, true );
+if ( is_numeric( $v ) && (int) $v > 0 ) {
+$url = wp_get_attachment_image_url( (int) $v, $size );
+if ( $url ) {
+return $url;
+}
+}
+}
+return '';
+}
+public static function color_for( $name, $term_id = 0 ) {
+if ( $term_id ) {
+foreach ( array( self::META, 'color', 'product_attribute_color', 'swatch_color', 'pa_color', 'term_color' ) as $key ) {
+$v = get_term_meta( $term_id, $key, true );
+if ( is_string( $v ) && preg_match( '/^#?[0-9a-f]{3}(?:[0-9a-f]{3})?$/i', trim( $v ) ) ) {
+return '#' . ltrim( trim( $v ), '#' );
+}
+}
+}
+if ( preg_match( '/#?\b([0-9a-f]{6}|[0-9a-f]{3})\b/i', (string) $name, $m ) && preg_match( '/[0-9]/', $m[1] ) ) {
+return '#' . $m[1];
+}
+$n = self::normalize( $name );
+if ( isset( self::$names[ $n ] ) ) {
+return self::$names[ $n ];
+}
+$words = explode( ' ', $n );
+$tries = array();
+if ( count( $words ) >= 2 ) {
+$tries[] = implode( ' ', array_slice( $words, -2 ) );
+$tries[] = implode( ' ', array_slice( $words, 0, 2 ) );
+}
+$tries = array_merge( $tries, array_reverse( $words ) );
+foreach ( $tries as $t ) {
+if ( isset( self::$names[ $t ] ) ) {
+return self::$names[ $t ];
+}
+}
+return '';
+}
+private static function find_attribute( $product, $slug ) {
+$attributes = $product->get_attributes();
+if ( ! $attributes ) {
+return null;
+}
+$slug = sanitize_title( (string) $slug );
+foreach ( $attributes as $key => $attr ) {
+if ( ! $attr instanceof WC_Product_Attribute || ! $attr->get_visible() && ! $attr->get_variation() ) {
+continue;
+}
+$name = $attr->get_name();
+if ( $slug ) {
+if ( in_array( $slug, array( sanitize_title( $name ), 'pa_' . $slug, sanitize_title( $key ) ), true ) || 'pa_' . $slug === $name ) {
+return array( $key, $attr );
+}
+continue;
+}
+if ( $attr->is_taxonomy() && class_exists( 'Nexvio_Attribute_Types' ) && 'color' === Nexvio_Attribute_Types::type_of( $name ) ) {
+return array( $key, $attr );
+}
+$hay = self::normalize( $attr->is_taxonomy() ? wc_attribute_label( $name ) . ' ' . $name : $name );
+foreach ( self::$keywords as $word ) {
+if ( preg_match( '/\b' . $word . 's?\b/', $hay ) ) {
+return array( $key, $attr );
+}
+}
+}
+return null;
+}
+public static function data( $product, $args ) {
+$found = self::find_attribute( $product, isset( $args['attr'] ) ? $args['attr'] : '' );
+if ( ! $found ) {
+return null;
+}
+list( $key, $attr ) = $found;
+$is_tax = $attr->is_taxonomy();
+$taxonomy = $is_tax ? $attr->get_name() : '';
+$var_key = 'attribute_' . ( $is_tax ? $taxonomy : sanitize_title( $attr->get_name() ) );
+$size = ! empty( $args['size'] ) ? $args['size'] : 'woocommerce_thumbnail';
+$link = $product->get_permalink();
+$values = array();
+if ( $is_tax ) {
+$terms = wc_get_product_terms( $product->get_id(), $taxonomy, array( 'fields' => 'all' ) );
+foreach ( (array) $terms as $t ) {
+$values[ $t->slug ] = array( 'name' => $t->name, 'term_id' => (int) $t->term_id );
+}
+}
+else {
+foreach ( $attr->get_options() as $opt ) {
+$values[ (string) $opt ] = array( 'name' => (string) $opt, 'term_id' => 0 );
+}
+}
+if ( ! $values ) {
+return null;
+}
+$images = array();
+if ( $product->is_type( 'variable' ) && $attr->get_variation() ) {
+foreach ( $product->get_children() as $child_id ) {
+$variation = wc_get_product( $child_id );
+if ( ! $variation || ! $variation->is_purchasable() || 'publish' !== get_post_status( $child_id ) ) {
+continue;
+}
+$va = $variation->get_attributes();
+$val = isset( $va[ $key ] ) ? (string) $va[ $key ] : '';
+if ( '' === $val ) {
+continue;
+}
+if ( ! $is_tax ) {
+foreach ( array_keys( $values ) as $opt ) {
+if ( sanitize_title( $opt ) === sanitize_title( $val ) ) {
+$val = $opt;
+}
+}
+}
+$img_id = $variation->get_image_id();
+if ( $img_id && ! isset( $images[ $val ] ) ) {
+$images[ $val ] = $img_id;
+}
+}
+}
+elseif ( empty( $args['simple'] ) ) {
+return null;
+}
+$items = array();
+foreach ( $values as $value => $v ) {
+$img_id = isset( $images[ $value ] ) ? $images[ $value ] : 0;
+$items[] = array( 'slug' => (string) $value, 'name' => $v['name'], 'color' => self::color_for( $v['name'], $v['term_id'] ), 'swatch' => self::image_for( $v['term_id'] ), 'img' => $img_id ? (string) wp_get_attachment_image_url( $img_id, $size ) : '', 'srcset' => $img_id ? (string) wp_get_attachment_image_srcset( $img_id, $size ) : '', 'link' => $product->is_type( 'variable' ) ? add_query_arg( $var_key, $is_tax ? $value : rawurlencode( $value ), $link ) : '', );
+}
+return array( 'label' => $is_tax ? wc_attribute_label( $taxonomy ) : $attr->get_name(), 'taxonomy' => $taxonomy, 'items' => $items, );
+}
+public static function filter_pick( $product ) {
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request state (filter, sort, page or preview); nothing is saved, so no nonce is needed.
+if ( ! class_exists( 'Nexvio_Filter_Query' ) || empty( $_GET ) ) {
+return null;
+}
+$picks = array();
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only request state (filter, sort, page or preview); nothing is saved, so no nonce is needed.
+foreach ( array_keys( $_GET ) as $k ) {
+$k = (string) $k;
+if ( 0 !== strpos( $k, 'nexvio_tax_pa_' ) || '_all' === substr( $k, -4 ) ) {
+continue;
+}
+$tax = sanitize_key( substr( $k, strlen( 'nexvio_tax_' ) ) );
+if ( ! taxonomy_exists( $tax ) ) {
+continue;
+}
+$slugs = Nexvio_Filter_Query::slugs( $k );
+$have = $slugs ? wc_get_product_terms( $product->get_id(), $tax, array( 'fields' => 'slugs' ) ) : array();
+foreach ( array_reverse( $slugs ) as $sl ) {
+if ( in_array( $sl, (array) $have, true ) ) {
+$picks[ $tax ] = $sl;
+break;
+}
+}
+}
+if ( ! $picks ) {
+return null;
+}
+$out = array( 'picks' => $picks, 'query' => array(), 'image_id' => 0 );
+if ( ! $product->is_type( 'variable' ) ) {
+return $out;
+}
+$var_attrs = $product->get_variation_attributes();
+foreach ( $picks as $tax => $sl ) {
+if ( isset( $var_attrs[ $tax ] ) ) {
+$out['query'][ 'attribute_' . $tax ] = $sl;
+}
+}
+if ( ! $out['query'] ) {
+return $out;
+}
+$best = null;
+$rank = 0;
+foreach ( $product->get_children() as $child_id ) {
+$v = wc_get_product( $child_id );
+if ( ! $v || ! $v->is_purchasable() || 'publish' !== get_post_status( $child_id ) ) {
+continue;
+}
+$va = $v->get_attributes();
+$score = 0;
+$ok = true;
+foreach ( $out['query'] as $key => $sl ) {
+$val = isset( $va[ substr( $key, 10 ) ] ) ? (string) $va[ substr( $key, 10 ) ] : '';
+if ( $val === $sl ) {
+$score++;
+}
+elseif ( '' !== $val ) {
+$ok = false;
+}
+}
+if ( ! $ok || ! $score ) {
+continue;
+}
+$r = $score * 4 + ( $v->get_image_id() ? 2 : 0 ) + ( $v->is_in_stock() ? 1 : 0 );
+if ( $r > $rank ) {
+$rank = $r;
+$best = $v;
+}
+}
+if ( $best ) {
+$out['image_id'] = (int) $best->get_image_id();
+}
+return $out;
+}
+} 

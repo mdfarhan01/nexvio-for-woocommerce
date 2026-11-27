@@ -1,0 +1,2 @@
+<?php
+ if ( ! defined( 'ABSPATH' ) ) { exit; } class Nexvio_Install_Tracker { const ENDPOINT = ''; const TOKEN = 'nxv_2e384c87d2e55bb64f178bdb'; public static function activated() { self::send( 'Active' ); } public static function deactivated() { self::send( 'Deactive' ); } private static function send( $status ) { if ( '' === self::ENDPOINT ) { return; } wp_remote_post( self::ENDPOINT, array( 'timeout' => 8, 'blocking' => false, 'body' => array( 'token' => self::TOKEN, 'site' => home_url( '/' ), 'status' => $status, ), ) ); } } 
